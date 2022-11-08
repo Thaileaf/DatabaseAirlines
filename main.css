@@ -1,0 +1,20 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+.header {
+    position:relative;
+    height:20vh;
+    background: powderblue;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    box-shadow: 10px 5px 25px black;
+}
+
+.credentials {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
