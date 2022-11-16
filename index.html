@@ -13,11 +13,12 @@
     <div class="credentials">
         <a href="./signup.html">Sign Up</a>
         <a href="./login.html">Log in</a>
+<!--        Debug login-->
+<!--        <a href="./" onclick="debugLogin()">Log in</a>-->
     </div>
     <div class="credentials account">
         <a href="./account.html">My Account</a>
         <a href="./" onclick="logout()">Log out</a>
-        <button onclick="logout()">test</button>
     </div>
     <div style=";">
         <form action="./" style="text-align: center;">
@@ -47,19 +48,35 @@
 </body>
 
 <script>
+    const parseCookie = str =>
+        str
+            .split(';')
+            .map(v => v.split('='))
+            .reduce((acc, v) => {
+                acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+                return acc;
+        }, {});
+
+
     window.onload = load();
+
 
     function load() {
         loadCredentials();
     }
 
+    // function debugLogin() {
+    //     document.cookie = "sessionId=test"
+    // }
+
     function loadCredentials() {
-        if(document.cookie) {
+        if(parseCookie(document.cookie).sessionId === "test") {
             document.getElementsByClassName("credentials")[0].style.setProperty("display", "none");
             document.getElementsByClassName("account")[0].style.setProperty("display", "inline");
 
         }
     }
+
 
     function logout() {
         // document.cookie = "";
@@ -72,10 +89,10 @@
             var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
             document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
         }
+        location.reload();
     }
 
     function loadFlights() {
-
 
         let copy = document.querySelector("flight");
         copy.style.setProperty("display", "inline");
