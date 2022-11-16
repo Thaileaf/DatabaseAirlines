@@ -37,3 +37,7 @@ html, body {
 .arrival {
     display:none;
 }
+
+.block {
+    width: 30vw;
+}

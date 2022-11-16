@@ -13,9 +13,9 @@
     <h1 style="text-align: center">Database Airlines</h1>
     <div class="credentials">
         <a href="./signup.html">Sign Up</a>
-        <a href="./login.html">Log in</a>
+<!--        <a href="./login.html">Log in</a>-->
 <!--        Debug login-->
-<!--        <a href="./" onclick="debugLogin()">Log in</a>-->
+        <a href="./" onclick="debugLogin()">Log in</a>
     </div>
     <div class="credentials account">
         <a href="./account.html">My Account</a>
@@ -168,9 +168,9 @@
         loadCredentials();
     }
 
-    // function debugLogin() {
-    //     document.cookie = "sessionId=test"
-    // }
+    function debugLogin() {
+        document.cookie = "sessionId=test"
+    }
 
     function loadCredentials() {
         if(parseCookie(document.cookie).sessionId === "test") {
