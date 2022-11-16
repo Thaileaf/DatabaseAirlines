@@ -14,13 +14,96 @@
         <a href="./signup.html">Sign Up</a>
         <a href="./login.html">Log in</a>
     </div>
-    <div>
+    <div class="credentials account">
+        <a href="./account.html">My Account</a>
+        <a href="./" onclick="logout()">Log out</a>
+        <button onclick="logout()">test</button>
+    </div>
+    <div style=";">
         <form action="./" style="text-align: center;">
-            <input type="text" id="lname" name="lname">
+            <label for="airport">Airport: </label>
+            <select id="airport" name="airport">
+                <option value="JFK">JFK</option>
+                <option value="EWK">EWK</option>
+                <option value="SFO">SFO</option>
+                <option value="audi">Audi</option>
+            </select>
+            <label for="roundtrip">Roundtrip: </label>
+            <input onclick=arrivalOn() type="checkbox" id="roundtrip" name="roundtrip"><br/>
+            <label for="depart">Departure Date:</label>
+            <input type="date" id="depart" name="depart">
+            <label class="arrival" for="return">Return Date:</label>
+            <input class="arrival" type="date" id="return" name="return">
+
             <input type="submit" value="Submit">
         </form>
     </div>
 </div>
 
+<div class="flights">
+
+</div>
+
 </body>
+
+<script>
+    window.onload = load();
+
+    function load() {
+        loadCredentials();
+    }
+
+    function loadCredentials() {
+        if(document.cookie) {
+            document.getElementsByClassName("credentials")[0].style.setProperty("display", "none");
+            document.getElementsByClassName("account")[0].style.setProperty("display", "inline");
+
+        }
+    }
+
+    function logout() {
+        // document.cookie = "";
+        // document.cookie.split(";").forEach(function(c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
+        var cookies = document.cookie.split(";");
+
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i];
+            var eqPos = cookie.indexOf("=");
+            var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        }
+    }
+
+    function loadFlights() {
+
+
+        let copy = document.querySelector("flight");
+        copy.style.setProperty("display", "inline");
+
+
+    }
+
+    var on = false;
+    function arrivalOn() {
+        let arrivals = document.getElementsByClassName("arrival");
+        if(!on) {
+            for(let i = 0; i < arrivals.length; ++i) {
+
+                arrivals[i].style.setProperty("display", "inline");
+            }
+            on = true;
+        }
+        else {
+            for(let i = 0; i < arrivals.length; ++i) {
+
+                arrivals[i].style.setProperty("display", "none");
+            }
+            on = false;
+        }
+    }
+</script>
 </html>
+
+<div class="flight" style="display:none;">
+    <p>Hello</p>
+</div>

@@ -18,3 +18,22 @@ html, body {
     top: 0;
     right: 0;
 }
+.credentials.account {
+    display:none;
+}
+
+.flights {
+    width:80vw;
+    padding-left: 10vw;
+    padding-top: 50px;
+}
+.flight {
+    border-style: solid;
+    height: 100px;
+    width: 100%;
+
+}
+
+.arrival {
+    display:none;
+}
