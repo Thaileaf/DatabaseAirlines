@@ -40,4 +40,6 @@ html, body {
 
 .block {
     width: 30vw;
+    flex: 1 0 21%; /* explanation below */
+    margin: 20px;
 }
