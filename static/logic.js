@@ -10,13 +10,8 @@ const parseCookie = str =>
 
 
 
-function load() {
-    loadCredentials();
-}
 
-function debugLogin() {
-    document.cookie = "sessionId=test;"
-}
+
 
 function loadCredentials() {
     if(parseCookie(document.cookie).sessionId === "test") {

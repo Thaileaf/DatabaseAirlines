@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel = "stylesheet" href="{{ url_for('static', filename='main.css') }}"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Airline</title>
+</head>
+<body>
+  <div class="header">
+  </div>
+  <form action="/staffRegisterAuth" method="POST" style="text-align: left;">
+    <p>Email:</p>
+    <input type="text" id="lname" name="username" placeholder="username" required> <br/>
+    <p>Password</p>
+    <input type="password" id="password" name="password" placeholder="password" required><br/>
+    <p>Airline</p>
+    <input type="text" id="lname" name="airline" placeholder="airline" required><br/>
+    <p>First Name</p>
+    <input type="text" id="lname" name="first name" placeholder="first name" required><br/>
+    <p>Last Name</p>
+    <input type="text" id="lname" name="last name" placeholder="last name" required><br/>
+    <p>Birth Day</p>
+    <input type="date" id="lname" name="bday"  required><br/>
+
+    <input type="submit" value="Login"><br/>
+    {% if error %}
+    <p class="error"><strong>Error:</strong> {{error}}</p>
+    {% endif %}
+  </form>
+</body>
+</html>

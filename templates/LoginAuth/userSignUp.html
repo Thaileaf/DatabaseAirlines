@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel = "stylesheet" href="{{ url_for('static', filename='main.css') }}"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Airline</title>
+</head>
+<body>
+  <div class="header">
+    <form action="/userRegisterAuth" method="POST" style="text-align: left;">
+      <p>Email:</p>
+      <input type="text" id="email" name="email" placeholder="email" required> <br/>
+      <p>Password</p>
+      <input type="password" id="password" name="password" placeholder="password" required><br/>
+      <input type="submit" value="Login"><br/>
+      {% if error %}
+      <p class="error"><strong>Error:</strong> {{error}}</p>
+      {% endif %}
+    </form>
+  </div>
+</body>
+</html> 
