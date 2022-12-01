@@ -1,6 +1,8 @@
 #Import Flask Library
 from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
+import hashlib
+import sys
 
 #Initialize the app from Flask
 app = Flask(__name__)
@@ -15,12 +17,22 @@ conn = pymysql.connect(host='localhost',
 					   port=3306
 					   )
 
-
-
 #Define a route to hello function
 @app.route('/')
-def hello():
-	return render_template('index.html')
+def root():
+	# print("test", file=sys.stdout)
+	cursor = conn.cursor()
+	query = 'SELECT * from flight'
+	cursor.execute(query)
+	data = cursor.fetchall()
+	# print(cursor, file=sys.stdout)
+	for each in data:
+		print(each)
+
+	cursor.close()
+	print(data, file=sys.stdout)
+
+	return render_template('index.html', data=data)
 
 #Define route for login
 @app.route('/login')
@@ -138,33 +150,9 @@ def registerStaffAuth():
 		cursor.close()
 		return render_template('index.html')
 
-@app.route('/home')
-def home():
-    username = session['username']
-    cursor = conn.cursor()
-    query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
-    cursor.execute(query, (username))
-    data1 = cursor.fetchall() 
-    # for each in data1:
-        # print(each['blog_post'])
-    cursor.close()
-    return render_template('home.html', username=username, posts=data1)
-
-		
-@app.route('/post', methods=['GET', 'POST'])
-def post():
-	username = session['username']
-	cursor = conn.cursor()
-	blog = request.form['blog']
-	query = 'INSERT INTO blog (blog_post, username) VALUES(%s, %s)'
-	cursor.execute(query, (blog, username))
-	conn.commit()
-	cursor.close()
-	return redirect(url_for('home'))
 
 @app.route('/logout')
-def logout():
-
+def logout():	
 	session.pop('username')
 	return redirect('/')
 		
@@ -182,7 +170,6 @@ def customer():
 
 
 
-
 @app.route('/flightsearch')
 def flightsearch():
 
@@ -196,3 +183,27 @@ app.secret_key = 'some key that you will never guess'
 if __name__ == "__main__":
 	app.run('127.0.0.1', 5000, debug = True)
 
+
+# @app.route('/home')
+# def home():
+#     username = session['username']
+#     cursor = conn.cursor()
+#     query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
+#     cursor.execute(query, (username))
+#     data1 = cursor.fetchall() 
+#     # for each in data1:
+#         # print(each['blog_post'])
+#     cursor.close()
+#     return render_template('home.html', username=username, posts=data1)
+
+		
+# @app.route('/post', methods=['GET', 'POST'])
+# def post():
+# 	username = session['username']
+# 	cursor = conn.cursor()
+# 	blog = request.form['blog']
+# 	query = 'INSERT INTO blog (blog_post, username) VALUES(%s, %s)'
+# 	cursor.execute(query, (blog, username))
+# 	conn.commit()
+# 	cursor.close()
+# 	return redirect(url_for('home'))
