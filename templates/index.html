@@ -24,21 +24,20 @@
         <a href="./logout">Log out</a>
     </div>
     {% endif %}
+    
     <div>
-        <form action="./" style="text-align: center;">
-            <label for="airport">Airport: </label>
+        <form action="/flights" method="GET" style="text-align: center;">
+            <!-- <label for="airport">Airport: </label> -->
             <select id="airport" name="airport">
-                
-                <option value="JFK">JFK</option>
-                <option value="EWK">EWK</option>
-                <option value="SFO">SFO</option>
-                <option value="audi">Audi</option>
+            {% for line in airports %}
+                <option name="airport" id="airport" value={{line['name']}}>{{line['name']}}</option> <!-- Vscode doesn't like that-->
+            {% endfor %}
             </select>
-            <label for="roundtrip">Roundtrip: </label>
+            <!-- <label for="roundtrip">Roundtrip: </label> -->
             <input onclick=arrivalOn() type="checkbox" id="roundtrip" name="roundtrip"><br/>
-            <label for="depart">Departure Date:</label>
+            <!-- <label for="depart">Departure Date:</label> -->
             <input type="date" id="depart" name="depart">
-            <label class="arrival" for="return">Return Date:</label>
+            <!-- <label class="arrival" for="return">Return Date:</label> -->
             <input class="arrival" type="date" id="return" name="return">
 
             <input type="submit" value="Submit">
@@ -49,7 +48,7 @@
 <div class="flights">
     <!-- Needs flight status and date (potentially airline name, flight number, arrival/departure date but assignment isn't clear) -->
 
-{% for line in data %}
+{% for line in flights %}
     <div class="card" style="width: 80vw;">
         <div class="card-body">
             <div class="row">
@@ -80,6 +79,7 @@
                 </div>
             </div>
             <p class="card-text">5H 48M</p>
+            <!-- For later, should only be visible if the user is logged in-->
             <a href="#" class="card-link">Book Flight</a>
         </div>
     </div>
