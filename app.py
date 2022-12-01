@@ -22,17 +22,25 @@ conn = pymysql.connect(host='localhost',
 def root():
 	# print("test", file=sys.stdout)
 	cursor = conn.cursor()
-	query = 'SELECT * from flight'
-	cursor.execute(query)
-	data = cursor.fetchall()
-	# print(cursor, file=sys.stdout)
-	for each in data:
-		print(each)
+	flights_query = 'SELECT * from flight'
+	cursor.execute(flights_query)
+	flights = cursor.fetchall()
 
+	airports_query = 'SELECT * from airport'
+	cursor.execute(airports_query)
+	airports = cursor.fetchall()
+	print(airports)
 	cursor.close()
-	print(data, file=sys.stdout)
+	# print(flights, file=sys.stdout)
+	
+	return render_template('index.html', flights=flights, airports=airports)
 
-	return render_template('index.html', data=data)
+@app.route('/flights', methods=['GET', 'POST'])
+def flights():
+	cursor = conn.cursor()
+	test = request.form['airport']
+	
+	print(test)
 
 #Define route for login
 @app.route('/login')
