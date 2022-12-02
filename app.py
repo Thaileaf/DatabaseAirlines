@@ -17,6 +17,15 @@ conn = pymysql.connect(host='localhost',
 					   port=3306
 					   )
 
+def get_airports():
+	cursor = conn.cursor()
+	airports_query = 'SELECT * from airport'
+	cursor.execute(airports_query)
+	airports = cursor.fetchall()
+	# print(airports)
+	return airports
+
+
 #Define a route to hello function
 @app.route('/')
 def root():
@@ -27,10 +36,11 @@ def root():
 	cursor.execute(flights_query)
 	flights = cursor.fetchall()
 
-	airports_query = 'SELECT * from airport'
-	cursor.execute(airports_query)
-	airports = cursor.fetchall()
-	print(airports)
+	# airports_query = 'SELECT * from airport'
+	# cursor.execute(airports_query)
+	# airports = cursor.fetchall()
+	# print(airports)
+	airports = get_airports()
 	cursor.close()
 	# print(flights, file=sys.stdout)
 	
@@ -38,22 +48,52 @@ def root():
 
 @app.route('/flights', methods=['GET', 'POST'])
 def flights():
+
+	# non-logged in use case for search
+	# if the search is called, probably want to hide the header bar and have a back button, would be easier
 	airport = request.form['airport']
 	departure_date = request.form['depart']
-	return_date = request.form['return'] # check this
+	# check this - is the return date the same as the roundtrip return? if not, then add new column to db. If yes, add some conditional hiding. some other reqs may also not work
+	return_date = request.form['return']
 	cursor = conn.cursor()
 
 	if not return_date:
-		query = "SELECT * from flight where departure_date = %s and depart_from = %s"
+		query = 'SELECT * from flight where departure_date = %s and depart_from = %s'
 		cursor.execute(query, (departure_date, airport))
 
 	else:
-		query = "SELECT * from flight where departure_date = %s and depart_from = %s and arrival_date = %s" 
+		query = 'SELECT * from flight where departure_date = %s and depart_from = %s and arrival_date = %s' 
 		cursor.execute(query, (departure_date, airport, return_date)) 
 
 	data = cursor.fetchall()	
 	return render_template('index.html', flights=data)
+
+@app.route('/pastFlights', methods=["GET"])
+def past_flights():
+	# check the session for the right email, for now skipping that 
+	email = "totallylegit@nyu.edu"
+	cursor = conn.cursor()
+	# needs more conditionals here to guarantee the same flight
+	query = 'SELECT * from flight where flight_number in (SELECT flight_number from ticket where email = %s and purchase_date < CAST(CURRENT_DATE() as Date))'
 	
+	cursor.execute(query, (email))
+	data = cursor.fetchall()
+	return render_template('index.html', flights=data)
+
+@app.route('/futureFlights', methods=["GET"])
+def future_flights():
+	# check the session for the right email, for now skipping that 
+	email = "totallylegit@nyu.edu"
+	cursor = conn.cursor()
+	query = 'SELECT * from flight where flight_number in (SELECT flight_number from ticket where email = %s and purchase_date >= CAST(CURRENT_DATE() as Date))'
+	
+	cursor.execute(query, (email))
+	data = cursor.fetchall()
+	return render_template('index.html', flights=data)
+
+
+
+
 #Define route for login
 @app.route('/login')
 def login():
@@ -184,7 +224,7 @@ def editPage():
 def charts():
 	return render_template('Staff/Reports/chart.html')
 
-@app.route('/viewinfo')
+@app.route('/home')
 def customer():
 	return render_template('Customers/customer.html')
 
