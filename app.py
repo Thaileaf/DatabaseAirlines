@@ -22,6 +22,7 @@ conn = pymysql.connect(host='localhost',
 def root():
 	# print("test", file=sys.stdout)
 	cursor = conn.cursor()
+	
 	flights_query = 'SELECT * from flight'
 	cursor.execute(flights_query)
 	flights = cursor.fetchall()
@@ -37,11 +38,22 @@ def root():
 
 @app.route('/flights', methods=['GET', 'POST'])
 def flights():
+	airport = request.form['airport']
+	departure_date = request.form['depart']
+	return_date = request.form['return'] # check this
 	cursor = conn.cursor()
-	test = request.form['airport']
-	
-	print(test)
 
+	if not return_date:
+		query = "SELECT * from flight where departure_date = %s and depart_from = %s"
+		cursor.execute(query, (departure_date, airport))
+
+	else:
+		query = "SELECT * from flight where departure_date = %s and depart_from = %s and arrival_date = %s" 
+		cursor.execute(query, (departure_date, airport, return_date)) 
+
+	data = cursor.fetchall()	
+	return render_template('index.html', flights=data)
+	
 #Define route for login
 @app.route('/login')
 def login():

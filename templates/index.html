@@ -26,27 +26,26 @@
     {% endif %}
     
     <div>
-        <form action="/flights" method="GET" style="text-align: center;">
-            <!-- <label for="airport">Airport: </label> -->
+        <form action="/flights" method="POST" style="text-align: center;">
+            <label for="airport">Airport: </label>
             <select id="airport" name="airport">
             {% for line in airports %}
-                <option name="airport" id="airport" value={{line['name']}}>{{line['name']}}</option> <!-- Vscode doesn't like that-->
+                <option name="airport" id="airport_s" value={{line['name']}}>{{line['name']}}</option> <!-- Vscode doesn't like that-->
             {% endfor %}
             </select>
-            <!-- <label for="roundtrip">Roundtrip: </label> -->
+            <label for="roundtrip">Roundtrip: </label>
             <input onclick=arrivalOn() type="checkbox" id="roundtrip" name="roundtrip"><br/>
-            <!-- <label for="depart">Departure Date:</label> -->
-            <input type="date" id="depart" name="depart">
-            <!-- <label class="arrival" for="return">Return Date:</label> -->
+            <label for="depart">Departure Date:</label>
+            <input type="date" id="depart" name="depart" required>
+            <label class="arrival" for="return">Return Date:</label>
             <input class="arrival" type="date" id="return" name="return">
-
+            
             <input type="submit" value="Submit">
         </form>
     </div>
 </div>
 
 <div class="flights">
-    <!-- Needs flight status and date (potentially airline name, flight number, arrival/departure date but assignment isn't clear) -->
 
 {% for line in flights %}
     <div class="card" style="width: 80vw;">
@@ -56,7 +55,7 @@
                     <h5 class="card-title">{{line['departure_time']}}</h5>
                 </div>
                 <div class="col-1">
-                    <!-- Empty-->
+                    <h5 class="card-subtitle mb-2 text-muted">{{line['status_flight']}}</h5>
                 </div>
                 <div class="col-2">
                     <h5 class="card-title">{{line['arrival_time']}}</h5>
@@ -65,6 +64,17 @@
                 <div class="col-6"></div>
                 <div class="col-1">
                     <h5 style="color:green">572$</h5>  <!-- only needs to be shown when purchasing tickets -->
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-2">
+                    <h6 class="card-subtitle mb-2 text-muted">{{line['departure_date']}}</h6>
+                </div>
+                <div class="col-1">
+
+                </div>
+                <div class="col-2">
+                    <h6 class="card-subtitle mb-2 text-muted">{{line['arrival_date']}}</h6> <!-- only show for roundtrips (else we need to change our db a bit)-->
                 </div>
             </div>
             <div class="row">
@@ -79,8 +89,7 @@
                 </div>
             </div>
             <p class="card-text">5H 48M</p>
-            <!-- For later, should only be visible if the user is logged in-->
-            <a href="#" class="card-link">Book Flight</a>
+            <a href="#" class="card-link">Book Flight</a>  <!-- For later, should only be visible if the user is logged in-->
         </div>
     </div>
 {% endfor %}
