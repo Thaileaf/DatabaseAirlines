@@ -15,7 +15,11 @@
     <p>Password</p>
     <input type="password" id="password" name="password" placeholder="password" required><br/>
     <p>Airline</p>
-    <input type="text" id="lname" name="airline" placeholder="airline" required><br/>
+    <select name="airline" class="selectpicker form-control">
+        {% for o in data %}
+        <option value="{{ o.name }}">{{ o.name }}</option>
+        {% endfor %}
+    </select>
     <p>First Name</p>
     <input type="text" id="lname" name="first name" placeholder="first name" required><br/>
     <p>Last Name</p>
