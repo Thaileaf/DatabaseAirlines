@@ -85,7 +85,7 @@ def past_flights():
 	
 	cursor.execute(query, (email))
 	data = cursor.fetchall()
-	return render_template('index.html', flights=data, hide_header=True)
+	return render_template('index.html', flights=data, hide_header=True, past_flights=True)
 
 
 @app.route('/futureFlights', methods=["GET"])
@@ -130,25 +130,6 @@ def spending_default():
 	# get the dates properly later
 	start_date = datetime(2022, 6, 3)
 	end_date = datetime(2022, 12, 3)
-	# table_info = []
-	# total_spending = 0
-	# for full_date in rrule.rrule(rrule.MONTHLY, dtstart=start_date, until=end_date):
-	# 	date, time = str(full_date).split()
-	# 	year, month, day = date.split("-")
-	# 	# print(day)
-	# 	# print(month)
-	# 	# print(year)
-	# 	email = "totallylegit@nyu.edu"
-	# 	cursor = conn.cursor()
-	# 	query = 'select sum(sold_price) as monthly_spending from ticket where email = %s and MONTH(purchase_date) = %s and YEAR(purchase_date) = %s group by email;'
-	# 	cursor.execute(query, (email, str(month), str(year)))
-	# 	spending = cursor.fetchone() 
-	# 	# print(spending)
-	# 	if spending:
-	# 		total_spending += spending["monthly_spending"] 
-	# 		table_info.append((date, spending["monthly_spending"])) 
-	# 	else:
-	# 		table_info.append((date, 0))
 	table_info, total_spending = calculate_spending(start_date, end_date)
 	print(table_info)
 	print(total_spending)
@@ -163,6 +144,15 @@ def spending_specify():
 	end_date = datetime(int(end_year), int(end_month), int(end_day))
 	table_info, total_spending = calculate_spending(start_date, end_date)
 	return render_template('spending.html', table_info=table_info, total=total_spending)
+
+@app.route('/comment', methods=["POST"])
+def comment():
+	rating = request.form['rating']
+	comment = request.form['comment']
+	info = request.form['flight_info']
+	print(info)
+	# query = 'INSERT into ratings Values ('
+	return render_template('submitted.html')
 
 # @app.route('/home')
 # def customer():
