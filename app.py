@@ -91,9 +91,6 @@ def future_flights():
 	data = cursor.fetchall()
 	return render_template('index.html', flights=data)
 
-
-
-
 #Define route for login
 @app.route('/login')
 def login():
@@ -232,7 +229,6 @@ def customer():
 
 @app.route('/flightsearch')
 def flightsearch():
-
 	query = "SELECT * from flight where depart_from = %s, arrive_at = %s, departure_date=%s"
 	return 
 
