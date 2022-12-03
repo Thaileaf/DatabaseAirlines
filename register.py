@@ -121,5 +121,9 @@ def registerStaffAuth():
 
 @app.route('/logout')
 def logout():	
-	session.pop('username')
-	return redirect('/')
+    if not session.email:
+        session.pop('email')
+    elif not session.username:
+        session.pop('username')
+    
+    return redirect('/')
