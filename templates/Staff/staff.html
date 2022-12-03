@@ -11,20 +11,19 @@
   <div class="header">
   <h1 style="text-align: center">My Account</h1>
   <div class="credentials">
-    <a href="..">Home</a>
-    <a href="../" onclick="logout()">Log out</a>
+    <a href="/">Home</a>
+    <a href="/logout" onclick="logout()">Log out</a>
   </div>
 </div>
   <div class="account staff" style="padding: 100px;display:flex;flex-wrap:wrap;">
     <div class="block">
       <form action="..">
         <p>Create flight: </p>
-        <select id="airline" name="airline">
-          <option value="Jetblue">JFK</option>
-          <option value="EWK">EWK</option>
-          <option value="SFO">SFO</option>
-          <option value="audi">Audi</option>
-        </select>
+        <select id="airport" name="airport">
+          {% for line in airports %}
+              <option name="airport" id="airport_s" value={{line['name']}}>{{line['name']}}</option> <!-- Vscode doesn't like that-->
+          {% endfor %}
+          </select>
         <input type="datetime-local" id="depart" name="depart">
         <input type="datetime-local" id="arrival" name="arrival">
         <input type="submit" value="Submit">
