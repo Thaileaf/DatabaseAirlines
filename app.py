@@ -1,6 +1,8 @@
 #Import Flask Library
 from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
+import hashlib
+import sys
 
 #Initialize the app from Flask
 app = Flask(__name__)
@@ -15,12 +17,82 @@ conn = pymysql.connect(host='localhost',
 					   port=3306
 					   )
 
+def get_airports():
+	cursor = conn.cursor()
+	airports_query = 'SELECT * from airport'
+	cursor.execute(airports_query)
+	airports = cursor.fetchall()
+	# print(airports)
+	return airports
 
 
 #Define a route to hello function
 @app.route('/')
-def hello():
-	return render_template('index.html')
+def root():
+	# print("test", file=sys.stdout)
+	cursor = conn.cursor()
+	
+	flights_query = 'SELECT * from flight'
+	cursor.execute(flights_query)
+	flights = cursor.fetchall()
+
+	# airports_query = 'SELECT * from airport'
+	# cursor.execute(airports_query)
+	# airports = cursor.fetchall()
+	# print(airports)
+	airports = get_airports()
+	cursor.close()
+	# print(flights, file=sys.stdout)
+	
+	return render_template('index.html', flights=flights, airports=airports)
+
+@app.route('/flights', methods=['GET', 'POST'])
+def flights():
+
+	# non-logged in use case for search
+	# if the search is called, probably want to hide the header bar and have a back button, would be easier
+	airport = request.form['airport']
+	departure_date = request.form['depart']
+	# check this - is the return date the same as the roundtrip return? if not, then add new column to db. If yes, add some conditional hiding. some other reqs may also not work
+	return_date = request.form['return']
+	cursor = conn.cursor()
+
+	if not return_date:
+		query = 'SELECT * from flight where departure_date = %s and depart_from = %s'
+		cursor.execute(query, (departure_date, airport))
+
+	else:
+		query = 'SELECT * from flight where departure_date = %s and depart_from = %s and arrival_date = %s' 
+		cursor.execute(query, (departure_date, airport, return_date)) 
+
+	data = cursor.fetchall()	
+	return render_template('index.html', flights=data)
+
+@app.route('/pastFlights', methods=["GET"])
+def past_flights():
+	# check the session for the right email, for now skipping that 
+	email = "totallylegit@nyu.edu"
+	cursor = conn.cursor()
+	# needs more conditionals here to guarantee the same flight
+	query = 'SELECT * from flight where flight_number in (SELECT flight_number from ticket where email = %s and purchase_date < CAST(CURRENT_DATE() as Date))'
+	
+	cursor.execute(query, (email))
+	data = cursor.fetchall()
+	return render_template('index.html', flights=data)
+
+@app.route('/futureFlights', methods=["GET"])
+def future_flights():
+	# check the session for the right email, for now skipping that 
+	email = "totallylegit@nyu.edu"
+	cursor = conn.cursor()
+	query = 'SELECT * from flight where flight_number in (SELECT flight_number from ticket where email = %s and purchase_date >= CAST(CURRENT_DATE() as Date))'
+	
+	cursor.execute(query, (email))
+	data = cursor.fetchall()
+	return render_template('index.html', flights=data)
+
+
+
 
 #Define route for login
 @app.route('/login')
@@ -138,33 +210,9 @@ def registerStaffAuth():
 		cursor.close()
 		return render_template('index.html')
 
-@app.route('/home')
-def home():
-    username = session['username']
-    cursor = conn.cursor()
-    query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
-    cursor.execute(query, (username))
-    data1 = cursor.fetchall() 
-    # for each in data1:
-        # print(each['blog_post'])
-    cursor.close()
-    return render_template('home.html', username=username, posts=data1)
-
-		
-@app.route('/post', methods=['GET', 'POST'])
-def post():
-	username = session['username']
-	cursor = conn.cursor()
-	blog = request.form['blog']
-	query = 'INSERT INTO blog (blog_post, username) VALUES(%s, %s)'
-	cursor.execute(query, (blog, username))
-	conn.commit()
-	cursor.close()
-	return redirect(url_for('home'))
 
 @app.route('/logout')
-def logout():
-
+def logout():	
 	session.pop('username')
 	return redirect('/')
 		
@@ -176,10 +224,9 @@ def editPage():
 def charts():
 	return render_template('Staff/Reports/chart.html')
 
-@app.route('/viewinfo')
+@app.route('/home')
 def customer():
 	return render_template('Customers/customer.html')
-
 
 
 
@@ -196,3 +243,27 @@ app.secret_key = 'some key that you will never guess'
 if __name__ == "__main__":
 	app.run('127.0.0.1', 5000, debug = True)
 
+
+# @app.route('/home')
+# def home():
+#     username = session['username']
+#     cursor = conn.cursor()
+#     query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
+#     cursor.execute(query, (username))
+#     data1 = cursor.fetchall() 
+#     # for each in data1:
+#         # print(each['blog_post'])
+#     cursor.close()
+#     return render_template('home.html', username=username, posts=data1)
+
+		
+# @app.route('/post', methods=['GET', 'POST'])
+# def post():
+# 	username = session['username']
+# 	cursor = conn.cursor()
+# 	blog = request.form['blog']
+# 	query = 'INSERT INTO blog (blog_post, username) VALUES(%s, %s)'
+# 	cursor.execute(query, (blog, username))
+# 	conn.commit()
+# 	cursor.close()
+# 	return redirect(url_for('home'))

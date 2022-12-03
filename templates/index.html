@@ -15,6 +15,7 @@
     <div class="credentials">
         <a href="./signup">Sign Up</a>
        <a href="./login">Log in</a>
+       <!-- Will need a button here to go back to the home page for logged in users-->
 <!--        Debug login-->
         <!-- <a href="/" onclick="debugLogin()">Log in</a> -->
     </div>
@@ -24,127 +25,75 @@
         <a href="./logout">Log out</a>
     </div>
     {% endif %}
-    <div style=";">
-        <form action="./" style="text-align: center;">
+    
+    <div>
+        <form action="/flights" method="POST" style="text-align: center;">
             <label for="airport">Airport: </label>
             <select id="airport" name="airport">
-                <option value="JFK">JFK</option>
-                <option value="EWK">EWK</option>
-                <option value="SFO">SFO</option>
-                <option value="audi">Audi</option>
+            {% for line in airports %}
+                <option name="airport" id="airport_s" value={{line['name']}}>{{line['name']}}</option> <!-- Vscode doesn't like that-->
+            {% endfor %}
             </select>
             <label for="roundtrip">Roundtrip: </label>
             <input onclick=arrivalOn() type="checkbox" id="roundtrip" name="roundtrip"><br/>
             <label for="depart">Departure Date:</label>
-            <input type="date" id="depart" name="depart">
+            <input type="date" id="depart" name="depart" required>
             <label class="arrival" for="return">Return Date:</label>
             <input class="arrival" type="date" id="return" name="return">
-
+            
             <input type="submit" value="Submit">
         </form>
     </div>
 </div>
 
 <div class="flights">
+
+{% for line in flights %}
     <div class="card" style="width: 80vw;">
         <div class="card-body">
             <div class="row">
                 <div class="col-2">
-                    <h5 class="card-title">10:00:00AM</h5>
+                    <h5 class="card-title">{{line['departure_time']}}</h5>
                 </div>
                 <div class="col-1">
-<!--                    Empty-->
+                    <h5 class="card-subtitle mb-2 text-muted">{{line['status_flight']}}</h5>
                 </div>
                 <div class="col-2">
-                    <h5 class="card-title">02:00:00PM</h5>
+                    <h5 class="card-title">{{line['arrival_time']}}</h5>
                 </div>
 <!--                Spacing-->
                 <div class="col-6"></div>
                 <div class="col-1">
-                    <h5 style="color:green">572$</h5>
+                    <h5 style="color:green">572$</h5>  <!-- only needs to be shown when purchasing tickets -->
                 </div>
             </div>
             <div class="row">
                 <div class="col-2">
-                    <h6 class="card-subtitle mb-2 text-muted">JFK</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">{{line['departure_date']}}</h6>
                 </div>
                 <div class="col-1">
 
                 </div>
                 <div class="col-2">
-                    <h6 class="card-subtitle mb-2 text-muted">SFO</h6>
-                </div>
-            </div>
-            <p class="card-text">5H 48M</p>
-            <a href="#" class="card-link">Book Flight</a>
-        </div>
-    </div>
-    <div class="card" style="width: 80vw;">
-        <div class="card-body">
-            <div class="row">
-                <div class="col-2">
-                    <h5 class="card-title">10:00:00AM</h5>
-                </div>
-                <div class="col-1">
-                    <!--                    Empty-->
-                </div>
-                <div class="col-2">
-                    <h5 class="card-title">02:00:00PM</h5>
-                </div>
-                <!--                Spacing-->
-                <div class="col-6"></div>
-                <div class="col-1">
-                    <h5 style="color:green">572$</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{line['arrival_date']}}</h6> <!-- only show for roundtrips (else we need to change our db a bit)-->
                 </div>
             </div>
             <div class="row">
                 <div class="col-2">
-                    <h6 class="card-subtitle mb-2 text-muted">JFK</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">{{line['depart_from']}}</h6>
                 </div>
                 <div class="col-1">
 
                 </div>
                 <div class="col-2">
-                    <h6 class="card-subtitle mb-2 text-muted">SFO</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">{{line['arrive_at']}}</h6>
                 </div>
             </div>
             <p class="card-text">5H 48M</p>
-            <a href="#" class="card-link">Book Flight</a>
+            <a href="#" class="card-link">Book Flight</a>  <!-- For later, should only be visible if the user is logged in-->
         </div>
     </div>
-    <div class="card" style="width: 80vw;">
-        <div class="card-body">
-            <div class="row">
-                <div class="col-2">
-                    <h5 class="card-title">10:00:00AM</h5>
-                </div>
-                <div class="col-1">
-                    <!--                    Empty-->
-                </div>
-                <div class="col-2">
-                    <h5 class="card-title">02:00:00PM</h5>
-                </div>
-                <!--                Spacing-->
-                <div class="col-6"></div>
-                <div class="col-1">
-                    <h5 style="color:green">572$</h5>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-2">
-                    <h6 class="card-subtitle mb-2 text-muted">JFK</h6>
-                </div>
-                <div class="col-1">
-
-                </div>
-                <div class="col-2">
-                    <h6 class="card-subtitle mb-2 text-muted">SFO</h6>
-                </div>
-            </div>
-            <p class="card-text">5H 48M</p>
-            <a href="#" class="card-link">Book Flight</a>
-        </div>
-    </div>
+{% endfor %}
 </div>
 
 
