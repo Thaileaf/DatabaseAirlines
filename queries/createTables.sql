@@ -76,7 +76,7 @@ unique_airplane_num		DOUBLE(10, 0) UNSIGNED NOT NULL,
 
 create table Customers(
 	email 				VARCHAR(20) NOT NULL,
-	password 			VARCHAR(20) NOT NULL, 
+	password 			VARCHAR(32) NOT NULL, 
 	name 				VARCHAR(20) NOT NULL, 
 	building_number 		DOUBLE(10, 0) UNSIGNED NOT NULL,
 	street 				VARCHAR(30) NOT NULL,
@@ -92,7 +92,7 @@ create table Customers(
 create table AirlineStaff(
 	username 			VARCHAR(20) NOT NULL,
 	airline_name			VARCHAR(20) NOT NULL, 
-	password			VARCHAR(20) NOT NULL, 
+	password			VARCHAR(32) NOT NULL, 
 	first_name			VARCHAR(20),
 	last_name			VARCHAR(20), 
 	date_of_birth			DATE, 
