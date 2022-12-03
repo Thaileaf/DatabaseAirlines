@@ -5,18 +5,27 @@ import sys
 from helperFuncs import *
 
 
-# Decorator to ensure routes can only be accessed
-# With correct credentials
-def login_required(func, login_state):
+# Decorator
+# Used to ensure only customers can access page
+# Put under routes
+def Customer(func):
     def check():
-        if login_state == "Customer":
-            if "email" in session:
-                return func();
-        elif login_state == "Staff":
-            if "username" in session:
-                return func();
+        if "email" in session:
+            return func();
         else:
             return redirect("/login");
+    return check;
+
+# Decorator
+# Used to ensure only Staff can access page
+# Put under routes
+def Staff(func):
+    def check():
+        if "username" in session:
+            return func();
+        else:
+            return redirect("/login");
+    return check;
 
 
 @app.route('/myaccount')
@@ -26,7 +35,9 @@ def myaccount():
 	elif "username" in session:
 		return redirect('/Staff/staff')
 
+
 @app.route('/Staff/staff')
+@Staff
 def staff():
     airports = get_airports();
     return render_template("Staff/staff.html", airports = airports);
