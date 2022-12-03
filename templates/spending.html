@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+<body>
+
+<!-- <canvas id="myChart" style="width:100%;max-width:600px"></canvas> -->
+
+<h1> Money Spent </h1>
+<a href="/home">Home</a> <!-- This doesn't work at the moment -->
+
+<table>
+	<th>Dates</th>
+	<th>Amount Spent</th>
+	
+  {% for month in table_info %} 
+  <tr>
+		<td>{{ month[0] }}</td>
+		<td>{{ month[1] }}</td>
+	</tr>
+  {% endfor %}
+</table>
+
+<h3>Total Spent: {{ total }} </h3>
+
+<form action="/spend_specify" method="POST">
+  <label for="start">Start date:</label>
+  <input type="date" id="start" name="start" required>
+  <br> </br>
+  <label for="start">End date:</label>
+  <input type="date" id="end" name="end" required>
+  <br> </br>
+  <input type="submit" value="Submit">
+</form>
+
+
+</body>
+</html>

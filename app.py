@@ -3,6 +3,8 @@ from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
 import hashlib
 import sys
+from datetime import datetime
+from dateutil import rrule
 
 
 #Initialize the app from Flask
@@ -83,7 +85,7 @@ def past_flights():
 	
 	cursor.execute(query, (email))
 	data = cursor.fetchall()
-	return render_template('index.html', flights=data, hide_header=True)
+	return render_template('index.html', flights=data, hide_header=True, past_flights=True)
 
 
 @app.route('/futureFlights', methods=["GET"])
@@ -92,153 +94,77 @@ def future_flights():
 	email = "notlegit@nyu.edu"
 	cursor = conn.cursor()
 	# needs more conditionals here to guarantee the same flight
+	# add email check here too
 	query = 'SELECT * from flight AS C, ticket AS D where C.airline_name = D.airline_name and C.unique_airplane_num = D.unique_airplane_num and C.flight_number = D.flight_number and C.departure_date = D.departure_date and C.departure_time = D.departure_time and D.email = %s and C.departure_date >= CAST(CURRENT_DATE() AS Date);'
 	
 	cursor.execute(query, (email))
 	data = cursor.fetchall()
 	return render_template('index.html', flights=data, hide_header=True)
 
-# #Define route for login
-# @app.route('/login')
-# def login():
-# 	return render_template('LoginAuth/login.html')
+def calculate_spending(start_date, end_date):
+	table_info = []
+	total_spending = 0
+	for full_date in rrule.rrule(rrule.MONTHLY, dtstart=start_date, until=end_date):
+		date, time = str(full_date).split()
+		year, month, day = date.split("-")
+		# print(day)
+		# print(month)
+		# print(year)
+		email = "totallylegit@nyu.edu"
+		cursor = conn.cursor()
+		query = 'select sum(sold_price) as monthly_spending from ticket where email = %s and MONTH(purchase_date) = %s and YEAR(purchase_date) = %s group by email;'
+		cursor.execute(query, (email, str(month), str(year)))
+		spending = cursor.fetchone() 
+		# print(spending)
+		if spending:
+			total_spending += spending["monthly_spending"] 
+			table_info.append((date, spending["monthly_spending"])) 
+		else:
+			table_info.append((date, 0))
 
-#Define route for login
-# @app.route('/login')
-# def login():
-	# return render_template('LoginAuth/login.html')
+	return table_info, total_spending
 
-# @app.route('/userSignUp')
-# def userSignUp():
-# 	return render_template('LoginAuth/userSignUp.html')
+@app.route('/spending')
+# @role_required("Customer")
+def spending_default():
+	# get the dates properly later
+	start_date = datetime(2022, 6, 3)
+	end_date = datetime(2022, 12, 3)
+	table_info, total_spending = calculate_spending(start_date, end_date)
+	print(table_info)
+	print(total_spending)
 
-# @app.route('/staffSignUp')
-# def staffSignUp():
-# 	return render_template('LoginAuth/staffSignUp.html')
+	return render_template('spending.html', table_info=table_info, total=total_spending)
 
-# #Authenticates the login
-# @app.route('/loginAuth', methods=['GET', 'POST'])
-# def loginAuth():
-# 	#grabs information from the forms
-# 	email = request.form['email']
-# 	password = request.form['password']#.md5()
-# 	hashed_password = hashlib.md5(password.encode())
+@app.route('/spend_specify', methods=["POST"])
+def spending_specify():
+	start_year, start_month, start_day  = request.form['start'].split("-") 
+	start_date = datetime(int(start_year), int(start_month), int(start_day))
+	end_year, end_month, end_day  = request.form['end'].split("-") 
+	end_date = datetime(int(end_year), int(end_month), int(end_day))
+	table_info, total_spending = calculate_spending(start_date, end_date)
+	return render_template('spending.html', table_info=table_info, total=total_spending)
 
-# 	#cursor used to send queries
-# 	cursor = conn.cursor()
-# 	#executes query
-# 	query = 'SELECT * FROM customers WHERE email = %s and password = %s'
-# 	cursor.execute(query, (email, password))
-# 	#stores the results in a variable
-# 	data = cursor.fetchone()
-# 	#use fetchall() if you are expecting more than 1 data row
-# 	cursor.close()
-# 	error = None
-# 	if (data):
-# 		#creates a session for the the user
-# 		#session is a built in
-# 		session['email'] = email
-# 		return redirect('/')
-# 	else:
-# 		#returns an error message to the html page
-# 		error = 'Invalid login or username'
-# 		return render_template('LoginAuth/login.html', error=error)
-
-# #Authenticates the user register
-# @app.route('/userRegisterAuth', methods=['GET', 'POST'])
-# def registerUserAuth():
-# 	#grabs information from the forms
-# 	username = request.form['username']
-# 	password = request.form['password']
-# 	# hashed_password = hashlib.md5(password.encode())
-
-# 	#cursor used to send queries
-# 	cursor = conn.cursor()
-# 	#executes query
-# 	query = 'SELECT * FROM customers WHERE email = %s'
-# 	cursor.execute(query, (username))
-# 	#stores the results in a variable
-# 	data = cursor.fetchone()
-# 	#use fetchall() if you are expecting more than 1 data row
-# 	error = None
-# 	if (data):
-# 		#If the previous query returns data, then user exists
-# 		error = "This user already exists"
-# 		return render_template('LoginAuth/userSignUp.html', error = error)
-# 	else:
-# 		return render_template('index.html')
-# 		ins = 'INSERT INTO customers VALUES(%s, %s)'
-# 		cursor.execute(ins, (username, hashed_password))
-# 		conn.commit()
-# 		cursor.close()
-# 		return render_template('index.html')
-
-# #Authenticates the Staff register
-# @app.route('/staffRegisterAuth', methods=['GET', 'POST'])
-# def registerStaffAuth():
-# 	#grabs information from the forms
-# 	username = request.form['username']
-# 	password = request.form['password']
-# 	airline = request.form['airline']
-# 	firstName = request.form['first name']
-# 	lastName = request.form['last name']
-# 	bday = request.form['bday']
-	
-# 	# hashed_password = hashlib.md5(password.encode())
-
-# 	#cursor used to send queries
-# 	cursor = conn.cursor()
-# 	#executes query
-# 	query = 'SELECT * FROM airlinestaff WHERE username = %s'
-# 	cursor.execute(query, (username))
-	
-# 	#stores the results in a variable
-# 	userData = cursor.fetchone()
-# 	#use fetchall() if you are expecting more than 1 data row
-# 	error = None
-# 	query = 'SELECT * FROM airline WHERE airline_name = %s'
-# 	cursor.execute(query, (airline))
-# 	airlineData = cursor.fetchone() 
-# 	if (userData):
-# 		#If the previous query returns data, then user exists
-# 		error = "This user already exists"
-# 		return render_template('LoginAuth/staffSignUp.html', error = error)
-# 	if(not airlineData): 
-# 		error = "Invalid Airline"
-# 		return render_template('LoginAuth/staffSignUp.html', error = error)
-# 	else:
-# 		return render_template('index.html')
-# 		ins = 'INSERT INTO customers VALUES(%s, %s)'
-# 		cursor.execute(ins, (username, hashed_password))
-# 		conn.commit()
-# 		cursor.close()
-# 		return render_template('index.html')
-
-
-# @app.route('/logout')
-# def logout():	
-# 	session.pop('username')
-# 	return redirect('/')
-		
-# @app.route('/staff')
-# def editPage():
-# 	return render_template('Staff/staff.html')
-
-@app.route('/reports')
-def charts():
-	return render_template('Staff/Reports/chart.html')
+@app.route('/comment', methods=["POST"])
+def comment():
+	rating = request.form['rating']
+	comment = request.form['comment']
+	info = request.form['flight_info']
+	print(info)
+	# query = 'INSERT into ratings Values ('
+	return render_template('submitted.html')
 
 # @app.route('/home')
 # def customer():
-# 	return render_template('Customers/customer.html')
+	# return render_template('Customers/customer.html')
 
 
 
-@app.route('/flightsearch')
-def flightsearch():
+# @app.route('/flightsearch')
+# def flightsearch():
 
-	query = "SELECT * from flight where depart_from = %s, arrive_at = %s, departure_date=%s"
-	return 
+	# query = "SELECT * from flight where depart_from = %s, arrive_at = %s, departure_date=%s"
+	# return 
 
 app.secret_key = 'some key that you will never guess'
 #Run the app on localhost port 5000
