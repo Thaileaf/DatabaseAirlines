@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
 import hashlib
 import sys
+from datetime import datetime
 
 #Initialize the app from Flask
 app = Flask(__name__)
@@ -222,9 +223,18 @@ def future_flights():
 def editPage():
 	return render_template('Staff/staff.html')
 
-@app.route('/reports')
-def charts():
-	return render_template('Staff/Reports/chart.html')
+@app.route('/spending_default')
+def spending_default():
+	# get the dates properly later
+	start_date = datetime(2022, 6, 3)
+	end_date = datetime(2022, 12, 3)
+	
+	while start_date <= end_date:
+		
+	
+	query = 'select sum(sold_price) as monthly_spending from ticket where email = "notlegit@nyu.edu" and MONTH(purchase_date) = 10 and group by email;'
+
+	return render_template('chart.html')
 
 @app.route('/home')
 def customer():
