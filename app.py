@@ -210,7 +210,7 @@ def registerStaffAuth():
 
 @app.route('/logout')
 def logout():	
-	session.pop('username')
+	session.pop('email')
 	return redirect('/')
 		
 @app.route('/staff')
