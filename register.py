@@ -18,7 +18,13 @@ def userSignUp():
 
 @app.route('/staffSignUp')
 def staffSignUp():
-	return render_template('LoginAuth/staffSignUp.html')
+	query = "SELECT airline_name FROM Airline"
+	cursor = conn.cursor() 
+	cursor.execute(query)
+	data = cursor.fetchall()
+	print(data)
+	ret = [{"name": d["airline_name"]} for d in data]
+	return render_template('LoginAuth/staffSignUp.html', data = ret)
 
 #Authenticates the login
 @app.route('/loginAuth', methods=['GET', 'POST'])
@@ -27,8 +33,10 @@ def loginAuth():
 	
 	password = request.form['password']#.md5() # REMINDER ENCRYPTION
 	hashed_password = hashlib.md5(password.encode())
+	hashed_password = hashed_password.hexdigest()
 
 	customer = True if "email" in request.form else False;
+	print(hashed_password)
 
 	#cursor used to send queries
 	cursor = conn.cursor()
@@ -41,7 +49,7 @@ def loginAuth():
 	else:
 		username = request.form['username']
 		query = 'SELECT * FROM airlinestaff WHERE username = %s and password = %s'
-		cursor.execute(query, (username, password))
+		cursor.execute(query, (username, hashed_password))
 	
 	
 	#stores the results in a variable
@@ -133,7 +141,7 @@ def registerStaffAuth():
 		cursor.execute(ins, (username, airline, hashed_password,firstName, lastName, bday))
 		conn.commit()
 		cursor.close()
-		return render_template('LoginAuth/login.html')
+		return login()
 
 
 @app.route('/logout')
