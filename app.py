@@ -55,6 +55,7 @@ def flights():
 	departure_date = request.form['depart']
 	# check this - is the return date the same as the roundtrip return? if not, then add new column to db. If yes, add some conditional hiding. some other reqs may also not work
 	return_date = request.form['return']
+	print(return_date)
 	cursor = conn.cursor()
 
 	if not return_date:
@@ -62,8 +63,8 @@ def flights():
 		cursor.execute(query, (departure_date, airport))
 
 	else:
-		query = 'SELECT * from flight where departure_date = %s and depart_from = %s and arrival_date = %s' 
-		cursor.execute(query, (departure_date, airport, return_date)) 
+		query = 'SELECT * from flight where departure_date = %s and depart_from = %s and arrive_at in (Select depart_from from flight where departure_date = %s);' 
+		cursor.execute(query, (departure_date, airport, return_date))	
 
 	data = cursor.fetchall()	
 	return render_template('index.html', flights=data)
@@ -207,10 +208,9 @@ def registerStaffAuth():
 		cursor.close()
 		return render_template('index.html')
 
-
 @app.route('/logout')
 def logout():	
-	session.pop('email')
+	session.pop('username')
 	return redirect('/')
 		
 @app.route('/staff')
@@ -229,7 +229,7 @@ def customer():
 
 @app.route('/flightsearch')
 def flightsearch():
-	
+
 	query = "SELECT * from flight where depart_from = %s, arrive_at = %s, departure_date=%s"
 	return 
 
