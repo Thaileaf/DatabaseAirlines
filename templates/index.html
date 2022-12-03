@@ -26,6 +26,7 @@
     </div>
     {% endif %}
     
+    {% if not hide_header %}
     <div>
         <form action="/flights" method="POST" style="text-align: center;">
             <label for="airport">Airport: </label>
@@ -39,11 +40,12 @@
             <label for="depart">Departure Date:</label>
             <input type="date" id="depart" name="depart" required>
             <label class="arrival" for="return">Return Date:</label>
-            <input class="arrival" type="date" id="return" name="return">
+            <input class="arrival" type="date" id=" " name="return">
             
             <input type="submit" value="Submit">
         </form>
     </div>
+    {% endif %}
 </div>
 
 <div class="flights">

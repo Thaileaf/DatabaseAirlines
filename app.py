@@ -57,6 +57,7 @@ def flights():
 	departure_date = request.form['depart']
 	# check this - is the return date the same as the roundtrip return? if not, then add new column to db. If yes, add some conditional hiding. some other reqs may also not work
 	return_date = request.form['return']
+	print(return_date)
 	cursor = conn.cursor()
 
 	if not return_date:
@@ -64,8 +65,8 @@ def flights():
 		cursor.execute(query, (departure_date, airport))
 
 	else:
-		query = 'SELECT * from flight where departure_date = %s and depart_from = %s and arrival_date = %s' 
-		cursor.execute(query, (departure_date, airport, return_date)) 
+		query = 'SELECT * from flight where departure_date = %s and depart_from = %s and arrive_at in (Select depart_from from flight where departure_date = %s);' 
+		cursor.execute(query, (departure_date, airport, return_date))	
 
 	data = cursor.fetchall()	
 	return render_template('index.html', flights=data)
@@ -76,32 +77,34 @@ def past_flights():
 	email = "totallylegit@nyu.edu"
 	cursor = conn.cursor()
 	# needs more conditionals here to guarantee the same flight
-	query = 'SELECT * from flight where flight_number in (SELECT flight_number from ticket where email = %s and purchase_date < CAST(CURRENT_DATE() as Date))'
+	query = 'SELECT * from flight AS C, ticket AS D where C.airline_name = D.airline_name and C.unique_airplane_num = D.unique_airplane_num and C.flight_number = D.flight_number and C.departure_date = D.departure_date and C.departure_time = D.departure_time and D.email = %s and C.departure_date < CAST(CURRENT_DATE() AS Date);'
 	
 	cursor.execute(query, (email))
 	data = cursor.fetchall()
-	return render_template('index.html', flights=data)
+	return render_template('index.html', flights=data, hide_header=True)
+
 
 @app.route('/futureFlights', methods=["GET"])
 def future_flights():
 	# check the session for the right email, for now skipping that 
-	email = "totallylegit@nyu.edu"
+	email = "notlegit@nyu.edu"
 	cursor = conn.cursor()
-	query = 'SELECT * from flight where flight_number in (SELECT flight_number from ticket where email = %s and purchase_date >= CAST(CURRENT_DATE() as Date))'
+	# needs more conditionals here to guarantee the same flight
+	query = 'SELECT * from flight AS C, ticket AS D where C.airline_name = D.airline_name and C.unique_airplane_num = D.unique_airplane_num and C.flight_number = D.flight_number and C.departure_date = D.departure_date and C.departure_time = D.departure_time and D.email = %s and C.departure_date >= CAST(CURRENT_DATE() AS Date);'
 	
 	cursor.execute(query, (email))
 	data = cursor.fetchall()
-	return render_template('index.html', flights=data)
+	return render_template('index.html', flights=data, hide_header=True)
 
 # #Define route for login
 # @app.route('/login')
 # def login():
 # 	return render_template('LoginAuth/login.html')
 
-# #Define route for register
-# @app.route('/signup')
-# def signup():
-# 	return render_template('LoginAuth/signup.html')
+#Define route for login
+# @app.route('/login')
+# def login():
+	# return render_template('LoginAuth/login.html')
 
 # @app.route('/userSignUp')
 # def userSignUp():
@@ -231,7 +234,7 @@ def charts():
 
 @app.route('/flightsearch')
 def flightsearch():
-	
+
 	query = "SELECT * from flight where depart_from = %s, arrive_at = %s, departure_date=%s"
 	return 
 
