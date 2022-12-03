@@ -101,11 +101,7 @@ def future_flights():
 	data = cursor.fetchall()
 	return render_template('index.html', flights=data, hide_header=True)
 
-@app.route('/spending')
-def spending_default():
-	# get the dates properly later
-	start_date = datetime(2022, 6, 3)
-	end_date = datetime(2022, 12, 3)
+def calculate_spending(start_date, end_date):
 	table_info = []
 	total_spending = 0
 	for full_date in rrule.rrule(rrule.MONTHLY, dtstart=start_date, until=end_date):
@@ -114,26 +110,63 @@ def spending_default():
 		# print(day)
 		# print(month)
 		# print(year)
-		# print(month)
-		# print(year)
 		email = "totallylegit@nyu.edu"
 		cursor = conn.cursor()
 		query = 'select sum(sold_price) as monthly_spending from ticket where email = %s and MONTH(purchase_date) = %s and YEAR(purchase_date) = %s group by email;'
-		cursor.execute(query, (email, str(month), str(year))) #
+		cursor.execute(query, (email, str(month), str(year)))
 		spending = cursor.fetchone() 
 		# print(spending)
 		if spending:
 			total_spending += spending["monthly_spending"] 
 			table_info.append((date, spending["monthly_spending"])) 
-	
+		else:
+			table_info.append((date, 0))
+
+	return table_info, total_spending
+
+@app.route('/spending')
+# @role_required("Customer")
+def spending_default():
+	# get the dates properly later
+	start_date = datetime(2022, 6, 3)
+	end_date = datetime(2022, 12, 3)
+	# table_info = []
+	# total_spending = 0
+	# for full_date in rrule.rrule(rrule.MONTHLY, dtstart=start_date, until=end_date):
+	# 	date, time = str(full_date).split()
+	# 	year, month, day = date.split("-")
+	# 	# print(day)
+	# 	# print(month)
+	# 	# print(year)
+	# 	email = "totallylegit@nyu.edu"
+	# 	cursor = conn.cursor()
+	# 	query = 'select sum(sold_price) as monthly_spending from ticket where email = %s and MONTH(purchase_date) = %s and YEAR(purchase_date) = %s group by email;'
+	# 	cursor.execute(query, (email, str(month), str(year)))
+	# 	spending = cursor.fetchone() 
+	# 	# print(spending)
+	# 	if spending:
+	# 		total_spending += spending["monthly_spending"] 
+	# 		table_info.append((date, spending["monthly_spending"])) 
+	# 	else:
+	# 		table_info.append((date, 0))
+	table_info, total_spending = calculate_spending(start_date, end_date)
 	print(table_info)
 	print(total_spending)
 
 	return render_template('spending.html', table_info=table_info, total=total_spending)
 
+@app.route('/spend_specify', methods=["POST"])
+def spending_specify():
+	start_year, start_month, start_day  = request.form['start'].split("-") 
+	start_date = datetime(int(start_year), int(start_month), int(start_day))
+	end_year, end_month, end_day  = request.form['end'].split("-") 
+	end_date = datetime(int(end_year), int(end_month), int(end_day))
+	table_info, total_spending = calculate_spending(start_date, end_date)
+	return render_template('spending.html', table_info=table_info, total=total_spending)
+
 # @app.route('/home')
 # def customer():
-# 	return render_template('Customers/customer.html')
+	# return render_template('Customers/customer.html')
 
 
 
