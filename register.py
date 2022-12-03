@@ -24,24 +24,40 @@ def staffSignUp():
 @app.route('/loginAuth', methods=['GET', 'POST'])
 def loginAuth():
 	#grabs information from the forms
-	email = request.form['email']
-	password = request.form['password']#.md5()
+	
+	password = request.form['password']#.md5() # REMINDER ENCRYPTION
 	hashed_password = hashlib.md5(password.encode())
+
+	customer = True if "email" in request.form else False;
 
 	#cursor used to send queries
 	cursor = conn.cursor()
 	#executes query
-	query = 'SELECT * FROM customers WHERE email = %s and password = %s'
-	cursor.execute(query, (email, password))
+	if customer:
+		email = request.form['email']
+		query = 'SELECT * FROM customers WHERE email = %s and password = %s'
+		cursor.execute(query, (email, password))
+		
+	else:
+		username = request.form['username']
+		query = 'SELECT * FROM airlinestaff WHERE username = %s and password = %s'
+		cursor.execute(query, (username, password))
+	
+	
 	#stores the results in a variable
+	
 	data = cursor.fetchone()
+	print(data)
 	#use fetchall() if you are expecting more than 1 data row
 	cursor.close()
 	error = None
 	if (data):
 		#creates a session for the the user
 		#session is a built in
-		session['email'] = email
+		if customer:
+			session['email'] = email
+		else:
+			session['username'] = username;
 		return redirect('/')
 	else:
 		#returns an error message to the html page
@@ -122,9 +138,9 @@ def registerStaffAuth():
 
 @app.route('/logout')
 def logout():	
-    if not session.email:
+    if "email" in session:
         session.pop('email')
-    elif not session.username:
+    elif "username" in session:
         session.pop('username')
         
     return redirect('/')
