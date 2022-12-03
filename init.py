@@ -104,11 +104,11 @@ def registerStaffAuth():
 	username = request.form['username']
 	password = request.form['password']
 	airline = request.form['airline']
-	firstName = request.form['First-Name']
-	lastName = request.form['Last-Name']
+	firstName = request.form['first name']
+	lastName = request.form['last name']
 	bday = request.form['bday']
 	
-	hashed_password = hashlib.md5(password.encode())
+	# hashed_password = hashlib.md5(password.encode())
 
 	#cursor used to send queries
 	cursor = conn.cursor()
@@ -120,14 +120,14 @@ def registerStaffAuth():
 	userData = cursor.fetchone()
 	#use fetchall() if you are expecting more than 1 data row
 	error = None
-	query = 'SELECT * FROM airline WHERE aireline_name = %s'
+	query = 'SELECT * FROM airline WHERE airline_name = %s'
 	cursor.execute(query, (airline))
 	airlineData = cursor.fetchone() 
 	if (userData):
 		#If the previous query returns data, then user exists
 		error = "This user already exists"
 		return render_template('LoginAuth/staffSignUp.html', error = error)
-	elif(airlineData): 
+	if(not airlineData): 
 		error = "Invalid Airline"
 		return render_template('LoginAuth/staffSignUp.html', error = error)
 	else:
@@ -185,7 +185,7 @@ def customer():
 
 @app.route('/flightsearch')
 def flightsearch():
-
+	
 	query = "SELECT * from flight where depart_from = %s, arrive_at = %s, departure_date=%s"
 	return 
 
