@@ -147,9 +147,10 @@ def spending_specify():
 
 @app.route('/comment', methods=["POST"])
 def comment():
+	print("test")
 	rating = request.form['rating']
 	comment = request.form['comment']
-	info = request.form['flight_info']
+	info = request.form['sendover']
 	print(info)
 	# query = 'INSERT into ratings Values ('
 	return render_template('submitted.html')
