@@ -88,7 +88,8 @@ def registerStaffAuth():
 	lastName = request.form['last name']
 	bday = request.form['bday']
 	
-	# hashed_password = hashlib.md5(password.encode())
+	hashed_password = hashlib.md5(password.encode())
+
 
 	#cursor used to send queries
 	cursor = conn.cursor()
@@ -103,6 +104,7 @@ def registerStaffAuth():
 	query = 'SELECT * FROM airline WHERE airline_name = %s'
 	cursor.execute(query, (airline))
 	airlineData = cursor.fetchone() 
+	hashed_password = hashed_password.hexdigest()
 	if (userData):
 		#If the previous query returns data, then user exists
 		error = "This user already exists"
@@ -111,12 +113,11 @@ def registerStaffAuth():
 		error = "Invalid Airline"
 		return render_template('LoginAuth/staffSignUp.html', error = error)
 	else:
-		return render_template('index.html')
-		ins = 'INSERT INTO customers VALUES(%s, %s)'
-		cursor.execute(ins, (username, hashed_password))
+		ins = 'INSERT INTO airlinestaff VALUES(%s, %s, %s, %s, %s, %s)'
+		cursor.execute(ins, (username, airline, hashed_password,firstName, lastName, bday))
 		conn.commit()
 		cursor.close()
-		return render_template('index.html')
+		return render_template('LoginAuth/login.html')
 
 
 @app.route('/logout')
@@ -125,5 +126,5 @@ def logout():
         session.pop('email')
     elif not session.username:
         session.pop('username')
-    
+        
     return redirect('/')
