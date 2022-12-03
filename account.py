@@ -10,13 +10,13 @@ def myaccount():
 	elif "username" in session:
 		return redirect('/Staff/staff')
 
-# @app.route('Staff/staff')
-# def staff():
-#     return render_template("/Staff/staff.html");
+@app.route('/Staff/staff')
+def staff():
+    return render_template("Staff/staff.html");
 
-# @app.route('Customers/customer')
-# def staff():
-#     return render_template("/Customers/customer.html");
+@app.route('/Customers/customer')
+def customer():
+    return render_template("Customers/customer.html");
 
 
 

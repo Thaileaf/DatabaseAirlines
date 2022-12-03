@@ -102,9 +102,9 @@ def future_flights():
 # 	return render_template('LoginAuth/login.html')
 
 #Define route for login
-@app.route('/login')
-def login():
-	return render_template('LoginAuth/login.html')
+# @app.route('/login')
+# def login():
+	# return render_template('LoginAuth/login.html')
 
 # @app.route('/userSignUp')
 # def userSignUp():
@@ -213,22 +213,22 @@ def login():
 # 		return render_template('index.html')
 
 
-@app.route('/logout')
-def logout():	
-	session.pop('username')
-	return redirect('/')
+# @app.route('/logout')
+# def logout():	
+# 	session.pop('username')
+# 	return redirect('/')
 		
-@app.route('/staff')
-def editPage():
-	return render_template('Staff/staff.html')
+# @app.route('/staff')
+# def editPage():
+# 	return render_template('Staff/staff.html')
 
 @app.route('/reports')
 def charts():
 	return render_template('Staff/Reports/chart.html')
 
-@app.route('/home')
-def customer():
-	return render_template('Customers/customer.html')
+# @app.route('/home')
+# def customer():
+# 	return render_template('Customers/customer.html')
 
 
 
