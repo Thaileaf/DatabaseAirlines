@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel = "stylesheet" href="../main.css"/>
+  <link rel = "stylesheet" href="{{ url_for('static', filename='main.css') }}"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <title>Airline</title>
@@ -11,20 +11,19 @@
   <div class="header">
   <h1 style="text-align: center">My Account</h1>
   <div class="credentials">
-    <a href="..">Home</a>
-    <a href="../" onclick="logout()">Log out</a>
+    <a href="/">Home</a>
+    <a href="/logout" onclick="logout()">Log out</a>
   </div>
 </div>
   <div class="account staff" style="padding: 100px;display:flex;flex-wrap:wrap;">
     <div class="block">
       <form action="..">
         <p>Create flight: </p>
-        <select id="airline" name="airline">
-          <option value="Jetblue">JFK</option>
-          <option value="EWK">EWK</option>
-          <option value="SFO">SFO</option>
-          <option value="audi">Audi</option>
-        </select>
+        <select id="airport" name="airport">
+          {% for line in airports %}
+              <option name="airport" id="airport_s" value={{line['name']}}>{{line['name']}}</option> <!-- Vscode doesn't like that-->
+          {% endfor %}
+          </select>
         <input type="datetime-local" id="depart" name="depart">
         <input type="datetime-local" id="arrival" name="arrival">
         <input type="submit" value="Submit">

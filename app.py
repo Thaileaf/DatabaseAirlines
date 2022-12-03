@@ -5,6 +5,7 @@ import hashlib
 import sys
 from datetime import datetime
 
+
 #Initialize the app from Flask
 app = Flask(__name__)
 
@@ -20,13 +21,14 @@ conn = pymysql.connect(host='localhost',
 					   )
 import register
 import account
-def get_airports():
-	cursor = conn.cursor()
-	airports_query = 'SELECT * from airport'
-	cursor.execute(airports_query)
-	airports = cursor.fetchall()
-	# print(airports)
-	return airports
+from helperFuncs import *
+# def get_airports():
+# 	cursor = conn.cursor()
+# 	airports_query = 'SELECT * from airport'
+# 	cursor.execute(airports_query)
+# 	airports = cursor.fetchall()
+# 	# print(airports)
+# 	return airports
 
 
 #Define a route to hello function
@@ -219,9 +221,9 @@ def future_flights():
 # 	session.pop('username')
 # 	return redirect('/')
 		
-@app.route('/staff')
-def editPage():
-	return render_template('Staff/staff.html')
+# @app.route('/staff')
+# def editPage():
+# 	return render_template('Staff/staff.html')
 
 @app.route('/spending_default')
 def spending_default():
@@ -236,9 +238,9 @@ def spending_default():
 
 	return render_template('chart.html')
 
-@app.route('/home')
-def customer():
-	return render_template('Customers/customer.html')
+# @app.route('/home')
+# def customer():
+# 	return render_template('Customers/customer.html')
 
 
 

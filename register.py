@@ -18,7 +18,13 @@ def userSignUp():
 
 @app.route('/staffSignUp')
 def staffSignUp():
-	return render_template('LoginAuth/staffSignUp.html')
+	query = "SELECT airline_name FROM Airline"
+	cursor = conn.cursor() 
+	cursor.execute(query)
+	data = cursor.fetchall()
+	print(data)
+	ret = [{"name": d["airline_name"]} for d in data]
+	return render_template('LoginAuth/staffSignUp.html', data = ret)
 
 #Authenticates the login
 @app.route('/loginAuth', methods=['GET', 'POST'])
@@ -27,8 +33,10 @@ def loginAuth():
 	
 	password = request.form['password']#.md5() # REMINDER ENCRYPTION
 	hashed_password = hashlib.md5(password.encode())
+	hashed_password = hashed_password.hexdigest()
 
 	customer = True if "email" in request.form else False;
+	print(hashed_password)
 
 	#cursor used to send queries
 	cursor = conn.cursor()
@@ -41,7 +49,7 @@ def loginAuth():
 	else:
 		username = request.form['username']
 		query = 'SELECT * FROM airlinestaff WHERE username = %s and password = %s'
-		cursor.execute(query, (username, password))
+		cursor.execute(query, (username, hashed_password))
 	
 	
 	#stores the results in a variable
@@ -104,7 +112,8 @@ def registerStaffAuth():
 	lastName = request.form['last name']
 	bday = request.form['bday']
 	
-	# hashed_password = hashlib.md5(password.encode())
+	hashed_password = hashlib.md5(password.encode())
+
 
 	#cursor used to send queries
 	cursor = conn.cursor()
@@ -119,6 +128,7 @@ def registerStaffAuth():
 	query = 'SELECT * FROM airline WHERE airline_name = %s'
 	cursor.execute(query, (airline))
 	airlineData = cursor.fetchone() 
+	hashed_password = hashed_password.hexdigest()
 	if (userData):
 		#If the previous query returns data, then user exists
 		error = "This user already exists"
@@ -127,12 +137,11 @@ def registerStaffAuth():
 		error = "Invalid Airline"
 		return render_template('LoginAuth/staffSignUp.html', error = error)
 	else:
-		return render_template('index.html')
-		ins = 'INSERT INTO customers VALUES(%s, %s)'
-		cursor.execute(ins, (username, hashed_password))
+		ins = 'INSERT INTO airlinestaff VALUES(%s, %s, %s, %s, %s, %s)'
+		cursor.execute(ins, (username, airline, hashed_password,firstName, lastName, bday))
 		conn.commit()
 		cursor.close()
-		return render_template('index.html')
+		return login()
 
 
 @app.route('/logout')
@@ -141,5 +150,5 @@ def logout():
         session.pop('email')
     elif "username" in session:
         session.pop('username')
-    
+        
     return redirect('/')
