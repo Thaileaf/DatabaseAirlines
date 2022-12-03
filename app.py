@@ -18,6 +18,7 @@ conn = pymysql.connect(host='localhost',
 					   port=3306
 					   )
 import register
+import account
 def get_airports():
 	cursor = conn.cursor()
 	airports_query = 'SELECT * from airport'
