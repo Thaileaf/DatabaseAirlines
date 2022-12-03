@@ -215,17 +215,17 @@ def future_flights():
 # 	session.pop('username')
 # 	return redirect('/')
 		
-@app.route('/staff')
-def editPage():
-	return render_template('Staff/staff.html')
+# @app.route('/staff')
+# def editPage():
+# 	return render_template('Staff/staff.html')
 
 @app.route('/reports')
 def charts():
 	return render_template('Staff/Reports/chart.html')
 
-@app.route('/home')
-def customer():
-	return render_template('Customers/customer.html')
+# @app.route('/home')
+# def customer():
+# 	return render_template('Customers/customer.html')
 
 
 
