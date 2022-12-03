@@ -8,16 +8,38 @@
 </head>
 <body>
   <div class="header">
-    <form action="/userRegisterAuth" method="POST" style="text-align: left;">
-      <p>Email:</p>
-      <input type="text" id="email" name="email" placeholder="email" required> <br/>
-      <p>Password</p>
-      <input type="password" id="password" name="password" placeholder="password" required><br/>
-      <input type="submit" value="Login"><br/>
-      {% if error %}
-      <p class="error"><strong>Error:</strong> {{error}}</p>
-      {% endif %}
-    </form>
+    
   </div>
+  <form action="/userRegisterAuth" method="POST" style="text-align: left;">
+    <p>Email:</p>
+    <input id="email" name="email" placeholder="email" required> <br/>
+    <p>Password</p>
+    <input id="password" name="password" placeholder="password" required><br/>
+    <p>Name</p>
+    <input name="name" placeholder="name" required><br/>
+    <p>Building Number</p>
+    <input  name="buildnum" placeholder="Building Number" required><br/>
+    <p>Street</p>
+    <input  name="street" placeholder="street" required><br/>
+    <p>City</p>
+    <input  name="city" placeholder="city" required><br/>
+    <p>State</p>
+    <input  name="state" placeholder="state" required><br/>
+    <p>Phone Number</p>
+    <input  name="pnum" placeholder="Phone Number" type='tel' required><br/>
+    <p>Passport Number</p>
+    <input  name="passnum" placeholder="Passport Number" required><br/>
+    <p>Passport Expiration</p>
+    <input type="month" name="passexp" placeholder="Passport Expiration" required><br/>
+    <p>Passport Country</p>
+    <input name="passcon" placeholder="Passport Country" required><br/>
+    <p>Birth Day</p>
+    <input type="date"  name="bday" required><br/>
+
+    <input type="submit" value="Sign Up"><br/>
+    {% if error %}
+    <p class="error"><strong>Error:</strong> {{error}}</p>
+    {% endif %}
+  </form>
 </body>
 </html> 

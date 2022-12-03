@@ -10,9 +10,20 @@
 <div class="header">
     
 </div>
-<button id ="switch" onclick=val() >Switch to Staff Login</button>
+<button id ="switch" onclick=val() >
+{%if value%}
+    Switch to Staff Login
+{% else %}
+    Switch to Customer Login
+{%endif%}
+</button>
 
-<div id="CustomerLogin">
+{%if value%}
+    <div id = "CustomerLogin"  style = "display:block">
+{% else %}
+    <div id = "CustomerLogin"  style = "display:None">
+{%endif%}
+
     <h1>Customer Login</h1> 
     <form action="./loginAuth" method="POST" style="text-align: left;">
         <p>Email:</p>
@@ -22,7 +33,14 @@
         <input type="submit" value="Submit"><br/>
     </form>
 </div>
-<div id = "StaffLogin" style = "display:none">
+
+{%if value%}
+    <div id = "StaffLogin"  style = "display:none"
+>
+{% else %}
+    <div id = "StaffLogin"  style = "display:block">
+{%endif%}
+
     <h1>Staff Login</h1>
     <form action="./loginAuth" method="POST" style="text-align: left;">
         <p>Username:</p>
@@ -41,12 +59,12 @@
         d = document.getElementById("CustomerLogin")
         btn = document.getElementById("switch")
         if(d.style.display === "none"){ 
-            btn.textContent = "Switch To Staff Login"
+            btn.textContent = "Switch to Staff Login"
             document.getElementById("StaffLogin").style.display = "none";
             document.getElementById("CustomerLogin").style.display = "block";
         }
         else{ 
-            btn.textContent = "Switch To Customer Login"
+            btn.textContent = "Switch to Customer Login"
             document.getElementById("StaffLogin").style.display = "block";
             document.getElementById("CustomerLogin").style.display = "none";
         }
