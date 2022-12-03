@@ -3,20 +3,25 @@ import pymysql.cursors
 import hashlib
 import sys
 from helperFuncs import *
+from functools import wraps
 
 
-# Decorator to ensure routes can only be accessed
-# With correct credentials
-def login_required(func, login_state):
-    def check():
-        if login_state == "Customer":
-            if "email" in session:
-                return func();
-        elif login_state == "Staff":
-            if "username" in session:
-                return func();
-        else:
-            return redirect("/login");
+# Decorator
+# Used to ensure only correct users can access page
+# Put under routes
+def role_required(role):
+    def decorator(func):
+        @wraps(func)
+        def check(*args, **kwargs):
+            if role == "Customer" and "email" in session:
+                return func(*args, **kwargs)
+            elif role == "Staff" and "username" in session:
+                return func(*args, **kwargs)
+            else:
+                return redirect("/login") # not authorized
+        return check
+    return decorator
+
 
 
 @app.route('/myaccount')
@@ -26,17 +31,23 @@ def myaccount():
 	elif "username" in session:
 		return redirect('/Staff/staff')
 
+
+
 @app.route('/Staff/staff')
+@role_required("Staff")
 def staff():
     airports = get_airports();
     return render_template("Staff/staff.html", airports = airports);
 
+
 @app.route('/Customers/customer')
+@role_required("Customer")
 def customer():
     return render_template("Customers/customer.html");
 
 
 @app.route('/Staff/createflight', methods=['POST'])
+@role_required("Staff")
 def createflight():
     airport = request.form['airport'];
     # airport = request.form[]
