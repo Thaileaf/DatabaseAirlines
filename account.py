@@ -2,6 +2,7 @@ from __main__ import app, render_template, request, session, url_for, redirect, 
 import pymysql.cursors
 import hashlib
 import sys
+from helperFuncs import *
 
 @app.route('/myaccount')
 def myaccount():
@@ -12,11 +13,15 @@ def myaccount():
 
 @app.route('/Staff/staff')
 def staff():
-    return render_template("Staff/staff.html");
+    airports = get_airports();
+    return render_template("Staff/staff.html", airports = airports);
 
 @app.route('/Customers/customer')
 def customer():
     return render_template("Customers/customer.html");
 
 
-
+@app.route('/Staff/createflight', methods=['POST'])
+def createflight():
+    airport = request.form['airport'];
+    # airport = request.form[]

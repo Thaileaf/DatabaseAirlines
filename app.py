@@ -4,6 +4,7 @@ import pymysql.cursors
 import hashlib
 import sys
 
+
 #Initialize the app from Flask
 app = Flask(__name__)
 
@@ -19,13 +20,14 @@ conn = pymysql.connect(host='localhost',
 					   )
 import register
 import account
-def get_airports():
-	cursor = conn.cursor()
-	airports_query = 'SELECT * from airport'
-	cursor.execute(airports_query)
-	airports = cursor.fetchall()
-	# print(airports)
-	return airports
+from helperFuncs import *
+# def get_airports():
+# 	cursor = conn.cursor()
+# 	airports_query = 'SELECT * from airport'
+# 	cursor.execute(airports_query)
+# 	airports = cursor.fetchall()
+# 	# print(airports)
+# 	return airports
 
 
 #Define a route to hello function
