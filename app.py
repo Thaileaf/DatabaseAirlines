@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
 import hashlib
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from dateutil import rrule
 import re
 import random
@@ -139,18 +139,59 @@ def get_tickets():
 @app.route('/buyTicket', methods=["GET", "POST"])
 def buyTicket():
 	cursor = conn.cursor()
-	ticket_id = '{:05}'.format(random.randrange(1, 10**5))
-	
 
-	print(ticket_id)
-	holder = {'airline_name': request.form['airline_name'], 'unique_airplane_num': request.form['unique_airplane_num'], 'flight_number': request.form['flight_number'], 'departure_date': request.form['departure_date'],
-	'departure_time': request.form['departure_time'], 'card_type': request.form['drone'], 'card_number': request.form['card_number'], 'expiration': request.form['expiration']}
+	ticket_id = random.randrange(1, 10**10)
+	query = 'SELECT * from ticket where ticket.ticket_id = %s'
+	cursor.execute(query, (ticket_id))	
+	check = cursor.fetchone()
+	error_count = 0
 	
-	# do a check here to validate the flight 
-	#<!-- Will get purchase date and time in python code, also generate random ticket id there to (can do a check to make sure it's not in the db, or )-->
-	#<!-- db technically has days but we can just set the day to 1 or something-->
+	while check and error_count < 50:
+		error_count += 1
+		ticket_id = '{:05}'.format(random.randrange(1, 10**5))
+		cursor.execute(query, (ticket_id))	
+		check = cursor.fetchone()
+	if check:
+		raise RuntimeError("Unable to generate ticket_id")
 
-	print(holder)
+	# print(ticket_id)
+
+	#add random addition to base 
+	#purchase date, purchase time, email in python code
+
+	purchase_date = date.today()
+	purchase_time = datetime.now().strftime("%H:%M:%S")
+	email = "sonic@nyu.edu"
+
+	airline_name = str(request.form['airline_name'])
+	unique_airplane_num = int(float(request.form['unique_airplane_num']))
+	flight_number = int(float(request.form['flight_number']))
+	departure_date = str(request.form['departure_date'])
+	departure_time = str(request.form['departure_time'])
+	card_type = request.form['drone']
+	card_number = int(request.form['card_number'])
+	name_on_card = request.form['name_on_card']
+	expiration = request.form['expiration'] + "-01" #adding extra day to conform with db
+	base_price = int(float(request.form['base_price']))
+	# print(expiration)
+
+	print(airline_name)
+	print(unique_airplane_num)
+	print(flight_number)
+	print(departure_date)
+	print(departure_time)
+
+	
+	query = 'SELECT * from flight where airline_name = %s and unique_airplane_num = %s and flight_number = %s and departure_date = %s and departure_time = %s'
+	cursor.execute(query, (airline_name, unique_airplane_num, flight_number, departure_date, departure_time)) #departure_date, departure_date
+	data = cursor.fetchone()
+	# print(data)
+	if (data):
+		query = 'INSERT into ticket Values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+		cursor.execute(query, (ticket_id, airline_name, unique_airplane_num, flight_number, departure_date, departure_time, card_type, card_number, name_on_card, expiration, base_price + 10, email, purchase_date, purchase_time))
+		conn.commit()
+		cursor.close()
+		# print("")
 
 	return render_template('submitted.html')
 
