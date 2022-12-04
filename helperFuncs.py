@@ -1,8 +1,25 @@
-from __main__ import conn
+from __main__ import conn, session
 import pymysql.cursors
 import hashlib
 import sys
 from dateutil import rrule
+from functools import wraps
+
+# Decorator
+# Used to ensure only correct users can access page
+# Put under routes
+def role_required(role):
+    def decorator(func):
+        @wraps(func)
+        def check(*args, **kwargs):
+            if role == "Customer" and "email" in session:
+                return func(*args, **kwargs)
+            elif role == "Staff" and "username" in session:
+                return func(*args, **kwargs)
+            else:
+                return redirect("/login") # not authorized
+        return check
+    return decorator
 
 def get_airports():
 	cursor = conn.cursor()
@@ -30,3 +47,19 @@ def calculate_spending(email, start_date, end_date):
 			table_info.append((date, 0))
 
 	return table_info, total_spending
+
+def getAirplanes(airline = None): 
+    if(airline): 
+        query = "SELECT unique_airplane_num FROM airplane where airline_name = %s"
+        cursor = conn.cursor()
+        cursor.execute(query,(airline))
+        airplanes = cursor.fetchall() 
+        return airplanes
+    else: 
+        query = "SELECT unique_airplane_num FROM airplane"
+        cursor = conn.cursor()
+        cursor.execute(query)
+        airplanes = cursor.fetchall() 
+        for plane in airplanes: 
+            plane["unique_airplane_num"] = int(plane["unique_airplane_num"])
+        return airplanes

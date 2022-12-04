@@ -31,7 +31,51 @@
     </form>
 </div>
 
-<input class="IptBtn" type="submit" value="Add Flight">
+<input class="IptBtn" type="submit" value="Add Flights" onclick=showAdder()>
+</div>
+<div id = "FlightAdder" style = "text-align: center;  display: none;" >
+    <form>
+    <label>Airplane: </label>
+    <select type = "number"  name="airplane" placeholder="airplane" required>
+        {% for plane in planes%}
+            <option value={{plane['unique_airplane_num']}}>{{plane['unique_airplane_num']}}</option> <!-- Vscode doesn't like that-->
+        {% endfor %}
+    </select>
+    <label>Flight Number</label>
+    <input name="flightnum" placeholder="Flight Number" required><br/>
+    <label>Departure Date</label>
+    <input  type="date" name="dpdate" required><br/>
+    <label>Arrival Date</label>
+    <input  type="date" name="ardate" required><br/>
+    <label>Base Price</label>
+    <input name="baseprice" placeholder="Base Price" type = number required><br/>
+    <label>Flight Status</label>
+    <select name="status" placeholder="status" required>
+        <option>delayed</option>
+        <option>ontime</option>
+        <option>canceled</option>
+    </select>
+    <Label>Round Trip</Label>
+    <select  name="rtrip"  required>
+
+    </select>
+    <label>Departure Airport</label>
+    <select  name="depAir"  required>
+        {% for line in airports %}
+            <option value={{line['name']}}>{{line['name']}}</option> <!-- Vscode doesn't like that-->
+        {% endfor %}
+    </select>
+    <label>Arrival Airport</label>
+    <select  name="arrAir"  required>
+        {% for line in airports %}
+            <option value={{line['name']}}>{{line['name']}}</option> <!-- Vscode doesn't like that-->
+        {% endfor %}
+    </select>
+
+    <input type="submit" value="Add"><br/>
+    {% if error %}
+    <p class="error"><strong>Error:</strong> {{error}}</p>
+    {% endif %}
 </div>
 
 <div class="flights">
@@ -93,6 +137,14 @@
 <script src="{{ url_for('static', filename='logic.js') }}">
 </script>
 <script>
+    function showAdder(){
+        d = document.getElementById("FlightAdder")
+        if(d.style.display == "none"){ 
+            d.style.display = "block"
+        }else{ 
+            d.style.display = "none"
+        }
+    }
     // window.onload = load();
 </script>
 </html>

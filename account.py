@@ -7,21 +7,6 @@ from functools import wraps
 from datetime import datetime
 
 
-# Decorator
-# Used to ensure only correct users can access page
-# Put under routes
-def role_required(role):
-    def decorator(func):
-        @wraps(func)
-        def check(*args, **kwargs):
-            if role == "Customer" and "email" in session:
-                return func(*args, **kwargs)
-            elif role == "Staff" and "username" in session:
-                return func(*args, **kwargs)
-            else:
-                return redirect("/login") # not authorized
-        return check
-    return decorator
 
 @app.route('/myaccount')
 def myaccount():

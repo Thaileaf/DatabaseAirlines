@@ -9,7 +9,7 @@
 <body>
   <div class="header">
   </div>
-  <form action="/staffRegisterAuth" method="POST" style="text-align: left;">
+  <form action="/staffRegisterAuth" method="POST" style="text-align: center;">
     <p>Email:</p>
     <input type="text" id="lname" name="username" placeholder="username" required> <br/>
     <p>Password</p>
@@ -27,7 +27,7 @@
     <p>Birth Day</p>
     <input type="date" id="lname" name="bday"  required><br/>
 
-    <input type="submit" value="Login"><br/>
+    <input type="submit" value="Sign Up"><br/>
     {% if error %}
     <p class="error"><strong>Error:</strong> {{error}}</p>
     {% endif %}

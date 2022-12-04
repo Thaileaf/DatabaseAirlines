@@ -22,6 +22,7 @@ conn = pymysql.connect(host='localhost',
 					   )
 import register
 import account
+import staff
 from helperFuncs import *
 
 #Define a route to hello function
