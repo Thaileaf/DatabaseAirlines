@@ -93,14 +93,13 @@ def comment():
 @app.route('/futureFlights', methods=["GET"])
 # @role_required('Customer')
 def future_flights():
-	# customer version  
 	email = "notlegit@nyu.edu"
 	cursor = conn.cursor()
 	# add email check here too
 	query = 'SELECT * from flight natural join ticket where flight.departure_date >= CAST(CURRENT_DATE() as Date) and email = %s;'
 	cursor.execute(query, (email))
 	data = cursor.fetchall()
-	return render_template('index.html', flights=data, hide_header=True)
+	return render_template('index.html', flights=data, hide_header=True, book_flights=True, view_tickets=False)
 
 @app.route('/getTickets', methods=["GET", "POST"])
 def get_tickets():
@@ -110,7 +109,7 @@ def get_tickets():
 	
 	cursor.execute(query, (email))
 	data = cursor.fetchall()
-	return render_template('index.html', flights=data, hide_header=True, bought_tickets=True)
+	return render_template('index.html', flights=data, hide_header=True, view_tickets=True)
 
 @app.route('/buyTicket', methods=["GET", "POST"])
 def buyTicket():
@@ -130,11 +129,6 @@ def buyTicket():
 	if check:
 		raise RuntimeError("Unable to generate ticket_id")
 
-	# print(ticket_id)
-
-	#add random addition to base 
-	#purchase date, purchase time, email in python code
-
 	purchase_date = date.today()
 	purchase_time = datetime.now().strftime("%H:%M:%S")
 	email = "sonic@nyu.edu"
@@ -149,15 +143,7 @@ def buyTicket():
 	name_on_card = request.form['name_on_card']
 	expiration = request.form['expiration'] + "-01" #adding extra day to conform with db
 	base_price = int(float(request.form['base_price']))
-	# print(expiration)
 
-	print(airline_name)
-	print(unique_airplane_num)
-	print(flight_number)
-	print(departure_date)
-	print(departure_time)
-
-	
 	query = 'SELECT * from flight where airline_name = %s and unique_airplane_num = %s and flight_number = %s and departure_date = %s and departure_time = %s'
 	cursor.execute(query, (airline_name, unique_airplane_num, flight_number, departure_date, departure_time)) #departure_date, departure_date
 	data = cursor.fetchone()
@@ -171,6 +157,7 @@ def buyTicket():
 
 	return render_template('submitted.html')
 
+# @app.route('/')
 
 app.secret_key = 'some key that you will never guess'
 #Run the app on localhost port 5000

@@ -93,7 +93,7 @@
                 </div>
             </div>
             <p class="card-text">5H 48M</p>
-            {% if not past_flights %}
+            {% if book_flights %}
             
             <div class="container">
                 <!-- <h2>Simple Collapsible</h2> -->
@@ -127,8 +127,21 @@
                     </form>
         
                 </div>
-              </div>
+            </div>
+            {% elif view_tickets %} <!-- Cancel tickets option -->
+            <div class="container">               
+                <form action="{{ url_for('buyTicket') }}" method="POST"> 
+                
+                    <input type="hidden" id="airline_name" name="airline_name" value="{{line['airline_name']}}"> 
+                    <input type="hidden" id="unique_airplane_num" name="unique_airplane_num" value="{{line['unique_airplane_num']}}"> 
+                    <input type="hidden" id="flight_number" name="flight_number" value="{{line['flight_number']}}"> 
+                    <input type="hidden" id="departure_date" name="departure_date" value="{{line['departure_date']}}"> 
+                    <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}"> 
+                    <input type="hidden" id="base_price" name="base_price" value="{{line['base_price']}}"> 
+                    <input type="submit" value="Cancel Flight" class="card-link">  <!-- For later, should only be visible if the user is logged in and only when searching/viewing future flights-->
+                </form>
 
+            </div>
             {% elif not line['rating'] %}
             <form action="{{ url_for('comment') }}" method="POST">
                 <label for="rating">Rating (between 1 and 5):</label>
