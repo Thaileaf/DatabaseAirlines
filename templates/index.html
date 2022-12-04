@@ -56,6 +56,7 @@
             <div class="row">
                 <div class="col-2">
                     <h5 class="card-title">{{line['departure_time']}}</h5>
+                    <!-- <h5>{{line['unique_airplane_num']}}</h5> -->
                 </div>
                 <div class="col-1">
                     <h5 class="card-subtitle mb-2 text-muted">{{line['status_flight']}}</h5>
@@ -93,7 +94,38 @@
             </div>
             <p class="card-text">5H 48M</p>
             {% if not past_flights %}
-            <a href="#" class="card-link">Book Flight</a>  <!-- For later, should only be visible if the user is logged in and only when searching/viewing future flights-->
+            
+            <div class="container">
+                <!-- <h2>Simple Collapsible</h2> -->
+                <!-- <p>Click on the button to toggle between showing and hiding content.</p> -->
+                <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#demo">Book Flight</button>
+                <div id="demo" class="collapse">
+                    <form action="{{ url_for('buyTicket') }}" method="POST"> 
+                        <input type="radio" id="credit" name="drone" value="credit" checked>
+                        <label for="credit">Credit</label>
+                        <input type="radio" id="debit" name="drone" value="debit">
+                        <label for="debit">Debit</label>
+                        <br></br>
+                        <label for="card_number">Credit/Debit Card:</label>
+                        <input id="card_number" name="card_number" type="number" min="1000000000" max="9999999999">
+                        <br></br>
+                        <label for="name_on_card">Name for Card:</label>
+                        <input type="text" name="name_on_card" id="name_on_card"> 
+                        <br></br>
+                        <label for="expiration">Expiration Date:</label> 
+                        <input type="month" id="expiration" name="expiration" min="2022-12" value="2024-01">
+                    
+                        <input type="hidden" id="airline_name" name="airline_name" value="{{line['airline_name']}}"> 
+                        <input type="hidden" id="unique_airplane_num" name="unique_airplane_num" value="{{line['unique_airplane_num']}}"> 
+                        <input type="hidden" id="flight_number" name="flight_number" value="{{line['flight_number']}}"> 
+                        <input type="hidden" id="departure_date" name="departure_date" value="{{line['departure_date']}}"> 
+                        <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}"> 
+                        <input type="submit" value="Book Flight" class="card-link">  <!-- For later, should only be visible if the user is logged in and only when searching/viewing future flights-->
+                    </form>
+        
+                </div>
+              </div>
+
             {% elif not line['rating'] %}
             <form action="{{ url_for('comment') }}" method="POST">
                 <label for="rating">Rating (between 1 and 5):</label>
@@ -101,7 +133,13 @@
                 <label for="Comment">Comment</label>
                 <input type="text" id="comment" name="comment" required>
                 <input type="submit" value="Submit">
-                <input type="hidden" id="sendover" name="sendover" value="{{line}}">  
+
+                <input type="hidden" id="airline_name" name="airline_name" value="{{line['airline_name']}}"> 
+                <input type="hidden" id="unique_airplane_num" name="unique_airplane_num" value="{{line['unique_airplane_num']}}"> 
+                <input type="hidden" id="flight_number" name="flight_number" value="{{line['flight_number']}}"> 
+                <input type="hidden" id="departure_date" name="departure_date" value="{{line['departure_date']}}"> 
+                <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}"> 
+                <!-- <input type="hidden" id="sendover" name="sendover" value="{{line}}">  Fix this to not be horrible -->
             </form>
             {% endif %}
         </div>
