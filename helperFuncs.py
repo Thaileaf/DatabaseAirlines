@@ -2,6 +2,7 @@ from __main__ import conn, session
 import pymysql.cursors
 import hashlib
 import sys
+import datetime
 from dateutil import rrule
 from functools import wraps
 
@@ -27,6 +28,31 @@ def get_airports():
 	cursor.execute(airports_query)
 	airports = cursor.fetchall()
 	return airports
+
+def getFutureFlights(airline = None):
+	cursor = conn.cursor()
+	if(airline):
+		flights_query = 'SELECT * FROM flight WHERE flight.departure_date >= CAST(CURRENT_DATE() as Date) AND airline_name = %s'
+		cursor.execute(flights_query, [airline])
+		flights = cursor.fetchall()
+		cursor.close()
+
+		for flight in flights: 
+			dep = datetime.datetime.strptime(str(flight["departure_date"])+" "+str(flight["departure_time"]),  '%Y-%m-%d %H:%M:%S')
+			arr = datetime.datetime.strptime(str(flight["arrival_date"])+" "+str(flight["arrival_time"]),  '%Y-%m-%d %H:%M:%S')
+			flight["TotalTime"] = str(arr-dep)
+		return flights
+	else:
+		flights_query = 'SELECT * from flight where flight.departure_date >= CAST(CURRENT_DATE() as Date)'
+		cursor.execute(flights_query)
+		flights = cursor.fetchall()
+		cursor.close()
+		for flight in flights: 
+			dep = datetime.datetime.strptime(str(flight["departure_date"])+" "+str(flight["departure_time"]),  '%Y-%m-%d %H:%M:%S')
+			arr = datetime.datetime.strptime(str(flight["arrival_date"])+" "+str(flight["arrival_time"]),  '%Y-%m-%d %H:%M:%S')
+			flight["TotalTime"] = str(arr-dep)
+		return flights
+
 
 def findFlight(airline, flight_num):
 	cursor = conn.cursor() 

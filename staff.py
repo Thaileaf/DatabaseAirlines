@@ -8,10 +8,11 @@ from helperFuncs import *
 @app.route('/FlightEditor')
 @role_required("Staff")
 def flightEditor():
-	ap = get_airports()
-	planes = getAirplanes()
 	staffAirline = session["staffAirline"]
-	return render_template('Staff/FlightEditor.html', airports = ap, planes = planes, airline = staffAirline)
+	flights = getFutureFlights(staffAirline)
+	ap = get_airports()
+	planes = getAirplanes(staffAirline)
+	return render_template('Staff/FlightEditor.html', airports = ap, planes = planes, airline = staffAirline, flights = flights)
 
 
 @app.route('/FlightEditor/addFlight', methods=['GET', 'POST'])
