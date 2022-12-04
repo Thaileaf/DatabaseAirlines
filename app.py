@@ -67,12 +67,14 @@ def flights():
 
 @app.route('/pastFlights', methods=["GET"])
 def past_flights():
+
+	# This is the customer version, the regular version is just query = 'SELECT * from flight natural join ticket where flight.departure_date < CAST(CURRENT_DATE() as Date) and email = %s;'
 	# check the session for the right email, for now skipping that 
 	email = "totallylegit@nyu.edu"
 	cursor = conn.cursor()
 	# query = 'SELECT * from flight AS C, ticket AS D where C.airline_name = D.airline_name and C.unique_airplane_num = D.unique_airplane_num and C.flight_number = D.flight_number and C.departure_date = D.departure_date and C.departure_time = D.departure_time and D.email = %s and C.departure_date < CAST(CURRENT_DATE() AS Date);'
 	# need to double check this query
-	query = 'SELECT * from flight natural join ticket AS C, ratings where C.email = %s and C.departure_date < CAST(CURRENT_DATE() AS Date);'
+	query = "SELECT * from flight natural join ticket as C left join ratings on (ratings.airline_name = C.airline_name and ratings.email = C.email and ratings.unique_airplane_num = C.unique_airplane_num and ratings.flight_number = C.flight_number and ratings.departure_date = C.departure_date and ratings.departure_time = C.departure_time) where flight.departure_date < CAST(CURRENT_DATE() as Date) and C.email = %s"
 	cursor.execute(query, (email))
 
 	# need to do another to check tickets
@@ -83,12 +85,14 @@ def past_flights():
 
 @app.route('/futureFlights', methods=["GET"])
 def future_flights():
-	# check the session for the right email, for now skipping that 
+
+	# noncustomer version is just query = 'SELECT * from flight natural join ticket where flight.departure_date >= CAST(CURRENT_DATE() as Date) and email = %s;'
+	# also the customer version, need to check that  
 	email = "notlegit@nyu.edu"
 	cursor = conn.cursor()
-	# needs more conditionals here to guarantee the same flight
+	# actually, as a private business, I don't care if you buy multiple tickets, that's your right, maybe give one to a friend 
 	# add email check here too
-	query = 'SELECT * from flight AS C, ticket AS D where C.airline_name = D.airline_name and C.unique_airplane_num = D.unique_airplane_num and C.flight_number = D.flight_number and C.departure_date = D.departure_date and C.departure_time = D.departure_time and D.email = %s and C.departure_date >= CAST(CURRENT_DATE() AS Date);'
+	query = 'SELECT * from flight natural join ticket where flight.departure_date >= CAST(CURRENT_DATE() as Date) and email = %s;'
 		
 	cursor.execute(query, (email))
 	data = cursor.fetchall()
@@ -174,7 +178,8 @@ def comment():
 
 	cursor = conn.cursor()
 	query = 'INSERT into ratings Values (%s, %s, %s, %s, %s, %s, %s, %s)'
-
+	
+	cursor.execute(query, (email, airline_name, unique_airplane_num, flight_number, departure_date, departure_time, rating, comment))	
 	conn.commit()
 	cursor.close()
 	return render_template('submitted.html')
