@@ -73,36 +73,13 @@ def past_flights():
 def comment():
 	rating = request.form['rating']
 	comment = request.form['comment']
-	# info = request.form['sendover']
 	
-	# manually parsing the python string dict
-	# splitter = re.sub('[(){}\'"]', '', info).split(",")
-	# holder = {}
-	# i = 0
-	# while i < len(splitter):
-	# 	if "datetime.date" in splitter[i]:
-	# 		key, value = splitter[i].split(":")
-	# 		key = key.strip()
-	# 		value = value[14:]
-	# 		value += "-" + splitter[i + 1] + "-" + splitter[i + 2]
-	# 		holder[key[0:14]] = datetime.strptime(value.replace(" ", ""), '%Y-%m-%d')
-	# 		i += 3
-	# 	else:
-	# 		key, value = splitter[i].replace(" ", "").split(':')
-	# 		key = key.strip()
-	# 		if key == "departure_time":
-	# 			holder[key] = timedelta(seconds=int(value[26:]))
-	# 		else:
-	# 			holder[key] = value
-	# 		i += 1
-
-	email = request.form['email']
-	airline_name = request.form['airline_name']
-	unique_airplane_num = request.form['unique_airplane_num']
-	flight_number = request.form['flight_number']
-	departure_date = request.form['departure_date']
-	departure_time = request.form['departure_time']
-	# need to check this after
+	email = "sonic@nyu.edu"
+	airline_name = str(request.form['airline_name'])
+	unique_airplane_num = int(float(request.form['unique_airplane_num']))
+	flight_number = int(float(request.form['flight_number']))
+	departure_date = str(request.form['departure_date'])
+	departure_time = str(request.form['departure_time'])
 
 	cursor = conn.cursor()
 	query = 'INSERT into ratings Values (%s, %s, %s, %s, %s, %s, %s, %s)'
@@ -111,7 +88,6 @@ def comment():
 	conn.commit()
 	cursor.close()
 	return render_template('submitted.html')
-	# redirect("submitted.html")
 
 # should be customer only
 @app.route('/futureFlights', methods=["GET"])
