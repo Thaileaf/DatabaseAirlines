@@ -3,8 +3,9 @@ from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
 import hashlib
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil import rrule
+import re
 
 
 #Initialize the app from Flask
@@ -23,14 +24,6 @@ conn = pymysql.connect(host='localhost',
 import register
 import account
 from helperFuncs import *
-# def get_airports():
-# 	cursor = conn.cursor()
-# 	airports_query = 'SELECT * from airport'
-# 	cursor.execute(airports_query)
-# 	airports = cursor.fetchall()
-# 	# print(airports)
-# 	return airports
-
 
 #Define a route to hello function
 @app.route('/')
@@ -54,12 +47,9 @@ def root():
 
 @app.route('/flights', methods=['GET', 'POST'])
 def flights():
-
 	# non-logged in use case for search
-	# if the search is called, probably want to hide the header bar and have a back button, would be easier
 	airport = request.form['airport']
 	departure_date = request.form['depart']
-	# check this - is the return date the same as the roundtrip return? if not, then add new column to db. If yes, add some conditional hiding. some other reqs may also not work
 	return_date = request.form['return']
 	print(return_date)
 	cursor = conn.cursor()
@@ -80,13 +70,16 @@ def past_flights():
 	# check the session for the right email, for now skipping that 
 	email = "totallylegit@nyu.edu"
 	cursor = conn.cursor()
-	# needs more conditionals here to guarantee the same flight
-	query = 'SELECT * from flight AS C, ticket AS D where C.airline_name = D.airline_name and C.unique_airplane_num = D.unique_airplane_num and C.flight_number = D.flight_number and C.departure_date = D.departure_date and C.departure_time = D.departure_time and D.email = %s and C.departure_date < CAST(CURRENT_DATE() AS Date);'
-	
+	# query = 'SELECT * from flight AS C, ticket AS D where C.airline_name = D.airline_name and C.unique_airplane_num = D.unique_airplane_num and C.flight_number = D.flight_number and C.departure_date = D.departure_date and C.departure_time = D.departure_time and D.email = %s and C.departure_date < CAST(CURRENT_DATE() AS Date);'
+	# need to double check this query
+	query = 'SELECT * from flight natural join ticket AS C, ratings where C.email = %s and C.departure_date < CAST(CURRENT_DATE() AS Date);'
 	cursor.execute(query, (email))
-	data = cursor.fetchall()
-	return render_template('index.html', flights=data, hide_header=True, past_flights=True)
 
+	# need to do another to check tickets
+	# query = 'SELECT '
+	data = cursor.fetchall() 
+	print(data)
+	return render_template('index.html', flights=data, hide_header=True, past_flights=True)
 
 @app.route('/futureFlights', methods=["GET"])
 def future_flights():
@@ -96,7 +89,7 @@ def future_flights():
 	# needs more conditionals here to guarantee the same flight
 	# add email check here too
 	query = 'SELECT * from flight AS C, ticket AS D where C.airline_name = D.airline_name and C.unique_airplane_num = D.unique_airplane_num and C.flight_number = D.flight_number and C.departure_date = D.departure_date and C.departure_time = D.departure_time and D.email = %s and C.departure_date >= CAST(CURRENT_DATE() AS Date);'
-	
+		
 	cursor.execute(query, (email))
 	data = cursor.fetchall()
 	return render_template('index.html', flights=data, hide_header=True)
@@ -147,23 +140,52 @@ def spending_specify():
 
 @app.route('/comment', methods=["POST"])
 def comment():
-	print("test")
 	rating = request.form['rating']
 	comment = request.form['comment']
 	info = request.form['sendover']
-	print(info)
-	# query = 'INSERT into ratings Values ('
+
+	splitter = re.sub('[(){}\'"]', '', info).split(",")
+	holder = {}
+	i = 0
+	while i < len(splitter):
+		if "datetime.date" in splitter[i]:
+			key, value = splitter[i].split(":")
+			key = key.strip()
+			value = value[14:]
+			value += "-" + splitter[i + 1] + "-" + splitter[i + 2]
+			holder[key[0:14]] = datetime.strptime(value.replace(" ", ""), '%Y-%m-%d')
+			i += 3
+		else:
+			key, value = splitter[i].replace(" ", "").split(':')
+			key = key.strip()
+			if key == "departure_time":
+				holder[key] = timedelta(seconds=int(value[26:]))
+			else:
+				holder[key] = value
+			i += 1
+
+	print(holder)
+	email = holder['email']
+	airline_name = holder['airline_name']
+	unique_airplane_num = holder['unique_airplane_num']
+	flight_number = holder['flight_number']
+	departure_date = holder['departure_date']
+	departure_time = holder['departure_time']
+
+	cursor = conn.cursor()
+	query = 'INSERT into ratings Values (%s, %s, %s, %s, %s, %s, %s, %s)'
+
+	conn.commit()
+	cursor.close()
 	return render_template('submitted.html')
+	# redirect("submitted.html")
 
 # @app.route('/home')
 # def customer():
 	# return render_template('Customers/customer.html')
 
-
-
 # @app.route('/flightsearch')
 # def flightsearch():
-
 	# query = "SELECT * from flight where depart_from = %s, arrive_at = %s, departure_date=%s"
 	# return 
 
