@@ -1,3 +1,8 @@
+:root {
+    --ff-primary: 'Source Sans Pro', sans-serif;
+    --ff-secondary: 'Source Code Pro', monospace;
+    
+}
 html, body {
     margin: 0;
     padding: 0;
@@ -10,7 +15,7 @@ html, body {
     display: flex;
     justify-content: center;
     flex-direction: column;
-    box-shadow: 10px 5px 25px black;
+    border-bottom: 2px solid black;
 }
 
 .credentials {
@@ -39,4 +44,14 @@ html, body {
     width: 30vw;
     flex: 1 0 21%; /* explanation below */
     margin: 20px;
+}
+
+.IptBtn{
+    background-color:white; 
+    border-color: black;
+    border-width: 1px;
+}
+.IptBtn:hover{ 
+    background: #f2f2f2;
+    color: black;
 }

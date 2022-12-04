@@ -82,8 +82,8 @@ create table Customers(
 	street 				VARCHAR(30) NOT NULL,
 	city 				VARCHAR(20) NOT NULL,
 	state 				VARCHAR(20) NOT NULL,
-	phone_number		 CHAR(12),
-	passport_number 		CHAR(9) NOT NULL,
+	phone_number		 VARCHAR(20),
+	passport_number 	    VARCHAR(20) NOT NULL,
 	passport_expiration 		DATE NOT NULL,
 	passport_country 		VARCHAR(20) NOT NULL, 
 	date_of_birth 			DATE NOT NULL

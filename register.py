@@ -4,8 +4,8 @@ import hashlib
 import sys
 #Define route for login
 @app.route('/login')
-def login():
-	return render_template('LoginAuth/login.html')
+def login(isCus = True):
+	return render_template('LoginAuth/login.html', isCust = isCus)
 
 #Define route for register
 @app.route('/signup')
@@ -44,7 +44,7 @@ def loginAuth():
 	if customer:
 		email = request.form['email']
 		query = 'SELECT * FROM customers WHERE email = %s and password = %s'
-		cursor.execute(query, (email, password))
+		cursor.execute(query, (email, hashed_password))
 		
 	else:
 		username = request.form['username']
@@ -69,37 +69,64 @@ def loginAuth():
 		return redirect('/')
 	else:
 		#returns an error message to the html page
-		error = 'Invalid login or username'
-		return render_template('LoginAuth/login.html', error=error)
+		if customer: 
+			error = 'Invalid password or email'
+			value = True 
+		else: 
+			error = 'Invalid password or username'
+			value = False
+		
+
+		return render_template('LoginAuth/login.html', error=error, isCust = value )
 
 #Authenticates the user register
 @app.route('/userRegisterAuth', methods=['GET', 'POST'])
 def registerUserAuth():
 	#grabs information from the forms
-	username = request.form['username']
+	email = request.form['email']
 	password = request.form['password']
-	# hashed_password = hashlib.md5(password.encode())
+	name = request.form['name']
+	buildNum = int(request.form['buildnum'])
+	street = request.form['street']
+
+	city = request.form['city']
+	state = request.form['state']
+	phoneNum = request.form['pnum']
+	passNum = request.form['passnum']
+	passExp = request.form['passexp']
+
+	passCon = request.form['passcon']
+	bday = request.form['bday']
+
+	hashed_password = hashlib.md5(password.encode())
+	hashed_password = hashed_password.hexdigest()
 
 	#cursor used to send queries
 	cursor = conn.cursor()
 	#executes query
 	query = 'SELECT * FROM customers WHERE email = %s'
-	cursor.execute(query, (username))
+	cursor.execute(query, (email))
 	#stores the results in a variable
 	data = cursor.fetchone()
 	#use fetchall() if you are expecting more than 1 data row
 	error = None
+	passExp += "-01"
 	if (data):
 		#If the previous query returns data, then user exists
 		error = "This user already exists"
 		return render_template('LoginAuth/userSignUp.html', error = error)
 	else:
-		return render_template('index.html')
-		ins = 'INSERT INTO customers VALUES(%s, %s)'
-		cursor.execute(ins, (username, hashed_password))
+		print(passExp)
+		print(password, hashed_password)
+		ins = 'INSERT INTO Customers VALUES(%s, %s, %s, %s,%s, %s, %s, %s,%s, %s, %s, %s);'
+		print((email, hashed_password, name, buildNum, street, city, state, phoneNum, passNum, passExp, passCon, bday))
+		cursor.execute(ins, (email, hashed_password, name, 
+		buildNum, street, city, 
+		state, phoneNum, passNum, 
+		passExp, passCon, bday))
 		conn.commit()
 		cursor.close()
-		return render_template('index.html')
+		return login(True)
 
 #Authenticates the Staff register
 @app.route('/staffRegisterAuth', methods=['GET', 'POST'])
@@ -141,7 +168,7 @@ def registerStaffAuth():
 		cursor.execute(ins, (username, airline, hashed_password,firstName, lastName, bday))
 		conn.commit()
 		cursor.close()
-		return login()
+		return login(False)
 
 
 @app.route('/logout')
