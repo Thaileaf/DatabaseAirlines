@@ -10,11 +10,13 @@
 <body>
 
 <div class="header">
-
+    {% if airline %}
+    <h1 style="text-align: center"> {{airline}} Flights</h1>
+    {%endif%}
 </div>
 <div style="text-align: center">
 <div>
-    <form action="/flights" method="POST" style="text-align: center;">
+    <form action="/flights" id="addFligthsForm" method="POST" style="text-align: center;">
         <label for="airport">Airport: </label>
         <select id="airport" name="airport">
         {% for line in airports %}
@@ -33,8 +35,12 @@
 
 <input class="IptBtn" type="submit" value="Add Flights" onclick=showAdder()>
 </div>
+{%if addingFlight%}
+<div id = "FlightAdder" style = "text-align: center;  display: block;" >
+{%else%}
 <div id = "FlightAdder" style = "text-align: center;  display: none;" >
-    <form>
+{%endif%}
+    <form action="/FlightEditor/addFlight" method ="POST">
     <label>Airplane: </label>
     <select type = "number"  name="airplane" placeholder="airplane" required>
         {% for plane in planes%}
@@ -42,23 +48,26 @@
         {% endfor %}
     </select>
     <label>Flight Number</label>
-    <input name="flightnum" placeholder="Flight Number" required><br/>
+    <input type="number" name="flightnum" placeholder="Flight Number" required><br/>
     <label>Departure Date</label>
-    <input  type="date" name="dpdate" required><br/>
+    <input  type="date" name="dpdate" required>
+    <label>Departure Time</label>
+    <input type="time" name="dptime"><br/>
     <label>Arrival Date</label>
-    <input  type="date" name="ardate" required><br/>
+    <input  type="date" name="ardate" required>
+    <label>Arrival Time</label>
+    <input type="time" name="artime"><br/>
     <label>Base Price</label>
     <input name="baseprice" placeholder="Base Price" type = number required><br/>
     <label>Flight Status</label>
     <select name="status" placeholder="status" required>
-        <option>delayed</option>
         <option>ontime</option>
+        <option>delayed</option>
         <option>canceled</option>
     </select>
     <Label>Round Trip</Label>
-    <select  name="rtrip"  required>
-
-    </select>
+    <input  name="rtrip"  type="checkbox">
+    </input>
     <label>Departure Airport</label>
     <select  name="depAir"  required>
         {% for line in airports %}
@@ -73,8 +82,8 @@
     </select>
 
     <input type="submit" value="Add"><br/>
-    {% if error %}
-    <p class="error"><strong>Error:</strong> {{error}}</p>
+    {% if addFlightError %}
+    <p class="error">{{addFlightError}}</p>
     {% endif %}
 </div>
 

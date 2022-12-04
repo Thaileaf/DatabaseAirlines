@@ -65,7 +65,8 @@ def loginAuth():
 		if customer:
 			session['email'] = email
 		else:
-			session['username'] = username;
+			session['username'] = username
+			session['staffAirline'] = data['airline_name']
 		return redirect('/')
 	else:
 		#returns an error message to the html page
@@ -125,7 +126,6 @@ def registerUserAuth():
 		state, phoneNum, passNum, 
 		passExp, passCon, bday))
 		conn.commit()
-		cursor.close()
 		return login(True)
 
 #Authenticates the Staff register
@@ -173,9 +173,9 @@ def registerStaffAuth():
 
 @app.route('/logout')
 def logout():	
-    if "email" in session:
-        session.pop('email')
-    elif "username" in session:
-        session.pop('username')
-        
-    return redirect('/')
+	if "email" in session:
+		session.pop('email')
+	elif "username" in session:
+		session.pop('username')
+		session.pop('staffAirline')
+	return redirect('/')

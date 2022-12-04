@@ -26,8 +26,13 @@ def get_airports():
 	airports_query = 'SELECT * from airport'
 	cursor.execute(airports_query)
 	airports = cursor.fetchall()
-	# print(airports)
 	return airports
+
+def findFlight(airline, flight_num):
+	cursor = conn.cursor() 
+	query = 'SELECT * FROM flight WHERE airline_name = %s and flight_number = %s'
+	cursor.execute(query, (airline, flight_num))
+	return cursor.fetchall()
 
 def calculate_spending(email, start_date, end_date):
 	table_info = []
