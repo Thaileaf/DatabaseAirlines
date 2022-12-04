@@ -9,16 +9,17 @@
 <body >
 <div class="header">
     
+    
 </div>
 <button id ="switch" onclick=val() >
-{%if value%}
+{%if isCust%}
     Switch to Staff Login
 {% else %}
     Switch to Customer Login
 {%endif%}
 </button>
 
-{%if value%}
+{%if isCust%}
     <div id = "CustomerLogin"  style = "display:block">
 {% else %}
     <div id = "CustomerLogin"  style = "display:None">
@@ -34,7 +35,7 @@
     </form>
 </div>
 
-{%if value%}
+{%if isCust%}
     <div id = "StaffLogin"  style = "display:none"
 >
 {% else %}

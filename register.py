@@ -5,7 +5,7 @@ import sys
 #Define route for login
 @app.route('/login')
 def login(isCus = True):
-	return render_template('LoginAuth/login.html', value = isCus)
+	return render_template('LoginAuth/login.html', isCust = isCus)
 
 #Define route for register
 @app.route('/signup')
@@ -77,7 +77,7 @@ def loginAuth():
 			value = False
 		
 
-		return render_template('LoginAuth/login.html', error=error, value = value )
+		return render_template('LoginAuth/login.html', error=error, isCust = value )
 
 #Authenticates the user register
 @app.route('/userRegisterAuth', methods=['GET', 'POST'])
