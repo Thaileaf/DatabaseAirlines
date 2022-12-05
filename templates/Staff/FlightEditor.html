@@ -10,11 +10,13 @@
 <body>
 
 <div class="header">
-
+    {% if airline %}
+    <h1 style="text-align: center"> {{airline}} Flights</h1>
+    {%endif%}
 </div>
 <div style="text-align: center">
 <div>
-    <form action="/flights" method="POST" style="text-align: center;">
+    <form action="/flights" id="addFligthsForm" method="POST" style="text-align: center;">
         <label for="airport">Airport: </label>
         <select id="airport" name="airport">
         {% for line in airports %}
@@ -31,7 +33,58 @@
     </form>
 </div>
 
-<input class="IptBtn" type="submit" value="Add Flight">
+<input class="IptBtn" type="submit" value="Add Flights" onclick=showAdder()>
+</div>
+{%if addingFlight%}
+<div id = "FlightAdder" style = "text-align: center;  display: block;" >
+{%else%}
+<div id = "FlightAdder" style = "text-align: center;  display: none;" >
+{%endif%}
+    <form action="/FlightEditor/addFlight" method ="POST">
+    <label>Airplane: </label>
+    <select type = "number"  name="airplane" placeholder="airplane" required>
+        {% for plane in planes%}
+            <option value={{plane['unique_airplane_num']}}>{{plane['unique_airplane_num']}}</option> <!-- Vscode doesn't like that-->
+        {% endfor %}
+    </select>
+    <label>Flight Number</label>
+    <input type="number" name="flightnum" placeholder="Flight Number" required><br/>
+    <label>Departure Date</label>
+    <input  type="date" name="dpdate" required>
+    <label>Departure Time</label>
+    <input type="time" name="dptime"><br/>
+    <label>Arrival Date</label>
+    <input  type="date" name="ardate" required>
+    <label>Arrival Time</label>
+    <input type="time" name="artime"><br/>
+    <label>Base Price</label>
+    <input name="baseprice" placeholder="Base Price" type = number required><br/>
+    <label>Flight Status</label>
+    <select name="status" placeholder="status" required>
+        <option>ontime</option>
+        <option>delayed</option>
+        <option>canceled</option>
+    </select>
+    <Label>Round Trip</Label>
+    <input  name="rtrip"  type="checkbox">
+    </input>
+    <label>Departure Airport</label>
+    <select  name="depAir"  required>
+        {% for line in airports %}
+            <option value={{line['name']}}>{{line['name']}}</option> <!-- Vscode doesn't like that-->
+        {% endfor %}
+    </select>
+    <label>Arrival Airport</label>
+    <select  name="arrAir"  required>
+        {% for line in airports %}
+            <option value={{line['name']}}>{{line['name']}}</option> <!-- Vscode doesn't like that-->
+        {% endfor %}
+    </select>
+
+    <input type="submit" value="Add"><br/>
+    {% if addFlightError %}
+    <p class="error">{{addFlightError}}</p>
+    {% endif %}
 </div>
 
 <div class="flights">
@@ -77,7 +130,7 @@
                     <h6 class="card-subtitle mb-2 text-muted">{{line['arrive_at']}}</h6>
                 </div>
             </div>
-            <p class="card-text">5H 48M</p>
+            <p class="card-text">{{line['TotalTime']}}</p>
             <a href="#" class="card-link">Book Flight</a>  <!-- For later, should only be visible if the user is logged in and only when searching/viewing future flights-->
         </div>
     </div>
@@ -93,6 +146,14 @@
 <script src="{{ url_for('static', filename='logic.js') }}">
 </script>
 <script>
+    function showAdder(){
+        d = document.getElementById("FlightAdder")
+        if(d.style.display == "none"){ 
+            d.style.display = "block"
+        }else{ 
+            d.style.display = "none"
+        }
+    }
     // window.onload = load();
 </script>
 </html>

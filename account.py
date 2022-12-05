@@ -7,21 +7,6 @@ from functools import wraps
 from datetime import datetime
 
 
-# Decorator
-# Used to ensure only correct users can access page
-# Put under routes
-def role_required(role):
-    def decorator(func):
-        @wraps(func)
-        def check(*args, **kwargs):
-            if role == "Customer" and "email" in session:
-                return func(*args, **kwargs)
-            elif role == "Staff" and "username" in session:
-                return func(*args, **kwargs)
-            else:
-                return redirect("/login") # not authorized
-        return check
-    return decorator
 
 @app.route('/myaccount')
 def myaccount():
@@ -35,7 +20,7 @@ def myaccount():
 @app.route('/Staff/staff')
 @role_required("Staff")
 def staff():
-    airports = get_airports();
+    airports = get_airports()
     return render_template("Staff/staff.html", airports = airports);
 
 
@@ -72,3 +57,20 @@ def spending_specify():
 def createflight():
     airport = request.form['airport'];
     # airport = request.form[]
+
+@app.route('/Staff/frequentcustomers')
+@role_required("Staff")
+def frequentCustomer():
+    query = """SELECT email as customer, count(email) as flights 
+            FROM (
+                SELECT *
+                FROM ticket
+                WHERE departure_date >= cast(DATE_ADD(CURDATE(), INTERVAL -1 YEAR) AS DATE)
+                ) as TABLE1
+            WHERE airline_name = %s
+            GROUP BY email 
+            ORDER BY count(email) DESC;"""
+
+    queryAirline = "SELECT airline_name FROM airlinestaff WHERE username = %s;"
+
+    cursor = conn.cursuor()

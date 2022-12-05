@@ -22,15 +22,14 @@ conn = pymysql.connect(host='localhost',
 					   )
 import register
 import account
+import staff
 from helperFuncs import *
 
 #Define a route to hello function
 @app.route('/')
 def root():
 	cursor = conn.cursor()
-	flights_query = 'SELECT * from flight where flight.departure_date >= CAST(CURRENT_DATE() as Date)'
-	cursor.execute(flights_query)
-	flights = cursor.fetchall()
+	flights = getFutureFlights()
 	airports = get_airports()
 	cursor.close()
 	
