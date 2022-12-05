@@ -54,58 +54,68 @@ def addFlight():
 	conn.commit()
 	return render_template('Staff/FlightEditor.html', airports = ap, planes = planes, airline = staffAirline, addFlightError = "Flight Successfully Added", addingFlight = True)
 
+
+# Queries frequent customers and displays to Staff
 @app.route('/Staff/frequentcustomers')
 @role_required("Staff")
 def frequentCustomer():
-    query = """SELECT email as customer, count(email) as flights 
-            FROM (
-                SELECT *
-                FROM ticket
-                WHERE departure_date >= cast(DATE_ADD(CURDATE(), INTERVAL -1 YEAR) AS DATE)
-                ) as TABLE1
-            WHERE airline_name = %s
-            GROUP BY email 
-            ORDER BY count(email) DESC;"""
+	query = """SELECT email as customer, count(email) as flights 
+			FROM (
+				SELECT *
+				FROM ticket
+				WHERE departure_date >= cast(DATE_ADD(CURDATE(), INTERVAL -1 YEAR) AS DATE)
+				) as TABLE1
+			WHERE airline_name = %s
+			GROUP BY email 
+			ORDER BY count(email) DESC;"""
 
 
-    cursor = conn.cursor()
-
-   
-    cursor.execute(query, (session["staffAirline"]))
-    data = cursor.fetchall();
-
-    # Need to display 
-    return render_template('/Staff/frequentCustomers.html', table_info=data);
+	cursor = conn.cursor()
 
 
+	cursor.execute(query, (session["staffAirline"]))
+	data = cursor.fetchall();
+
+	return render_template('/Staff/frequentCustomers.html', table_info=data);
+
+
+# Calculates the revenue for the last month and year for the airline
 @app.route('/Staff/revenue')
 @role_required("Staff")
 def revenue():
-	query = """SELECT sum(sold_price) 
+
+	# Revenue last year
+	query = """SELECT sum(sold_price) as tot
 				FROM (
-                SELECT *
-                FROM ticket
-                WHERE departure_date >= cast(DATE_ADD(CURDATE(), INTERVAL -1 YEAR) AS DATE)
-                ) as TABLE1
+				SELECT *
+				FROM ticket
+				WHERE departure_date >= cast(DATE_ADD(CURDATE(), INTERVAL -1 YEAR) AS DATE)
+				) as TABLE1
 				WHERE airline_name = %s;"""
 	
-	query2 = """SELECT sum(sold_price) 
+	# Revenue last month
+	query2 = """SELECT sum(sold_price) as tot 
 				FROM (
-                SELECT *
-                FROM ticket
-                WHERE departure_date >= cast(DATE_ADD(CURDATE(), INTERVAL -1 MONTH) AS DATE)
-                ) as TABLE1
+				SELECT *
+				FROM ticket
+				WHERE departure_date >= cast(DATE_ADD(CURDATE(), INTERVAL -1 MONTH) AS DATE)
+				) as TABLE1
 				WHERE airline_name = %s;"""
 
 	cursor = conn.cursor()
 
 	airline = session["staffAirline"]
 
+
+	# Query month and year
 	cursor.execute(query, (airline))
-    year = cursor.fetchone();
+	year = cursor.fetchone();
 	cursor.execute(query2, (airline))
 	month = cursor.fetchone();
 
 
-	print(data);
+	# If did not sum anything sets it to 0 else just the int
+	year = 0 if not year["tot"] else year["tot"];
+	month = 0 if not month["tot"] else month["tot"];
+
 	return render_template("/Staff/revenue.html", month=month, year=year);
