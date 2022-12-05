@@ -67,21 +67,45 @@ def frequentCustomer():
             GROUP BY email 
             ORDER BY count(email) DESC;"""
 
-    queryAirline = "SELECT airline_name FROM airlinestaff WHERE username = %s;"
 
     cursor = conn.cursor()
 
-    cursor.execute(queryAirline, (session["username"]));
-    airline = cursor.fetchone();
-    print(airline);
-    cursor.execute(query, (airline["airline_name"]))
+   
+    cursor.execute(query, (session["staffAirline"]))
     data = cursor.fetchall();
-    print(data);
 
     # Need to display 
     return render_template('/Staff/frequentCustomers.html', table_info=data);
 
 
-@app.route('/Staff/')
+@app.route('/Staff/revenue')
 @role_required("Staff")
-def frequentCustomer():
+def revenue():
+	query = """SELECT sum(sold_price) 
+				FROM (
+                SELECT *
+                FROM ticket
+                WHERE departure_date >= cast(DATE_ADD(CURDATE(), INTERVAL -1 YEAR) AS DATE)
+                ) as TABLE1
+				WHERE airline_name = %s;"""
+	
+	query2 = """SELECT sum(sold_price) 
+				FROM (
+                SELECT *
+                FROM ticket
+                WHERE departure_date >= cast(DATE_ADD(CURDATE(), INTERVAL -1 MONTH) AS DATE)
+                ) as TABLE1
+				WHERE airline_name = %s;"""
+
+	cursor = conn.cursor()
+
+	airline = session["staffAirline"]
+
+	cursor.execute(query, (airline))
+    year = cursor.fetchone();
+	cursor.execute(query2, (airline))
+	month = cursor.fetchone();
+
+
+	print(data);
+	return render_template("/Staff/revenue.html", month=month, year=year);
