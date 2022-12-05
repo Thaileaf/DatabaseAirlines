@@ -52,35 +52,9 @@ def spending_specify():
 	return render_template('spending.html', table_info=table_info, total=total_spending)
 
 
-@app.route('/Staff/createflight', methods=['POST'])
-@role_required("Staff")
-def createflight():
-    airport = request.form['airport'];
-    # airport = request.form[]
+# @app.route('/Staff/createflight', methods=['POST'])
+# @role_required("Staff")
+# def createflight():
+#     airport = request.form['airport'];
+#     # airport = request.form[]
 
-@app.route('/Staff/frequentcustomers')
-@role_required("Staff")
-def frequentCustomer():
-    query = """SELECT email as customer, count(email) as flights 
-            FROM (
-                SELECT *
-                FROM ticket
-                WHERE departure_date >= cast(DATE_ADD(CURDATE(), INTERVAL -1 YEAR) AS DATE)
-                ) as TABLE1
-            WHERE airline_name = %s
-            GROUP BY email 
-            ORDER BY count(email) DESC;"""
-
-    queryAirline = "SELECT airline_name FROM airlinestaff WHERE username = %s;"
-
-    cursor = conn.cursor()
-
-    cursor.execute(queryAirline, (session["username"]));
-    airline = cursor.fetchone();
-    print(airline);
-    cursor.execute(query, (airline["airline_name"]))
-    data = cursor.fetchall();
-    print(data);
-
-    # Need to display 
-    return render_template('/Staff/frequentCustomers.html', table_info=data);

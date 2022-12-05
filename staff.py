@@ -53,3 +53,35 @@ def addFlight():
 	cursor.execute(query, values)
 	conn.commit()
 	return render_template('Staff/FlightEditor.html', airports = ap, planes = planes, airline = staffAirline, addFlightError = "Flight Successfully Added", addingFlight = True)
+
+@app.route('/Staff/frequentcustomers')
+@role_required("Staff")
+def frequentCustomer():
+    query = """SELECT email as customer, count(email) as flights 
+            FROM (
+                SELECT *
+                FROM ticket
+                WHERE departure_date >= cast(DATE_ADD(CURDATE(), INTERVAL -1 YEAR) AS DATE)
+                ) as TABLE1
+            WHERE airline_name = %s
+            GROUP BY email 
+            ORDER BY count(email) DESC;"""
+
+    queryAirline = "SELECT airline_name FROM airlinestaff WHERE username = %s;"
+
+    cursor = conn.cursor()
+
+    cursor.execute(queryAirline, (session["username"]));
+    airline = cursor.fetchone();
+    print(airline);
+    cursor.execute(query, (airline["airline_name"]))
+    data = cursor.fetchall();
+    print(data);
+
+    # Need to display 
+    return render_template('/Staff/frequentCustomers.html', table_info=data);
+
+
+@app.route('/Staff/')
+@role_required("Staff")
+def frequentCustomer():
