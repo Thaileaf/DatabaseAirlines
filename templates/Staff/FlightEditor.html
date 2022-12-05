@@ -97,7 +97,16 @@
                     <h5 class="card-title">{{line['departure_time']}}</h5>
                 </div>
                 <div class="col-1">
-                    <h5 class="card-subtitle mb-2 text-muted">{{line['status_flight']}}</h5>
+                    <h5 class="card-subtitle mb-2 text-muted" >{{line['status_flight']}}</h5>
+                    <a class="word-button" style="color:blue">Edit</a>
+                    <form  name =flight_status_form >
+                        <select  name = "flight_status_val">
+                            <option>ontime</option>
+                            <option>delayed</option>
+                            <option>canceled</option>
+                        </select>
+                        <input type = "submit" >
+                    </form>
                 </div>
                 <div class="col-2">
                     <h5 class="card-title">{{line['arrival_time']}}</h5>
@@ -130,8 +139,8 @@
                     <h6 class="card-subtitle mb-2 text-muted">{{line['arrive_at']}}</h6>
                 </div>
             </div>
-            <p class="card-text">{{line['TotalTime']}}</p>
-            <a href="#" class="card-link">Book Flight</a>  <!-- For later, should only be visible if the user is logged in and only when searching/viewing future flights-->
+            <p class="card-text"><strong>Length: </strong> {{line['TotalTime']}}</p>
+            <!-- <a class="word-button" style="color:blue">Edit Flight</a>  For later, should only be visible if the user is logged in and only when searching/viewing future flights -->
         </div>
     </div>
 {% endfor %}
@@ -153,6 +162,9 @@
         }else{ 
             d.style.display = "none"
         }
+    }
+    function editFlightStatus(val){
+        console.log(val)
     }
     // window.onload = load();
 </script>
