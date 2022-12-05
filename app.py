@@ -66,8 +66,7 @@ def past_flights():
 
 	data = cursor.fetchall() 
 	print(data)
-	return render_template('index.html', flights=data, hide_header=True, past_flights=True)
-
+	return render_template('index.html', flights=data, hide_header=True, past_flights=True, view_comments=True) # this doesn't seem to work ??????
 
 @app.route('/comment', methods=["POST"])
 def comment():
@@ -87,7 +86,7 @@ def comment():
 	cursor.execute(query, (email, airline_name, unique_airplane_num, flight_number, departure_date, departure_time, rating, comment))	
 	conn.commit()
 	cursor.close()
-	return render_template('submitted.html')
+	return render_template('submitted.html', view_comments=True)
 
 # should be customer only
 @app.route('/futureFlights', methods=["GET"])
@@ -149,15 +148,33 @@ def buyTicket():
 	data = cursor.fetchone()
 	# print(data)
 	if (data):
+		# need to change base price depending on how many people are on the plane, can have fixed number of seats but if 60% of the capacity is full (booked/reserved), then extra 25% will be added to min/base price
+		sold_price = base_price + 10
 		query = 'INSERT into ticket Values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
-		cursor.execute(query, (ticket_id, airline_name, unique_airplane_num, flight_number, departure_date, departure_time, card_type, card_number, name_on_card, expiration, base_price + 10, email, purchase_date, purchase_time))
+		cursor.execute(query, (ticket_id, airline_name, unique_airplane_num, flight_number, departure_date, departure_time, card_type, card_number, name_on_card, expiration, sold_price, email, purchase_date, purchase_time))
 		conn.commit()
 		cursor.close()
-		# print("")
 
 	return render_template('submitted.html')
 
-# @app.route('/')
+@app.route('/cancelTicket', methods=["GET", "POST"])
+def cancelTicket():
+	cursor = conn.cursor()
+	email = "totallylegit@nyu.edu"
+	ticket_id = int(float(request.form['ticket_id']))
+
+	#check that the ticket_id is in your email so you can't delete someone elses ticket
+	query = 'SELECT * from ticket where email = %s and ticket_id = %s'
+	cursor.execute(query, (email, ticket_id))
+	data = cursor.fetchone()
+	print(ticket_id)
+
+	if (data):
+		query = 'DELETE from ticket where ticket.ticket_id = %s' # only works temporarily? a bit strange 
+		cursor.execute(query, (ticket_id))
+	
+	cursor.close()
+	return render_template('submitted.html')
 
 app.secret_key = 'some key that you will never guess'
 #Run the app on localhost port 5000

@@ -67,8 +67,13 @@
                 <!--Spacing-->
                 <div class="col-6"></div>
                 <div class="col-1">
+                {% if view_tickets %}
+                    <h5 style="color:green">${{line['sold_price']}}</h5>
+                {% else %}
                     <h5 style="color:green">${{line['base_price']}}</h5>
-                </div>
+                {% endif %}
+
+            </div>
             </div>
             <div class="row">
                 <div class="col-2">
@@ -130,19 +135,13 @@
             </div>
             {% elif view_tickets %} <!-- Cancel tickets option -->
             <div class="container">               
-                <form action="{{ url_for('buyTicket') }}" method="POST"> 
-                
-                    <input type="hidden" id="airline_name" name="airline_name" value="{{line['airline_name']}}"> 
-                    <input type="hidden" id="unique_airplane_num" name="unique_airplane_num" value="{{line['unique_airplane_num']}}"> 
-                    <input type="hidden" id="flight_number" name="flight_number" value="{{line['flight_number']}}"> 
-                    <input type="hidden" id="departure_date" name="departure_date" value="{{line['departure_date']}}"> 
-                    <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}"> 
-                    <input type="hidden" id="base_price" name="base_price" value="{{line['base_price']}}"> 
-                    <input type="submit" value="Cancel Flight" class="card-link">  <!-- For later, should only be visible if the user is logged in and only when searching/viewing future flights-->
+                <form action="{{ url_for('cancelTicket') }}" method="POST"> 
+                    <input type="hidden" id="ticket_id" name="ticket_id" value="{{line['ticket_id']}}">       
+                    <input type="submit" value="cancel_flight" class="card-link">  <!-- should only be visible if the user is logged in-->
                 </form>
 
             </div>
-            {% elif not line['rating'] %}
+            {% elif view_comments and not line['rating'] %} <!-- showing the comment option when it shouldn't-->
             <form action="{{ url_for('comment') }}" method="POST">
                 <label for="rating">Rating (between 1 and 5):</label>
                 <input type="number" id="rating" name="rating" min="1" max="5" required>
