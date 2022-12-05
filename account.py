@@ -73,4 +73,14 @@ def frequentCustomer():
 
     queryAirline = "SELECT airline_name FROM airlinestaff WHERE username = %s;"
 
-    cursor = conn.cursuor()
+    cursor = conn.cursor()
+
+    cursor.execute(queryAirline, (session["username"]));
+    airline = cursor.fetchone();
+    print(airline);
+    cursor.execute(query, (airline["airline_name"]))
+    data = cursor.fetchall();
+    print(data);
+
+    # Need to display 
+    return render_template('/Staff/frequentCustomers.html', table_info=data);
