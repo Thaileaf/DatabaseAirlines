@@ -12,15 +12,31 @@ def staff():
     airports = get_airports()
     return render_template("Staff/staff.html", airports = airports)
 
-	
+
+@app.route('/FlightEditor/searchFlight', methods=['GET', 'POST'])
+@role_required("Staff")
+def staffSearchFlight():
+	dep = request.form['dep']
+	arr = request.form['arr']
+	arrCity = request.form['arrCity']
+	depCity = request.form['depCity']
+	start = request.form['start']
+	end = request.form['end']
+	if(start): start = datetime.datetime.strptime(start, '%Y-%m-%d').date()
+	if(end): end = datetime.datetime.strptime(end, '%Y-%m-%d').date()
+	flights = searchFlight(dep = dep, arr = arr, arrCity=arrCity, depCity=depCity, start = start, end = end)
+	print(len(flights))
+	return flightEditor(flights = flights)
+
 
 
 
 @app.route('/FlightEditor')
 @role_required("Staff")
-def flightEditor(addingFlight = False, addFlightError = None, addingAirplane = False, addAirplaneError = None, addingAirport = False, addAirportError = None):
+def flightEditor(addingFlight = False, addFlightError = None, addingAirplane = False, addAirplaneError = None, addingAirport = False, addAirportError = None, flights = None):
 	staffAirline = session["staffAirline"]
-	flights = getFutureFlights(staffAirline)
+	if(flights == None):
+		flights = getFutureFlights(staffAirline)
 	ap = get_airports()
 	planes = getAirplanes(staffAirline)
 	return render_template('Staff/FlightEditor.html', airports = ap, planes = planes, airline = staffAirline, 
@@ -31,9 +47,6 @@ def flightEditor(addingFlight = False, addFlightError = None, addingAirplane = F
 @app.route('/FlightEditor/addFlight', methods=['GET', 'POST'])
 @role_required("Staff")
 def addFlight(): 
-	ap = get_airports()
-	planes = getAirplanes()
-	flights = getFutureFlights(staffAirline)
 	staffAirline = session["staffAirline"]
 	arrAirport = request.form['arrAir']
 	depAirport = request.form['depAir']
@@ -68,6 +81,7 @@ def addFlight():
 	cursor.execute(query, values)
 	conn.commit()
 	flights = getFutureFlights(staffAirline)
+	addFlightError = "Successfully Added Flight"
 	return flightEditor(True, addFlightError)
 
 
