@@ -7,13 +7,14 @@ from helperFuncs import *
 
 @app.route('/FlightEditor')
 @role_required("Staff")
-def flightEditor(addingFlight = False, addFlightError = None, addingAirplane = False, addAirplaneError = None):
+def flightEditor(addingFlight = False, addFlightError = None, addingAirplane = False, addAirplaneError = None, addingAirport = False, addAirportError = None):
 	staffAirline = session["staffAirline"]
 	flights = getFutureFlights(staffAirline)
 	ap = get_airports()
 	planes = getAirplanes(staffAirline)
 	return render_template('Staff/FlightEditor.html', airports = ap, planes = planes, airline = staffAirline, 
-	flights = flights, addingFlight = addingFlight, addFlightError = addFlightError, addingAirplane = addingAirplane, addAirplaneError =addAirplaneError )
+	flights = flights, addingFlight = addingFlight, addFlightError = addFlightError, addingAirplane = addingAirplane, addAirplaneError =addAirplaneError,
+	addingAirport = addingAirport, addAirportError = addAirportError )
 
 
 @app.route('/FlightEditor/addFlight', methods=['GET', 'POST'])
@@ -97,6 +98,26 @@ def addAirplane():
 	cursor.execute(query,(staffAirline, airplaneNum, seats, company, age))
 	conn.commit()
 	return flightEditor(False, None, True, "Successfully Added Airplane")
+
+
+@app.route('/FlightEditor/addAirport', methods=['GET', 'POST'])
+@role_required("Staff")
+def addAirport():
+	name = request.form["name"]
+	aType = request.form['type']
+	city = request.form['city']
+	country = request.form['country']
+
+	query = "Select * FROM airport WHERE name = %s"
+	cursor = conn.cursor() 
+	cursor.execute(query, (name))
+	data = cursor.fetchone() 
+	if(data): 
+		return flightEditor(False, None, False, None, True, "Airport Name Already Exists")
+	query = "INSERT INTO airport VALUES(%s, %s,%s,%s)"
+	cursor.execute(query,(name, city, country, aType))
+	conn.commit()
+	return flightEditor(False, None, False, None, True, "Successfully Added Airport")
 
 
 # Queries frequent customers and displays to Staff
