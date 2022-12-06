@@ -12,7 +12,6 @@ def staff():
     airports = get_airports()
     return render_template("Staff/staff.html", airports = airports)
 
-
 @app.route('/FlightEditor/searchFlight', methods=['GET', 'POST'])
 @role_required("Staff")
 def staffSearchFlight():
@@ -27,9 +26,6 @@ def staffSearchFlight():
 	flights = searchFlight(dep = dep, arr = arr, arrCity=arrCity, depCity=depCity, start = start, end = end)
 	print(len(flights))
 	return flightEditor(flights = flights)
-
-
-
 
 @app.route('/FlightEditor')
 @role_required("Staff")

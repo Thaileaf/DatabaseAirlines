@@ -29,6 +29,14 @@ def get_airports():
 	airports = cursor.fetchall()
 	return airports
 
+def add_time_difference(flights):
+	for flight in flights:
+		dep = datetime.datetime.strptime(str(flight["departure_date"])+" "+str(flight["departure_time"]),  '%Y-%m-%d %H:%M:%S')
+		arr = datetime.datetime.strptime(str(flight["arrival_date"])+" "+str(flight["arrival_time"]),  '%Y-%m-%d %H:%M:%S')
+		flight["total_time"] = str(arr - dep)
+
+	return flights
+
 def getFutureFlights(airline = None):
 	cursor = conn.cursor()
 	if(airline):
@@ -37,22 +45,25 @@ def getFutureFlights(airline = None):
 		flights = cursor.fetchall()
 		cursor.close()
 
-		for flight in flights: 
-			dep = datetime.datetime.strptime(str(flight["departure_date"])+" "+str(flight["departure_time"]),  '%Y-%m-%d %H:%M:%S')
-			arr = datetime.datetime.strptime(str(flight["arrival_date"])+" "+str(flight["arrival_time"]),  '%Y-%m-%d %H:%M:%S')
-			flight["TotalTime"] = str(arr-dep)
-		return flights
+		# for flight in flights: 
+		# 	dep = datetime.datetime.strptime(str(flight["departure_date"])+" "+str(flight["departure_time"]),  '%Y-%m-%d %H:%M:%S')
+		# 	arr = datetime.datetime.strptime(str(flight["arrival_date"])+" "+str(flight["arrival_time"]),  '%Y-%m-%d %H:%M:%S')
+		# 	flight["total_time"] = str(arr-dep)
+		# return flights
+		return add_time_difference(flights)
+
 	else:
 		flights_query = 'SELECT * from flight where flight.departure_date >= CAST(CURRENT_DATE() as Date)'
 		cursor.execute(flights_query)
 		flights = cursor.fetchall()
 		cursor.close()
-		for flight in flights: 
-			dep = datetime.datetime.strptime(str(flight["departure_date"])+" "+str(flight["departure_time"]),  '%Y-%m-%d %H:%M:%S')
-			arr = datetime.datetime.strptime(str(flight["arrival_date"])+" "+str(flight["arrival_time"]),  '%Y-%m-%d %H:%M:%S')
-			flight["TotalTime"] = str(arr-dep)
-		return flights
+		# for flight in flights: 
+		# 	dep = datetime.datetime.strptime(str(flight["departure_date"])+" "+str(flight["departure_time"]),  '%Y-%m-%d %H:%M:%S')
+		# 	arr = datetime.datetime.strptime(str(flight["arrival_date"])+" "+str(flight["arrival_time"]),  '%Y-%m-%d %H:%M:%S')
+		# 	flight["total_time"] = str(arr-dep)
+		# return flights
 
+		return add_time_difference(flights)
 
 def findFlight(airline, flight_num):
 	cursor = conn.cursor() 
