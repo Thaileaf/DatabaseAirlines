@@ -1,1 +1,27 @@
-![image](https://user-images.githubusercontent.com/28660350/206040768-62a5dce4-4f67-45ff-a40b-0cbb81539dc2.png)
+Why The Fuck Would You Even Do That Holy Shit Public License
+Development Draft
+
+Everything not prohibited is permitted.
+
+#Prohibited Purposes
+You may not rewrite this software in Python 2.
+#Acceptance
+To receive this license, you have to agree to its rules. Those rules are both obligations under that agreement and conditions to your license. Don't do anything with this software against any rule you can't or won't follow.
+
+#Copyright
+Each contributor licenses you to do everything with this software that would otherwise infringe their copyright in it, except for Prohibited Purposes.
+
+#Notices
+You must ensure that everyone who gets a copy of any part of this software from you, with or without changes, also gets the text of this license.
+
+#Excuse
+You're excused for unknowingly breaking Notices if you take all practical steps to comply within thirty days of learning you broke the rule.
+
+#Patent
+Each contributor licenses you to do everything with this software that would otherwise infringe any patent claims they can license or become able to license, except for Prohibited Purposes.
+
+#Reliability
+No contributor can revoke this license.
+
+#No Liability
+As far as the law allows, this software comes as is, without any warranty or condition, and no contributor will be liable to anyone for any damages related to this software or this license, under any kind of legal claim.![image](https://user-images.githubusercontent.com/28660350/206040961-468a4965-ea30-4262-a314-113a48903c9f.png)
