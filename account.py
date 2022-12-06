@@ -32,8 +32,6 @@ def root():
     else:
         return render_template('index.html', flights=flights, airports=airports)
 
-
-
 @app.route('/pastFlights', methods=["GET"])
 @role_required('Customer')
 def pastFlights():

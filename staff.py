@@ -33,8 +33,8 @@ def flightEditor(addingFlight = False, addFlightError = None, addingAirplane = F
 def addFlight(): 
 	ap = get_airports()
 	planes = getAirplanes()
-	flights = getFutureFlights(staffAirline)
 	staffAirline = session["staffAirline"]
+	flights = getFutureFlights(staffAirline)
 	arrAirport = request.form['arrAir']
 	depAirport = request.form['depAir']
 	flightnum = request.form['flightnum']
@@ -68,6 +68,7 @@ def addFlight():
 	cursor.execute(query, values)
 	conn.commit()
 	flights = getFutureFlights(staffAirline)
+	addFlightError = "Successfully Added a Flight"
 	return flightEditor(True, addFlightError)
 
 
