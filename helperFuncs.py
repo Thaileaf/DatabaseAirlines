@@ -1,4 +1,4 @@
-from __main__ import conn, session
+from __main__ import conn, session, redirect
 import pymysql.cursors
 import hashlib
 import sys
