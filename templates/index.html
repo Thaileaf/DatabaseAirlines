@@ -15,15 +15,18 @@
     <div class="credentials">
         <a href="./signup">Sign Up</a>  
        <a href="./login">Log in</a>
-       <!-- Will need a button here to go back to the home page for logged in users-->
-<!--        Debug login-->
-        <!-- <a href="/" onclick="debugLogin()">Log in</a> -->
+       {% if hide_header %}
+       <a href="/">Go back to search</a>
+       {% endif %}
     </div>
     {% else %}
     <div class="credentials account">
         <a href="/myaccount">My Account</a>
         <a href="./logout">Log out</a>
-    </div>
+        {% if hide_header %}
+        <a href="/">Go back to search</a>
+        {% endif %}
+     </div>
     {% endif %}
     
     {% if not hide_header %}
@@ -32,7 +35,7 @@
             <label for="airport">Airport: </label>
             <select id="airport" name="airport">
             {% for line in airports %}
-                <option name="airport" id="airport_s" value={{line['name']}}>{{line['name']}}</option> <!-- Vscode doesn't like that-->
+                <option name="airport" id="airport_s" value={{line['name']}}>{{line['name']}}</option> 
             {% endfor %}
             </select>
             <label for="roundtrip">Roundtrip: </label>
