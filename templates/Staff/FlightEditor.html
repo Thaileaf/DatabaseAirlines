@@ -33,8 +33,11 @@
     </form>
 </div>
 
-<input class="IptBtn" type="submit" value="Add Flights" onclick=showAdder()>
+
 </div>
+<div style = "text-align: center; padding-bottom: 5px; ">
+    <input class="IptBtn" type="submit" value="Add Flights" onclick=showAdder()>
+
 {%if addingFlight%}
 <div id = "FlightAdder" style = "text-align: center;  display: block;" >
 {%else%}
@@ -81,13 +84,34 @@
             {% endfor %}
         </select>
 
-        <input type="submit" value="Add"><br/>
+        <br><input type="submit" value="Add"><br/>
         {% if addFlightError %}
         <p class="error">{{addFlightError}}</p>
         {% endif %}
     </form>
 </div>
-
+</div>
+<div style ="text-align: center;">
+<input class="IptBtn" type="submit" value="Add Airplane" onclick=showAdderAirplane()>
+{% if addingAirplane %}
+<form id = "addAirplaneForm" style="display: block" action="/FlightEditor/addAirplane" method = "POST">
+{% else %}
+<form id = "addAirplaneForm" style="display: none" action="/FlightEditor/addAirplane" method = "POST">
+{%endif%}
+    <label>Unique Airplane Number</label>
+    <input type = "number" name="uniAir"  required>
+    <label>Number of Seats</label>
+    <input type = "number" name="seat" required><br>
+    <label>Manufacturing Company</label>
+    <input name="company" required>
+    <label>Airplane Age</label>
+    <input type = "number" name="age"  required><br/>
+    <input type="submit" value="Add">
+    {% if addAirplaneError %}
+    <p class="error">{{addAirplaneError}}</p>
+    {% endif %} 
+</form>
+</div>
 <div class="flights">
 
 {% for line in flights %}
@@ -163,6 +187,14 @@
 <script>
     function showAdder(){
         d = document.getElementById("FlightAdder")
+        if(d.style.display == "none"){ 
+            d.style.display = "block"
+        }else{ 
+            d.style.display = "none"
+        }
+    }
+    function showAdderAirplane(){
+        d = document.getElementById("addAirplaneForm")
         if(d.style.display == "none"){ 
             d.style.display = "block"
         }else{ 

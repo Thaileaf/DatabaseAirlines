@@ -7,12 +7,13 @@ from helperFuncs import *
 
 @app.route('/FlightEditor')
 @role_required("Staff")
-def flightEditor():
+def flightEditor(addingFlight = False, addFlightError = None, addingAirplane = False, addAirplaneError = None):
 	staffAirline = session["staffAirline"]
 	flights = getFutureFlights(staffAirline)
 	ap = get_airports()
 	planes = getAirplanes(staffAirline)
-	return render_template('Staff/FlightEditor.html', airports = ap, planes = planes, airline = staffAirline, flights = flights)
+	return render_template('Staff/FlightEditor.html', airports = ap, planes = planes, airline = staffAirline, 
+	flights = flights, addingFlight = addingFlight, addFlightError = addFlightError, addingAirplane = addingAirplane, addAirplaneError =addAirplaneError )
 
 
 @app.route('/FlightEditor/addFlight', methods=['GET', 'POST'])
@@ -35,15 +36,15 @@ def addFlight():
 	
 	if(depAirport == arrAirport): 
 		addFlightError = "Invalid Flight Departure and Arrival Airport are the Same"
-		return render_template('Staff/FlightEditor.html', airports = ap, planes = planes, airline = staffAirline, addFlightError = addFlightError, addingFlight = True, flights = flights)
+		return flightEditor(True, addFlightError)
 
 	if(findFlight(staffAirline, flightnum)): 
 		addFlightError = "Flight Number Already Exists"
-		return render_template('Staff/FlightEditor.html', airports = ap, planes = planes, airline = staffAirline, addFlightError = addFlightError, addingFlight = True, flights = flights)
+		return flightEditor(True, addFlightError)
 
 	if(arrDT < depDT):
 		addFlightError = "Invalid Date and Time, Arrival is Before Departure"
-		return render_template('Staff/FlightEditor.html', airports = ap, planes = planes, airline = staffAirline, addFlightError = addFlightError, addingFlight = True, flights = flights)
+		return flightEditor(True, addFlightError)
 		
 	
 	values = ( session["staffAirline"], request.form['airplane'], flightnum, request.form['dpdate'], 
@@ -55,14 +56,14 @@ def addFlight():
 	cursor.execute(query, values)
 	conn.commit()
 	flights = getFutureFlights(staffAirline)
-	return render_template('Staff/FlightEditor.html', airports = ap, planes = planes, airline = staffAirline, addFlightError = "Flight Successfully Added", addingFlight = True, flights = flights)
+	return flightEditor(True, addFlightError)
+
 
 
 @app.route('/FlightEditor/editStatus', methods=['GET', 'POST'])
 @role_required("Staff")
 def editFlightStatus():
 
-	print("i got here bitch")
 	staffAirline = session["staffAirline"]
 	uniPlanNum = request.form['unique_airplane_num']
 	flight_number = request.form['flight_number']
@@ -76,6 +77,26 @@ def editFlightStatus():
 	conn.commit() 
 
 	return flightEditor()
+
+
+@app.route('/FlightEditor/addAirplane', methods=['GET', 'POST'])
+@role_required("Staff")
+def addAirplane():
+	staffAirline = session["staffAirline"]
+	airplaneNum = request.form["uniAir"]
+	seats = request.form["seat"]
+	company = request.form["company"]
+	age = request.form["age"]
+	query = "Select * FROM airplane WHERE airline_name = %s AND unique_airplane_num = %s"
+	cursor = conn.cursor() 
+	cursor.execute(query, (staffAirline, airplaneNum))
+	data = cursor.fetchone() 
+	if(data): 
+		return flightEditor(False, None, True, "Airplane Number Already Exists")
+	query = "INSERT INTO airplane VALUES(%s, %s,%s,%s, %s)"
+	cursor.execute(query,(staffAirline, airplaneNum, seats, company, age))
+	conn.commit()
+	return flightEditor(False, None, True, "Successfully Added Airplane")
 
 
 # Queries frequent customers and displays to Staff
