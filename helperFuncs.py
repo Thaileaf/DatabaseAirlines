@@ -74,36 +74,41 @@ def findFlight(airline, flight_num):
 def calculate_spending(email, start_date, end_date):
 	table_info = []
 	total_spending = 0
-	for full_date in rrule.rrule(rrule.MONTHLY, dtstart=start_date, until=end_date):
-		date, time = str(full_date).split()
-		year, month, day = date.split("-")
-		cursor = conn.cursor()
-		query = 'select sum(sold_price) as monthly_spending from ticket where email = %s and MONTH(purchase_date) = %s and YEAR(purchase_date) = %s group by email;'
-		cursor.execute(query, (email, str(month), str(year)))
-		spending = cursor.fetchone() 
-		# print(spending)
-		if spending:
-			total_spending += spending["monthly_spending"] 
-			table_info.append((date, spending["monthly_spending"])) 
-		else:
-			table_info.append((date, 0))
+	# for full_date in rrule.rrule(rrule.MONTHLY, dtstart=start_date, until=end_date):
+	# 	date, time = str(full_date).split()
+	# 	year, month, day = date.split("-")
+	# 	cursor = conn.cursor()
+	# 	query = 'select sum(sold_price) as monthly_spending from ticket where email = %s and MONTH(purchase_date) = %s and YEAR(purchase_date) = %s group by email;'
+	# 	cursor.execute(query, (email, str(month), str(year)))
+	# 	spending = cursor.fetchone() 
+	# 	# print(spending)
+	# 	if spending:
+	# 		total_spending += spending["monthly_spending"] 
+	# 		table_info.append((date, spending["monthly_spending"])) 
+	# 	else:
+	# 		table_info.append((date, 0))
+	
+	test = calculate_by_month(start_date, end_date, "sum(sold_price)", email)
+	# cursor = conn.cursor()
+	# query = 'SELECT sum(sold_price) as tot, DATE_FORMAT(departure_date, "%Y-%m") AS year_and_month FROM (SELECT * FROM ticket WHERE departure_date > %s AND departure_date < %s AND airline_name like %s and email = %s) as TABLE1 GROUP BY year_and_month DESC;'''
+	# cursor.execute(query, (departure))
+	print(test)
 
 	return table_info, total_spending
 
-def calculate_by_month(startDate, endDate, airine_name):
+def calculate_by_month(startDate, endDate, select, email="%", airline_name="%"):
     # if not endDate and not startDate:
-    #     endDate = datetime.date.today().strftime("%y-%m-%d")
-    query = """SELECT count(ticket_id) as tot, DATE_FORMAT(departure_date, '%Y-%m') AS year_and_month
-                    FROM (SELECT * 
-                FROM ticket 
-                WHERE departure_date > %s AND departure_date < %s AND airline_name like %s) as TABLE1
-                   GROUP BY year_and_month DESC"""
+	#     endDate = datetime.date.today().strftime("%y-%m-%d")
+	print("1")
+	query = 'SELECT ' + select + ''' as tot, DATE_FORMAT(departure_date, "%%Y-%%m") AS year_and_month FROM (SELECT * FROM ticket WHERE departure_date > %s AND 
+	departure_date < %s AND airline_name like %s and email like %s) as TABLE1 GROUP BY year_and_month DESC;'''
+	
+	cursor = conn.cursor()
+	cursor.execute(query, (startDate, endDate, airline_name, email))
+	print("2")
 
-
-
-    cursor = conn.cursor();
-    cursor.execute(query, (startDate, endDate, airline_name))
-    
+	
+	return cursor.fetchall()
 
 def getAirplanes(airline = None): 
     if(airline): 

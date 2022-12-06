@@ -13,8 +13,8 @@ def staff():
 	'''
 	The Staff Homepage. It creates 
 	'''
-    airports = get_airports()
-    return render_template("Staff/staff.html", airports = airports)
+	airports = get_airports()
+	return render_template("Staff/staff.html", airports = airports)
 
 @app.route('/FlightEditor/searchFlight', methods=['GET', 'POST'])
 @role_required("Staff")
