@@ -6,9 +6,13 @@ import datetime
 from helperFuncs import *
 
 
+
 @app.route('/Staff/staff')
 @role_required("Staff")
 def staff():
+	'''
+	The Staff Homepage. It creates 
+	'''
     airports = get_airports()
     return render_template("Staff/staff.html", airports = airports)
 
@@ -220,7 +224,7 @@ def report():
 		start = request.form["from"]
 		end = request.form["to"]
 		query = """SELECT count(ticket_id) as tot
-					FROM (
+					FROM (s
 					SELECT *
 					FROM ticket
 					WHERE departure_date >= %s AND departure_date <= %s
