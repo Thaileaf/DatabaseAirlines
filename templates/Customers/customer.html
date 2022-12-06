@@ -9,17 +9,17 @@
 </head>
 <body>
 <div class="header">
-  <h1 style="text-align: center">My Account</h1>
+  <h1 style="text-align: center">Hello, {{session['email']}}</h1>
   <div class="credentials">
     <a href="/">Home</a>
-    <a href="/logout" onclick="logout()">Log out</a>
+    <a href="/logout" onclick="logout()">Log out</a>  
   </div>
 </div>
 <div class="account staff" style="padding: 100px;display:flex">
   <div class="block">
     <a href="/pastFlights">View Past Flights</a> </br>
     <!-- <a href="/futureFlights">View Future Flights</a> </br> -->
-    <a href="/tickets">View Tickets</a> </br>
+    <a href="/getTickets">View Tickets</a> </br>
     <a href="/">Search for Flights</a> </br>
     <a href="/spending">Track my spending</a> </br>
   </div>

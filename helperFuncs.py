@@ -29,6 +29,14 @@ def get_airports():
 	airports = cursor.fetchall()
 	return airports
 
+def add_time_difference(flights):
+	for flight in flights:
+		dep = datetime.datetime.strptime(str(flight["departure_date"])+" "+str(flight["departure_time"]),  '%Y-%m-%d %H:%M:%S')
+		arr = datetime.datetime.strptime(str(flight["arrival_date"])+" "+str(flight["arrival_time"]),  '%Y-%m-%d %H:%M:%S')
+		flight["total_time"] = str(arr - dep)
+
+	return flights
+
 def getFutureFlights(airline = None):
 	cursor = conn.cursor()
 	if(airline):
@@ -37,22 +45,25 @@ def getFutureFlights(airline = None):
 		flights = cursor.fetchall()
 		cursor.close()
 
-		for flight in flights: 
-			dep = datetime.datetime.strptime(str(flight["departure_date"])+" "+str(flight["departure_time"]),  '%Y-%m-%d %H:%M:%S')
-			arr = datetime.datetime.strptime(str(flight["arrival_date"])+" "+str(flight["arrival_time"]),  '%Y-%m-%d %H:%M:%S')
-			flight["TotalTime"] = str(arr-dep)
-		return flights
+		# for flight in flights: 
+		# 	dep = datetime.datetime.strptime(str(flight["departure_date"])+" "+str(flight["departure_time"]),  '%Y-%m-%d %H:%M:%S')
+		# 	arr = datetime.datetime.strptime(str(flight["arrival_date"])+" "+str(flight["arrival_time"]),  '%Y-%m-%d %H:%M:%S')
+		# 	flight["total_time"] = str(arr-dep)
+		# return flights
+		return add_time_difference(flights)
+
 	else:
 		flights_query = 'SELECT * from flight where flight.departure_date >= CAST(CURRENT_DATE() as Date)'
 		cursor.execute(flights_query)
 		flights = cursor.fetchall()
 		cursor.close()
-		for flight in flights: 
-			dep = datetime.datetime.strptime(str(flight["departure_date"])+" "+str(flight["departure_time"]),  '%Y-%m-%d %H:%M:%S')
-			arr = datetime.datetime.strptime(str(flight["arrival_date"])+" "+str(flight["arrival_time"]),  '%Y-%m-%d %H:%M:%S')
-			flight["TotalTime"] = str(arr-dep)
-		return flights
+		# for flight in flights: 
+		# 	dep = datetime.datetime.strptime(str(flight["departure_date"])+" "+str(flight["departure_time"]),  '%Y-%m-%d %H:%M:%S')
+		# 	arr = datetime.datetime.strptime(str(flight["arrival_date"])+" "+str(flight["arrival_time"]),  '%Y-%m-%d %H:%M:%S')
+		# 	flight["total_time"] = str(arr-dep)
+		# return flights
 
+		return add_time_difference(flights)
 
 def findFlight(airline, flight_num):
 	cursor = conn.cursor() 
@@ -119,7 +130,7 @@ def getComments( aName = None, fNum = None, dTime = None, dDate = None, aNum = N
 	q4 = "departure_date = %s"
 	q5 = "unique_airplane_num = %s"
 	q6 = "email = %s"
-	query = "SELECT * FROM ratings WHERE"
+	query = "SELECT * FROM ratings WHERE "
 	values = []
 	fquery= []
 	if(aName): 
@@ -148,5 +159,65 @@ def getComments( aName = None, fNum = None, dTime = None, dDate = None, aNum = N
 	res = cursor.fetchall() 
 	print(len(res))
 	return res
+
+def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start = None, end = None ):
+	findQuery = "SELECT * FROM flight WHERE"
+	cursor = conn.cursor()
+	conditionals = []
+	conditionals_val = []
+	airports = get_airports()
+	
+	arrPort = set()
+	depPort = set()
+	for port in airports: 
+		arrPort.add(port["name"])
+		depPort.add(port["name"])
+	if(dep): 
+		depPort = depPort.intersection({dep})
+	if(arr): 
+		arrPort = arrPort.intersection({arr})
+	if(arrCity): 
+		q1 = "SELECT * FROM airport WHERE city = %s"
+		cursor.execute(q1,[arrCity])
+		hold = cursor.fetchall()
+		a = set()
+		for port in hold: 
+			a.add(port["name"])
+		print(len(a))
+		arrPort =arrPort.intersection(a)
+	if(depCity): 
+		q1 = "SELECT * FROM airport WHERE city = %s"
+		cursor.execute(q1,[depCity])
+		hold = cursor.fetchall()
+
+		d = set()
+		print(hold)
+		for port in hold: 
+			d.add(port["name"])
+		depPort = depPort.intersection(d)
+	if(start): 
+		conditionals_val.append(start)
+		conditionals.append("departure_date > %s")
+	if(end): 
+		conditionals_val.append(end)
+		conditionals.append("departure_date < %s")
+	
+	if(len(conditionals) == 0): 
+		findQuery = "SELECT * FROM flight WHERE departure_date > CAST( CURRENT_DATE() AS Date) AND departure_date < CAST( CURRENT_DATE() AS Date) +30"
+	conditionals = " AND ".join(conditionals)
+	findQuery += " " 
+	findQuery += conditionals
+	arrPort = tuple(arrPort)
+	depPort = tuple(depPort)
+	findQuery += " AND arrive_at in %s"
+	findQuery += " AND depart_from in %s"
+	if(len(arrPort) == 0 or len(depPort) == 0): 
+		return [] 
+	print(conditionals_val+[arrPort,depPort])
+	print(findQuery)
+	cursor.execute(findQuery, conditionals_val+[arrPort,depPort])
+	flights = cursor.fetchall()
+
+	return flights
 
 

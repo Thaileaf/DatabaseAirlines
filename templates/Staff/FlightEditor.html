@@ -15,20 +15,30 @@
     {%endif%}
 </div>
 <div style="text-align: center">
-<div>
-    <form action="/flights" id="addFligthsForm" method="POST" style="text-align: center;">
-        <label for="airport">Airport: </label>
-        <select id="airport" name="airport">
+<div style="padding-bottom: 5px;">
+    <form action="/FlightEditor/searchFlight"  method="POST" style="text-align: center;">
+        <label for="airport">Departure Airport: </label>
+        <select id="airport" name="dep">
+            <option></option>
         {% for line in airports %}
             <option name="airport" id="airport_s" value={{line['name']}}>{{line['name']}}</option> <!-- Vscode doesn't like that-->
         {% endfor %}
         </select>
-        <label for="roundtrip">Roundtrip: </label>
-        <input onclick=arrivalOn() type="checkbox" id="roundtrip" name="roundtrip"><br/>
-        <label for="depart">Departure Date:</label>
-        <input type="date" id="depart" name="depart" required>
-        <label class="arrival" for="return">Return Date:</label>
-        <input class="arrival" type="date" id=" " name="return">
+        <label for="airport">Arrival Airport: </label>
+        <select id="airport" name="arr">
+            <option></option>
+        {% for line in airports %}
+            <option name="airport" id="airport_s" value={{line['name']}}>{{line['name']}}</option> <!-- Vscode doesn't like that-->
+        {% endfor %}
+        </select> <br>
+        <label for="airport">Departure City: </label>
+        <input name="depCity">
+        <label for="airport">Arrival City: </label>
+        <input name="arrCity"><br>
+        <label for="depart">Start Date:</label>
+        <input type="date"  name="start">
+        <label for="depart">End Date:</label>
+        <input type="date"  name="end"> <br>
         <input  class="IptBtn" type="submit" value="Submit">
     </form>
 </div>
@@ -195,7 +205,15 @@
                 </div>
             </div>
             <p class="card-text"><strong>Length: </strong> {{line['TotalTime']}}</p>
-            <a class="word-button" style="color:blue">view_comments</a>  
+            <form action="/Staff/findComments"  method="POST">
+            
+                <input type="hidden" name="aNum" value="{{line['unique_airplane_num']}}"> 
+                <input type="hidden"  name="fNum" value="{{line['flight_number']}}"> 
+                <input type="hidden" name="dDate" value="{{line['departure_date']}}"> 
+                <input type="hidden" name="dTime" value="{{line['departure_time']}}">
+                <input type="hidden" name="customer">  
+                <input type = "submit" class=".IptBtn" value ="View Comments">
+            </form> 
             <!-- <a class="word-button" style="color:blue">Edit Flight</a>  For later, should only be visible if the user is logged in and only when searching/viewing future flights -->
         </div>
     </div>

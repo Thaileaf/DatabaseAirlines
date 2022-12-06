@@ -24,15 +24,19 @@ def customer():
 #Define a route to hello function
 @app.route('/')
 def root():
-    flights = getFutureFlights()
+    # should only show future flights for which the traveler has purchased tickets from - also shouldn't manage tickets (canceling flights) here, should be done on the ticket page
     airports = get_airports()
-    # cursor = conn.cursor()
     if 'email' in session: # check if a customer is logged in 
-        return render_template('index.html', flights=flights, airports=airports, book_flights=True, view_tickets=False)
+        email = session['email']
+        cursor = conn.cursor()
+        query = 'SELECT distinct F.airline_name, F.unique_airplane_num, F.flight_number, F.departure_date, F.departure_time, F.arrival_date, F.arrival_time, F.base_price, F.status_flight, F.roundtrip, F.depart_from, F.arrive_at from flight as F, ticket as T where F.airline_name = T.airline_name and F.unique_airplane_num = T.unique_airplane_num and F.flight_number = T.flight_number and F.departure_date = T.departure_date and F.departure_time = T.departure_time and email = %s'
+        cursor.execute(query, (email)) 
+        flights = cursor.fetchall()      
+        flights = add_time_difference(flights)
+        return render_template('index.html', flights=flights, airports=airports, book_flights=True)
     else:
+        flights = getFutureFlights()
         return render_template('index.html', flights=flights, airports=airports)
-
-
 
 @app.route('/pastFlights', methods=["GET"])
 @role_required('Customer')
@@ -41,9 +45,11 @@ def pastFlights():
     cursor = conn.cursor()
     query = "SELECT * from flight natural join ticket as C left join ratings on (ratings.airline_name = C.airline_name and ratings.email = C.email and ratings.unique_airplane_num = C.unique_airplane_num and ratings.flight_number = C.flight_number and ratings.departure_date = C.departure_date and ratings.departure_time = C.departure_time) where flight.departure_date < CAST(CURRENT_DATE() as Date) and C.email = %s"
     cursor.execute(query, (email))
+    
+    flights = cursor.fetchall() 
+    flights = add_time_difference(flights)
 
-    data = cursor.fetchall() 
-    return render_template('index.html', flights=data, hide_header=True, past_flights=True, view_comments=True) # this doesn't seem to work ??????
+    return render_template('index.html', flights=flights, hide_header=True, past_flights=True) # this doesn't seem to work ??????
 
 @app.route('/comment', methods=["POST"])
 @role_required('Customer')
@@ -64,7 +70,7 @@ def comment():
 	cursor.execute(query, (email, airline_name, unique_airplane_num, flight_number, departure_date, departure_time, rating, comment))	
 	conn.commit()
 	cursor.close()
-	return render_template('submitted.html', view_comments=True)
+	return render_template('submitted.html')
 
 
 @app.route('/flights', methods=['GET', 'POST'])
@@ -92,15 +98,28 @@ def flights():
 @app.route('/getTickets', methods=["GET", "POST"])
 @role_required('Customer')
 def get_tickets():
-	email = session['email']
-	cursor = conn.cursor()
-	query = 'SELECT * from ticket where email = %s'
-	
-	cursor.execute(query, (email))
-	data = cursor.fetchall()
-	return render_template('index.html', flights=data, hide_header=True, view_tickets=True)
+    email = session['email']
+    cursor = conn.cursor()
+    query = 'SELECT * from ticket where email = %s'
+    
+    # need to add 24 hour requirement still
+    cursor.execute(query, (email))
+    tickets = cursor.fetchall()
 
-# buying a ticket
+    for ticket in tickets:
+        departure = datetime.strptime(str(ticket["departure_date"])+" "+str(ticket["departure_time"]),  '%Y-%m-%d %H:%M:%S')
+        current = departure - datetime.now() 
+        if current > timedelta(days=1):
+            ticket["can_cancel"] = True
+        else:
+            ticket["can_cancel"] = False
+        # print(current)
+        # arr = datetime.strptime(str(flight["arrival_date"])+" "+str(flight["arrival_time"]),  '%Y-%m-%d %H:%M:%S')
+        # flight["total_time"] = str(arr - dep)
+
+    return render_template('index.html', flights=tickets, hide_header=True, view_tickets=True)
+
+# Buying a ticket
 @app.route('/buyTicket', methods=["GET", "POST"])
 def buyTicket():
     cursor = conn.cursor()
@@ -164,22 +183,23 @@ def buyTicket():
 
 @app.route('/cancelTicket', methods=["GET", "POST"])
 def cancelTicket():
-	cursor = conn.cursor()
-	email = session['email']
-	ticket_id = int(float(request.form['ticket_id']))
+    cursor = conn.cursor()
+    email = session['email']
+    ticket_id = int(float(request.form['ticket_id']))
 
-	#check that the ticket_id is in your email so you can't delete someone elses ticket
-	query = 'SELECT * from ticket where email = %s and ticket_id = %s'
-	cursor.execute(query, (email, ticket_id))
-	data = cursor.fetchone()
-	print(ticket_id)
+    #check that the ticket_id is in your email so you can't delete someone elses ticket
+    query = 'SELECT * from ticket where email = %s and ticket_id = %s'
+    cursor.execute(query, (email, ticket_id))
+    data = cursor.fetchone()
+    print(ticket_id)
 
-	if (data):
-		query = 'DELETE from ticket where ticket.ticket_id = %s' # only works temporarily? a bit strange 
-		cursor.execute(query, (ticket_id))
-	
-	cursor.close()
-	return render_template('submitted.html')
+    if (data):
+        query = 'DELETE from ticket where ticket.ticket_id = %s' # only works temporarily? a bit strange 
+        cursor.execute(query, (ticket_id))
+        conn.commit()
+
+    cursor.close()
+    return render_template('submitted.html')
 
 @app.route('/spending')
 @role_required("Customer")
@@ -193,14 +213,14 @@ def spending_default():
 @app.route('/spendSpecify', methods=["POST"])
 @role_required("Customer")
 def spending_specify():
-	start_year, start_month, start_day  = request.form['start'].split("-") 
-	start_date = datetime(int(start_year), int(start_month), int(start_day))
-	end_year, end_month, end_day  = request.form['end'].split("-") 
-	end_date = datetime(int(end_year), int(end_month), int(end_day))
+    email = session['email']
+    start_year, start_month, start_day  = request.form['start'].split("-") 
+    start_date = datetime(int(start_year), int(start_month), int(start_day))
+    end_year, end_month, end_day  = request.form['end'].split("-") 
+    end_date = datetime(int(end_year), int(end_month), int(end_day))
 
-	table_info, total_spending = calculate_spending(start_date, end_date)
-	return render_template('spending.html', table_info=table_info, total=total_spending)
-
+    table_info, total_spending = calculate_spending(email, start_date, end_date)
+    return render_template('spending.html', table_info=table_info, total=total_spending)
 
 # @app.route('/Staff/createflight', methods=['POST'])
 # @role_required("Staff")

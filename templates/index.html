@@ -100,7 +100,12 @@
                     <h6 class="card-subtitle mb-2 text-muted">{{line['arrive_at']}}</h6>
                 </div>
             </div>
-            <p class="card-text"><strong>Length: </strong>{{line['TotalTime']}}</p>
+            {% if line['total_time'] %}
+            <p class="card-text"><strong>Length: </strong>{{line['total_time']}}</p>
+            {% else %}
+            <p class="card-text"><strong>Length: </strong>Not available for display on tickets</p>
+            {% endif %}
+                        
             {% if book_flights %}
             
             <div class="container">
@@ -136,15 +141,14 @@
         
                 </div>
             </div>
-            {% elif view_tickets %} <!-- Cancel tickets option -->
+            {% elif view_tickets and line['can_cancel'] %} <!-- should only be there if the 24 hour requirement is fufilled  -->  
             <div class="container">               
                 <form action="{{ url_for('cancelTicket') }}" method="POST"> 
                     <input type="hidden" id="ticket_id" name="ticket_id" value="{{line['ticket_id']}}">       
-                    <input type="submit" value="cancel_flight" class="card-link">  <!-- should only be visible if the user is logged in-->
+                    <input type="submit" value="Cancel Flight" class="card-link">  <!-- should only be visible if the user is logged in-->
                 </form>
-
             </div>
-            {% elif view_comments and not line ['rating'] %} <!-- showing the comment option when it shouldn't-->
+            {% elif past_flights and not line ['rating'] %} <!-- showing the comment option when it shouldn't-->
             <form action="{{ url_for('comment') }}" method="POST">
                 <label for="rating">Rating (between 1 and 5):</label>
                 <input type="number" id="rating" name="rating" min="1" max="5" required>
