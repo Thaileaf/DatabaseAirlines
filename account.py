@@ -6,6 +6,7 @@ from helperFuncs import *
 from functools import wraps
 from datetime import datetime
 import random
+from datetime import datetime, timedelta, date
 
 @app.route('/myaccount')
 def myaccount():
@@ -59,17 +60,36 @@ def comment():
 	cursor.close()
 	return render_template('submitted.html', view_comments=True)
 
-# Future flights, maybe don't want tickets actually (since ) natural join ticket
-@app.route('/futureFlights', methods=["GET"])
-@role_required('Customer')
-def future_flights():
-	email = session['email']
-	cursor = conn.cursor()
-	# add email check here tooand email = %s  flight.
-	query = 'SELECT * from flight where departure_date >= CAST(CURRENT_DATE() as Date)'
-	cursor.execute(query) #, (email)
-	data = cursor.fetchall()
-	return render_template('index.html', flights=data, hide_header=True, book_flights=True, view_tickets=False)
+#Define a route to hello function
+@app.route('/')
+def root():
+    flights = getFutureFlights()
+    airports = get_airports()
+    # cursor = conn.cursor()
+    if 'email' in session: # check if a customer is logged in 
+        return render_template('index.html', flights=flights, airports=airports, book_flights=True, view_tickets=False)
+    else:
+        return render_template('index.html', flights=flights, airports=airports)
+
+@app.route('/flights', methods=['GET', 'POST'])
+def flights():
+    airport = request.form['airport']
+    departure_date = request.form['depart']
+    return_date = request.form['return']
+
+    if 'email' in session:
+        show_book_button = True
+
+    cursor = conn.cursor()
+    if not return_date:
+        query = 'SELECT * from flight where departure_date = %s and depart_from = %s'
+        cursor.execute(query, (departure_date, airport))
+    else:
+        query = 'SELECT * from flight where departure_date = %s and depart_from = %s and arrive_at in (Select depart_from from flight where departure_date = %s);' 
+        cursor.execute(query, (departure_date, airport, return_date))	
+
+    data = cursor.fetchall()	
+    return render_template('index.html', flights=data, hide_header=True, book_flights=show_book_button, re_search=True)
 
 # Ticket management
 @app.route('/getTickets', methods=["GET", "POST"])
@@ -83,52 +103,85 @@ def get_tickets():
 	data = cursor.fetchall()
 	return render_template('index.html', flights=data, hide_header=True, view_tickets=True)
 
+# buying a ticket
 @app.route('/buyTicket', methods=["GET", "POST"])
 def buyTicket():
+    cursor = conn.cursor()
+    ticket_id = random.randrange(1, 10**10)
+    query = 'SELECT * from ticket where ticket.ticket_id = %s'
+    cursor.execute(query, (ticket_id))	
+    check = cursor.fetchone()
+    error_count = 0
+
+    # Verifies that the ticket_id is unique, if it takes too long, then give up 	
+    while check and error_count < 50:
+        error_count += 1
+        ticket_id = '{:10}'.format(random.randrange(1, 10**10))
+        cursor.execute(query, (ticket_id))	
+        check = cursor.fetchone()
+    if check:
+        raise RuntimeError("Unable to generate ticket_id")
+
+    purchase_date = date.today()
+    purchase_time = datetime.now().strftime("%H:%M:%S")
+    email = session['email']
+
+    airline_name = str(request.form['airline_name'])
+    unique_airplane_num = int(float(request.form['unique_airplane_num']))
+    flight_number = int(float(request.form['flight_number']))
+    departure_date = str(request.form['departure_date'])
+    departure_time = str(request.form['departure_time'])
+    card_type = request.form['drone']
+    card_number = int(request.form['card_number'])
+    name_on_card = request.form['name_on_card']
+    expiration = request.form['expiration'] + "-01" #adding extra day to conform with db
+    base_price = int(float(request.form['base_price']))
+
+    # flight verification
+    query = 'SELECT * from flight where airline_name = %s and unique_airplane_num = %s and flight_number = %s and departure_date = %s and departure_time = %s'
+    cursor.execute(query, (airline_name, unique_airplane_num, flight_number, departure_date, departure_time)) 
+    data = cursor.fetchone()
+
+    if (data):  
+        # get number of seats to seats
+        query = 'SELECT num_of_seats from airplane where airline_name = %s and unique_airplane_num = %s'
+        cursor.execute(query, (airline_name, unique_airplane_num))
+
+        total_seats = cursor.fetchone()['num_of_seats']
+        # print("Test")
+        print(total_seats)
+        # count number of tickets 
+        query = 'SELECT count(*) from ticket where airline_name = %s and unique_airplane_num = %s and flight_number = %s and departure_date = %s and departure_time = %s'
+        cursor.execute(query, (airline_name, unique_airplane_num, flight_number, departure_date, departure_time)) 
+        count_tickets = cursor.fetchone()['count(*)']
+
+        if count_tickets // total_seats > 0.6:
+            base_price *= 1.25
+
+        query = 'INSERT into ticket Values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        cursor.execute(query, (ticket_id, airline_name, unique_airplane_num, flight_number, departure_date, departure_time, card_type, card_number, name_on_card, expiration, base_price, email, purchase_date, purchase_time))
+        conn.commit()
+        cursor.close()
+
+    return render_template('submitted.html')
+
+@app.route('/cancelTicket', methods=["GET", "POST"])
+def cancelTicket():
 	cursor = conn.cursor()
-
-	ticket_id = random.randrange(1, 10**10)
-	query = 'SELECT * from ticket where ticket.ticket_id = %s'
-	cursor.execute(query, (ticket_id))	
-	check = cursor.fetchone()
-	error_count = 0
-
-	# verifies that the ticket_id is unique, if it takes too long, then give up 	
-	while check and error_count < 50:
-		error_count += 1
-		ticket_id = '{:10}'.format(random.randrange(1, 10**10))
-		cursor.execute(query, (ticket_id))	
-		check = cursor.fetchone()
-	if check:
-		raise RuntimeError("Unable to generate ticket_id")
-
-	purchase_date = date.today()
-	purchase_time = datetime.now().strftime("%H:%M:%S")
 	email = session['email']
+	ticket_id = int(float(request.form['ticket_id']))
 
-	airline_name = str(request.form['airline_name'])
-	unique_airplane_num = int(float(request.form['unique_airplane_num']))
-	flight_number = int(float(request.form['flight_number']))
-	departure_date = str(request.form['departure_date'])
-	departure_time = str(request.form['departure_time'])
-	card_type = request.form['drone']
-	card_number = int(request.form['card_number'])
-	name_on_card = request.form['name_on_card']
-	expiration = request.form['expiration'] + "-01" #adding extra day to conform with db
-	base_price = int(float(request.form['base_price']))
-
-	query = 'SELECT * from flight where airline_name = %s and unique_airplane_num = %s and flight_number = %s and departure_date = %s and departure_time = %s'
-	cursor.execute(query, (airline_name, unique_airplane_num, flight_number, departure_date, departure_time)) #departure_date, departure_date
+	#check that the ticket_id is in your email so you can't delete someone elses ticket
+	query = 'SELECT * from ticket where email = %s and ticket_id = %s'
+	cursor.execute(query, (email, ticket_id))
 	data = cursor.fetchone()
-	# print(data)
-	if (data):
-		# need to change base price depending on how many people are on the plane, can have fixed number of seats but if 60% of the capacity is full (booked/reserved), then extra 25% will be added to min/base price
-		sold_price = base_price + 10
-		query = 'INSERT into ticket Values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
-		cursor.execute(query, (ticket_id, airline_name, unique_airplane_num, flight_number, departure_date, departure_time, card_type, card_number, name_on_card, expiration, sold_price, email, purchase_date, purchase_time))
-		conn.commit()
-		cursor.close()
+	print(ticket_id)
 
+	if (data):
+		query = 'DELETE from ticket where ticket.ticket_id = %s' # only works temporarily? a bit strange 
+		cursor.execute(query, (ticket_id))
+	
+	cursor.close()
 	return render_template('submitted.html')
 
 @app.route('/spending')
