@@ -15,11 +15,7 @@ def myaccount():
 	elif "username" in session:
 		return redirect('/Staff/staff')
 
-
-
-
 # Customer Use Cases
-
 @app.route('/Customers/customer')
 @role_required("Customer")
 def customer():
@@ -35,6 +31,8 @@ def root():
         return render_template('index.html', flights=flights, airports=airports, book_flights=True, view_tickets=False)
     else:
         return render_template('index.html', flights=flights, airports=airports)
+
+
 
 @app.route('/pastFlights', methods=["GET"])
 @role_required('Customer')
@@ -74,6 +72,7 @@ def flights():
     airport = request.form['airport']
     departure_date = request.form['depart']
     return_date = request.form['return']
+    show_book_button = False
 
     if 'email' in session:
         show_book_button = True
