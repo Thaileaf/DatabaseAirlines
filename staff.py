@@ -10,7 +10,9 @@ from helperFuncs import *
 @role_required("Staff")
 def staff():
     airports = get_airports()
-    return render_template("Staff/staff.html", airports = airports);
+    return render_template("Staff/staff.html", airports = airports)
+
+	
 
 
 
@@ -243,7 +245,29 @@ def report():
 	return redirect("/");
 	
 
+@app.route('/Staff/ViewComments')
+@role_required("Staff")
+def viewComments(fNum = None, aNum = None, dDate = None, dTime = None, customer = None):
+	airline = session["staffAirline"]
+	comments = getComments(aName = airline, fNum=fNum, aNum=aNum, dDate=dDate, dTime=dTime, customer=customer)
+	avg = 0 
+	error = None
+	if(len(comments) > 0): 
+		for c in comments: 
+			avg += c["rating"]
+	else: 
+		error = "No Comments Found"
+	return render_template("Staff/viewComments.html", airline = airline, comments = comments,fNum=fNum, aNum=aNum, dDate=dDate, dTime=dTime, customer=customer, avg = avg, error = error)
 	
 	
 	
+@app.route('/Staff/findComments', methods=['GET', 'POST'])
+@role_required("Staff")
+def findComments():
+	fNum = request.form['fNum']
+	aNum = request.form['aNum']
+	dDate = request.form['dDate']
+	dTime = request.form['dTime']
+	customer = request.form['customer']
+	return viewComments(fNum = fNum, aNum = aNum, dDate = dDate, dTime = dTime, customer = customer)
 	
