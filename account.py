@@ -16,12 +16,6 @@ def myaccount():
 
 
 
-@app.route('/Staff/staff')
-@role_required("Staff")
-def staff():
-    airports = get_airports()
-    return render_template("Staff/staff.html", airports = airports);
-
 
 # Customer Use Cases
 

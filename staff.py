@@ -5,6 +5,15 @@ import sys
 import datetime
 from helperFuncs import *
 
+
+@app.route('/Staff/staff')
+@role_required("Staff")
+def staff():
+    airports = get_airports()
+    return render_template("Staff/staff.html", airports = airports);
+
+
+
 @app.route('/FlightEditor')
 @role_required("Staff")
 def flightEditor():
@@ -142,3 +151,57 @@ def revenue():
 	month = 0 if not month["tot"] else month["tot"];
 
 	return render_template("/Staff/revenue.html", month=month, year=year);
+
+
+
+# Calculates the revenue for the last month and year for the airline
+@app.route('/Staff/report', methods=['GET', 'POST'])
+@role_required("Staff")
+def report():
+	
+	range = request.form["range"]
+	cursor = conn.cursor();
+
+	if range == "Range":
+		start = request.form["from"]
+		end = request.form["to"]
+		query = """SELECT count(ticket_id) as tot
+					FROM (
+					SELECT *
+					FROM ticket
+					WHERE departure_date >= %s AND departure_date <= %s
+					) as TABLE1
+					WHERE airline_name = %s;""";
+		cursor.execute(query, (start, end, session["staffAirline"]))
+
+	elif range == "Month":
+		query = """SELECT count(ticket_id) as tot
+					FROM (
+					SELECT *
+					FROM ticket
+					WHERE departure_date >= cast(DATE_ADD(CURDATE(), INTERVAL -1 MONTH) AS DATE)
+					) as TABLE1
+					WHERE airline_name = %s;""";
+		cursor.execute(query, (session["staffAirline"]))
+
+	elif range == "Year":
+		query = """SELECT count(ticket_id) as tot
+					FROM (
+					SELECT *
+					FROM ticket
+					WHERE departure_date >= cast(DATE_ADD(CURDATE(), INTERVAL -1 YEAR) AS DATE)
+					) as TABLE1
+					WHERE airline_name = %s;""";
+		cursor.execute(query, (session["staffAirline"]))
+
+
+
+	data = cursor.fetchall();
+	print(data)
+	return redirect("/");
+	
+
+	
+	
+	
+	

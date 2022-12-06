@@ -74,7 +74,7 @@
       </form>
     </div>
     <div class="block">
-      <form action="..">
+      <form action="/Staff/report" method="post">
         <p>View Reports: </p>
         <label for="range">Time Range:</label>
         <select id="range" name="range">
@@ -101,4 +101,17 @@
   </div>
 </body>
 <script src="../logic.js"></script>
+<script>
+    // Logic for revenue
+    document.getElementById("range").addEventListener("change", function () {
+        if (this.selectedIndex != 2) {
+            document.getElementById("from2").required = false;
+            document.getElementById("to2").required = false;
+        }
+        if (this.selectedIndex == 2) {
+            document.getElementById("from2").required = true;
+            document.getElementById("to2").required = true;
+        }
+    });
+</script>
 </html>
