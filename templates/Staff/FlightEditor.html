@@ -41,50 +41,51 @@
 <div id = "FlightAdder" style = "text-align: center;  display: none;" >
 {%endif%}
     <form action="/FlightEditor/addFlight" method ="POST">
-    <label>Airplane: </label>
-    <select type = "number"  name="airplane" placeholder="airplane" required>
-        {% for plane in planes%}
-            <option value={{plane['unique_airplane_num']}}>{{plane['unique_airplane_num']}}</option> <!-- Vscode doesn't like that-->
-        {% endfor %}
-    </select>
-    <label>Flight Number</label>
-    <input type="number" name="flightnum" placeholder="Flight Number" required><br/>
-    <label>Departure Date</label>
-    <input  type="date" name="dpdate" required>
-    <label>Departure Time</label>
-    <input type="time" name="dptime"><br/>
-    <label>Arrival Date</label>
-    <input  type="date" name="ardate" required>
-    <label>Arrival Time</label>
-    <input type="time" name="artime"><br/>
-    <label>Base Price</label>
-    <input name="baseprice" placeholder="Base Price" type = number required><br/>
-    <label>Flight Status</label>
-    <select name="status" placeholder="status" required>
-        <option>ontime</option>
-        <option>delayed</option>
-        <option>canceled</option>
-    </select>
-    <Label>Round Trip</Label>
-    <input  name="rtrip"  type="checkbox">
-    </input>
-    <label>Departure Airport</label>
-    <select  name="depAir"  required>
-        {% for line in airports %}
-            <option value={{line['name']}}>{{line['name']}}</option> <!-- Vscode doesn't like that-->
-        {% endfor %}
-    </select>
-    <label>Arrival Airport</label>
-    <select  name="arrAir"  required>
-        {% for line in airports %}
-            <option value={{line['name']}}>{{line['name']}}</option> <!-- Vscode doesn't like that-->
-        {% endfor %}
-    </select>
+        <label>Airplane: </label>
+        <select type = "number"  name="airplane" placeholder="airplane" required>
+            {% for plane in planes%}
+                <option value={{plane['unique_airplane_num']}}>{{plane['unique_airplane_num']}}</option> <!-- Vscode doesn't like that-->
+            {% endfor %}
+        </select>
+        <label>Flight Number</label>
+        <input type="number" name="flightnum" placeholder="Flight Number" required><br/>
+        <label>Departure Date</label>
+        <input  type="date" name="dpdate" required>
+        <label>Departure Time</label>
+        <input type="time" name="dptime"><br/>
+        <label>Arrival Date</label>
+        <input  type="date" name="ardate" required>
+        <label>Arrival Time</label>
+        <input type="time" name="artime"><br/>
+        <label>Base Price</label>
+        <input name="baseprice" placeholder="Base Price" type = number required><br/>
+        <label>Flight Status</label>
+        <select name="status" placeholder="status" required>
+            <option>ontime</option>
+            <option>delayed</option>
+            <option>canceled</option>
+        </select>
+        <Label>Round Trip</Label>
+        <input  name="rtrip"  type="checkbox">
+        </input>
+        <label>Departure Airport</label>
+        <select  name="depAir"  required>
+            {% for line in airports %}
+                <option value={{line['name']}}>{{line['name']}}</option> <!-- Vscode doesn't like that-->
+            {% endfor %}
+        </select>
+        <label>Arrival Airport</label>
+        <select  name="arrAir"  required>
+            {% for line in airports %}
+                <option value={{line['name']}}>{{line['name']}}</option> <!-- Vscode doesn't like that-->
+            {% endfor %}
+        </select>
 
-    <input type="submit" value="Add"><br/>
-    {% if addFlightError %}
-    <p class="error">{{addFlightError}}</p>
-    {% endif %}
+        <input type="submit" value="Add"><br/>
+        {% if addFlightError %}
+        <p class="error">{{addFlightError}}</p>
+        {% endif %}
+    </form>
 </div>
 
 <div class="flights">
@@ -96,15 +97,19 @@
                 <div class="col-2">
                     <h5 class="card-title">{{line['departure_time']}}</h5>
                 </div>
-                <div class="col-1">
-                    <h5 class="card-subtitle mb-2 text-muted" >{{line['status_flight']}}</h5>
-                    <a class="word-button" style="color:blue">Edit</a>
-                    <form  name =flight_status_form >
+                <div class="col-2">
+                    <h5 class="card-subtitle mb-2 text-muted">{{line['status_flight']}}</h5>
+                    <!-- <a class="word-button" style="color:blue">Edit</a> -->
+                    <form  name ="flight_status_form"  action="/FlightEditor/editStatus" method ="POST">
+                        <input type="hidden" id="unique_airplane_num" name="unique_airplane_num" value="{{line['unique_airplane_num']}}"> 
+                        <input type="hidden" id="flight_number" name="flight_number" value="{{line['flight_number']}}"> 
+                        <input type="hidden" id="departure_date" name="departure_date" value="{{line['departure_date']}}"> 
+                        <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}"> 
                         <select  name = "flight_status_val">
                             <option>ontime</option>
                             <option>delayed</option>
                             <option>canceled</option>
-                        </select>
+                        </select> <br>
                         <input type = "submit" >
                     </form>
                 </div>
@@ -140,6 +145,7 @@
                 </div>
             </div>
             <p class="card-text"><strong>Length: </strong> {{line['TotalTime']}}</p>
+            <a class="word-button" style="color:blue">view_comments</a>  
             <!-- <a class="word-button" style="color:blue">Edit Flight</a>  For later, should only be visible if the user is logged in and only when searching/viewing future flights -->
         </div>
     </div>
