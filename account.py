@@ -33,7 +33,6 @@ def root():
         cursor.execute(query, (email)) 
         flights = cursor.fetchall()      
         flights = add_time_difference(flights)
-
         return render_template('index.html', flights=flights, airports=airports, book_flights=True)
     else:
         flights = getFutureFlights()
@@ -214,13 +213,14 @@ def spending_default():
 @app.route('/spendSpecify', methods=["POST"])
 @role_required("Customer")
 def spending_specify():
-	start_year, start_month, start_day  = request.form['start'].split("-") 
-	start_date = datetime(int(start_year), int(start_month), int(start_day))
-	end_year, end_month, end_day  = request.form['end'].split("-") 
-	end_date = datetime(int(end_year), int(end_month), int(end_day))
+    email = session['email']
+    start_year, start_month, start_day  = request.form['start'].split("-") 
+    start_date = datetime(int(start_year), int(start_month), int(start_day))
+    end_year, end_month, end_day  = request.form['end'].split("-") 
+    end_date = datetime(int(end_year), int(end_month), int(end_day))
 
-	table_info, total_spending = calculate_spending(start_date, end_date)
-	return render_template('spending.html', table_info=table_info, total=total_spending)
+    table_info, total_spending = calculate_spending(email, start_date, end_date)
+    return render_template('spending.html', table_info=table_info, total=total_spending)
 
 # @app.route('/Staff/createflight', methods=['POST'])
 # @role_required("Staff")
