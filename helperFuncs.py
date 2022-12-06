@@ -94,3 +94,44 @@ def getAirplanes(airline = None):
         for plane in airplanes: 
             plane["unique_airplane_num"] = int(plane["unique_airplane_num"])
         return airplanes
+
+
+def getComments( aName = None, fNum = None, dTime = None, dDate = None, aNum = None, customer = None): 
+	
+	q1 = "airline_name = %s"
+	q2 = "flight_number = %s"
+	q3 = "departure_time = %s"
+	q4 = "departure_date = %s"
+	q5 = "unique_airplane_num = %s"
+	q6 = "email = %s"
+	query = "SELECT * FROM ratings WHERE"
+	values = []
+	fquery= []
+	if(aName): 
+		fquery.append(q1)
+		values.append(aName)
+	if(fNum): 
+		fquery.append(q2)
+		values.append(fNum)
+	if(dTime): 
+		fquery.append(q3)
+		values.append(dTime)
+	if(dDate):
+		fquery.append(q4)
+		values.append(dDate)
+	if(aNum): 
+		fquery.append(q5)
+		values.append(aNum)
+	if(customer): 
+		fquery.append(q6)
+		values.append(customer)
+	if(len(values) == 0): 
+		return 
+	fquery = " AND ".join(fquery)
+	cursor = conn.cursor() 
+	cursor.execute(query + " " +fquery, values)
+	res = cursor.fetchall() 
+	print(len(res))
+	return res
+
+
