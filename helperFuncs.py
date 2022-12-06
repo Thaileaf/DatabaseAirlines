@@ -79,6 +79,21 @@ def calculate_spending(email, start_date, end_date):
 
 	return table_info, total_spending
 
+def calculate_by_month(startDate, endDate, airine_name):
+    # if not endDate and not startDate:
+    #     endDate = datetime.date.today().strftime("%y-%m-%d")
+    query = """SELECT count(ticket_id) as tot, DATE_FORMAT(departure_date, '%Y-%m') AS year_and_month
+                    FROM (SELECT * 
+                FROM ticket 
+                WHERE departure_date > %s AND departure_date < %s AND airline_name like %s) as TABLE1
+                   GROUP BY year_and_month DESC"""
+
+
+
+    cursor = conn.cursor();
+    cursor.execute(query, (startDate, endDate, airline_name))
+    
+
 def getAirplanes(airline = None): 
     if(airline): 
         query = "SELECT unique_airplane_num FROM airplane where airline_name = %s"
