@@ -59,41 +59,106 @@
 <h1 style="text-align: center"> {{error}}</h1>
 {%endif%}
 {% for comment in comments%}
-    <div class="card" style="width: 80vw;">
+    <!-- <div class="card" style="width: 80vw;">
         <div class="card-body" name={{line}}>
             <div class="row">
-                <div class="col-5">
-                    <h5 class="card-title"><strong>Customer:</strong>{{comment['email']}}</h5>
+                <div class="col-3">
                 </div>
     
                 </div>
-                <!--Spacing-->
-                <div class="col-6"></div>
-                <div class="col-1">
-                    <h5 class="card-title">{{comment['departure_time']}}</h5>
             </div>
             </div>
             <div class="row">
                 <div class="col-5">
                 </div>
-                <h5 class="card-title"><strong>Airplane Number: </strong>{{comment['unique_airplane_num']}}</h5>
-                </div>
                 </div>
                 <div class="col-6"></div>
-                <div class="col-1">
-                    <h6 class="card-subtitle mb-2 text-muted">{{comment['departure_date']}}</h6>
+                <div class="col-6">
             </div>
             <div class="row">
                 <div class="col-2">
-                    <h5 class="card-title"><strong>Rating: </strong>{{comment['rating']}}</h5>
+                </div>
+                <div class="col-6">
+                </div>
+            </div>
+        <div class="card-body" name={{line}}>
+            
+            <div class="row">
+                <div class="col-6">
+                    <h5 class="card-title"><strong>Customer:</strong>{{comment['email']}}</h5>
+                </div>
+                <div class="col-6">
+                    <h5 class="card-title"><strong>Airplane Number: </strong>{{comment['unique_airplane_num']}}</h5>
+                </div>
+            
+            </div>
+            <div class="row">
+                <div class="col-6">
+                </div>
+                <div class="col-3">
+                    <h5 class="card-title">{{comment['departure_time']}}</h5>
+
+                </div>
+                <div class="col-3">
+            <h6 class="card-subtitle mb-2 text-muted">{{comment['departure_date']}}</h6>
+
+                </div>
+                
+            </div>
+            <div class="row">
+                
+                <div class="col-6">
+
+                </div>
+                <div class="col-6">
+        
+                        </div>
+            </div>
+        </div>
+
+    </div> -->
+    <div class="card" style="width: 80vw;">
+        <div class="card-body" name={{line}}>
+            <div class="row">
+                <div class="col-3">
+                    <h5 class="card-title"><strong>Customer:</strong>{{comment['email']}}</h5>
+
+                </div>
+                <div class="col-3">
+                    <h5 class="card-title">{{comment['departure_time']}}</h5>
+
+                </div>
+                <!--Spacing-->
+                <div class="col-6">
+                <h5 class="card-title"><strong>Airplane Number: </strong>{{comment['unique_airplane_num']}}</h5>
+
+                </div>
+
+                
+
+            </div>
+            <div class="row">
+                <div class="col-6">
+            <h5 class="card-title"><strong>Rating: </strong>{{comment['rating']}}</h5>
+
                 </div>
                 <div class="col-6">
                     <p class="card-text"><strong>Comments: </strong>{{comment['comment_ratings']}}</p>
+
+
                 </div>
             </div>
+            
+       
+            
+            
+            
+        </div>
     </div>
+
+
 {% endfor %}
-</div>
+<!-- </div> -->
 
 
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
