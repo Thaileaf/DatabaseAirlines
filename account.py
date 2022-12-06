@@ -24,12 +24,17 @@ def customer():
 #Define a route to hello function
 @app.route('/')
 def root():
-    flights = getFutureFlights()
+    # should only show future flights for which the traveler has purchased tickets from - also shouldn't manage tickets (canceling flights) here, should be done on the ticket page
     airports = get_airports()
-    # cursor = conn.cursor()
     if 'email' in session: # check if a customer is logged in 
-        return render_template('index.html', flights=flights, airports=airports, book_flights=True, view_tickets=False)
+        email = session['email']
+        cursor = conn.cursor()
+        query = 'SELECT distinct F.airline_name, F.unique_airplane_num, F.flight_number, F.departure_date, F.departure_time, F.arrival_date, F.arrival_time, F.base_price, F.status_flight, F.roundtrip, F.depart_from, F.arrive_at from flight as F, ticket as T where F.airline_name = T.airline_name and F.unique_airplane_num = T.unique_airplane_num and F.flight_number = T.flight_number and F.departure_date = T.departure_date and F.departure_time = T.departure_time and email = %s'
+        cursor.execute(query, (email)) 
+        flights = cursor.fetchall()      
+        return render_template('index.html', flights=flights, airports=airports, book_flights=True)
     else:
+        flights = getFutureFlights()
         return render_template('index.html', flights=flights, airports=airports)
 
 @app.route('/pastFlights', methods=["GET"])
@@ -39,7 +44,7 @@ def pastFlights():
     cursor = conn.cursor()
     query = "SELECT * from flight natural join ticket as C left join ratings on (ratings.airline_name = C.airline_name and ratings.email = C.email and ratings.unique_airplane_num = C.unique_airplane_num and ratings.flight_number = C.flight_number and ratings.departure_date = C.departure_date and ratings.departure_time = C.departure_time) where flight.departure_date < CAST(CURRENT_DATE() as Date) and C.email = %s"
     cursor.execute(query, (email))
-
+    
     data = cursor.fetchall() 
     return render_template('index.html', flights=data, hide_header=True, past_flights=True, view_comments=True) # this doesn't seem to work ??????
 
@@ -98,7 +103,7 @@ def get_tickets():
 	data = cursor.fetchall()
 	return render_template('index.html', flights=data, hide_header=True, view_tickets=True)
 
-# buying a ticket
+# Buying a ticket
 @app.route('/buyTicket', methods=["GET", "POST"])
 def buyTicket():
     cursor = conn.cursor()
