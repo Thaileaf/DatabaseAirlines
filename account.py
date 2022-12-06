@@ -16,8 +16,6 @@ def myaccount():
 		return redirect('/Staff/staff')
 
 
-
-
 # Customer Use Cases
 
 @app.route('/Customers/customer')
