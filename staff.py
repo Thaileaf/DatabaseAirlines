@@ -3,6 +3,7 @@ import pymysql.cursors
 import hashlib
 import sys
 import datetime
+from dateutil.relativedelta import relativedelta
 from helperFuncs import *
 
 
@@ -23,12 +24,20 @@ def staffSearchFlight():
 	arr = request.form['arr']
 	arrCity = request.form['arrCity']
 	depCity = request.form['depCity']
+	arrCountry = request.form['arrCountry']
+	depCountry = request.form['depCountry']
 	start = request.form['start']
 	end = request.form['end']
 	if(start): start = datetime.datetime.strptime(start, '%Y-%m-%d').date()
 	if(end): end = datetime.datetime.strptime(end, '%Y-%m-%d').date()
-	flights = searchFlight(dep = dep, arr = arr, arrCity=arrCity, depCity=depCity, start = start, end = end)
-	print(len(flights))
+	flights = searchFlight(dep = dep, arr = arr, arrCity=arrCity, depCity=depCity, start = start, end = end, arrCountry = arrCountry, depCountry = depCountry)
+	add_time_difference(flights)
+	for flight in flights: 
+		cust = findCustomersForFlight(flight)
+		flight["customers"] = cust 
+		print(cust)
+		print(len(cust))
+
 	return flightEditor(flights = flights)
 
 @app.route('/FlightEditor')
@@ -36,7 +45,8 @@ def staffSearchFlight():
 def flightEditor(addingFlight = False, addFlightError = None, addingAirplane = False, addAirplaneError = None, addingAirport = False, addAirportError = None, flights = None):
 	staffAirline = session["staffAirline"]
 	if(flights == None):
-		flights = getFutureFlights(staffAirline)
+		flights = searchFlight()
+	flights = add_time_difference(flights)
 	ap = get_airports()
 	planes = getAirplanes(staffAirline)
 	return render_template('Staff/FlightEditor.html', airports = ap, planes = planes, airline = staffAirline, 
@@ -78,7 +88,11 @@ def addFlight():
 	)
 	query = "INSERT INTO flight VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 	cursor = conn.cursor() 
-	cursor.execute(query, values)
+	try:
+		cursor.execute(query, values)
+	except: 
+		addFlightError = "Invalid Inputs"
+		return flightEditor(True, addFlightError)
 	conn.commit()
 	flights = getFutureFlights(staffAirline)
 	addFlightError = "Successfully Added Flight"
@@ -120,7 +134,13 @@ def addAirplane():
 	if(data): 
 		return flightEditor(False, None, True, "Airplane Number Already Exists")
 	query = "INSERT INTO airplane VALUES(%s, %s,%s,%s, %s)"
-	cursor.execute(query,(staffAirline, airplaneNum, seats, company, age))
+	try:
+		cursor.execute(query,(staffAirline, airplaneNum, seats, company, age))
+	except: 
+		error = "Invalid Inputs"
+		return flightEditor(False, None, True, error)
+		
+
 	conn.commit()
 	return flightEditor(False, None, True, "Successfully Added Airplane")
 
@@ -140,7 +160,11 @@ def addAirport():
 	if(data): 
 		return flightEditor(False, None, False, None, True, "Airport Name Already Exists")
 	query = "INSERT INTO airport VALUES(%s, %s,%s,%s)"
-	cursor.execute(query,(name, city, country, aType))
+	try:
+		cursor.execute(query,(name, city, country, aType))
+	except:
+		error = "Invalid Inputs"
+		return flightEditor(False, None, False, None, True, error)
 	conn.commit()
 	return flightEditor(False, None, False, None, True, "Successfully Added Airport")
 
@@ -211,52 +235,35 @@ def revenue():
 	return render_template("/Staff/revenue.html", month=month, year=year);
 
 
-
 # Calculates the revenue for the last month and year for the airline
 @app.route('/Staff/report', methods=['GET', 'POST'])
 @role_required("Staff")
 def report():
 	
-	range = request.form["range"]
+	ranged = request.form["range"]
 	cursor = conn.cursor();
 
-	if range == "Range":
+	if ranged == "Range":
 		start = request.form["from"]
 		end = request.form["to"]
-		query = """SELECT count(ticket_id) as tot
-					FROM (s
-					SELECT *
-					FROM ticket
-					WHERE departure_date >= %s AND departure_date <= %s
-					) as TABLE1
-					WHERE airline_name = %s;""";
-		cursor.execute(query, (start, end, session["staffAirline"]))
 
-	elif range == "Month":
-		query = """SELECT count(ticket_id) as tot
-					FROM (
-					SELECT *
-					FROM ticket
-					WHERE departure_date >= cast(DATE_ADD(CURDATE(), INTERVAL -1 MONTH) AS DATE)
-					) as TABLE1
-					WHERE airline_name = %s;""";
-		cursor.execute(query, (session["staffAirline"]))
+	elif ranged == "Month":
+		today = datetime.date.today();
+		delta = relativedelta(months=1)
+		start = (today - delta).strftime("%y-%m-%d")
+		end = today
 
-	elif range == "Year":
-		query = """SELECT count(ticket_id) as tot
-					FROM (
-					SELECT *
-					FROM ticket
-					WHERE departure_date >= cast(DATE_ADD(CURDATE(), INTERVAL -1 YEAR) AS DATE)
-					) as TABLE1
-					WHERE airline_name = %s;""";
-		cursor.execute(query, (session["staffAirline"]))
+	elif ranged == "Year":
+		today = datetime.date.today();
+		delta = relativedelta(years=1)
+		start = (today - delta).strftime("%y-%m-%d")
+		end = today
 
+	
 
-
-	data = cursor.fetchall();
-	print(data)
-	return redirect("/");
+	data = calculate_by_month(start, end, 'count(ticket_id)', "%", session["staffAirline"]);
+	total = sum([i["tot"] for i in data])
+	return render_template("/Staff/report.html", table_info=data, total=total);
 	
 
 @app.route('/Staff/ViewComments')

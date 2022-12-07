@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+<body>
+
+<!-- <canvas id="myChart" style="width:100%;max-width:600px"></canvas> -->
+
+<h1> Report </h1>
+<a href="/">Home</a> <!-- This doesn't work at the moment -->
+
+<table>
+	<th>Date</th>
+	<th>Amt</th>
+	
+  {% for month in table_info %} 
+  <tr>
+		<td>{{ month["year_and_month"] }}</td>
+		<td>{{ month["tot"] }}</td>
+	</tr>
+  {% endfor %}
+</table>
+
+<h3>Total tickets: {{ total }} </h3>
+
+
+</body>
+</html>

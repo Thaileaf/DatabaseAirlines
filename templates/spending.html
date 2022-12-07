@@ -14,8 +14,8 @@
 	
   {% for month in table_info %} 
   <tr>
-		<td>{{ month[0] }}</td>
-		<td>{{ month[1] }}</td>
+		<td>{{ month["year_and_month"] }}</td>
+		<td>{{ month["tot"] }}</td>
 	</tr>
   {% endfor %}
 </table>

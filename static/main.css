@@ -57,8 +57,21 @@ html, body {
 }
 
 
-
 a.word-button:hover { 
     background: #f2f2f2;
     color: black;
 }
+
+.collapse > a{
+    cursor: pointer;
+    display: block;
+  }
+  .collapse:focus{
+    outline: none;
+  }
+  .collapse > div{
+    display: block;
+  }
+  .collapse:focus div{
+    display: block; 
+  }
