@@ -58,14 +58,14 @@
             <input name="arrive_city"><br>
 
             </select>
-            <label for="roundtrip">Roundtrip: </label>
-            <input onclick=arrivalOn() type="checkbox" id="roundtrip_date" name="roundtrip_date"><br/>
+            <!-- <label for="roundtrip">Roundtrip: </label> -->
+            <!-- <input onclick=arrivalOn() type="checkbox" id="flipper" name="flipper"><br/> -->
             <label for="depart">Departure Date:</label>
             <input type="date" id="depart_date" name="depart_date">
-            <label for="depart">Arrival Date:</label>
+            <label for="">Arrival Date:</label>
             <input type="date" id="arrive_date" name="arrive_date">
-            <label class="arrival" for="roundtrip_date">Roundtrip Date:</label>
-            <input class="arrival" type="date" id="roundtrip_date" name="roundtrip_date">
+            <label> Roundtrip Date:</label>
+            <input type="date" id="roundtrip_date" name="roundtrip_date">
             <input type="submit" value="Submit">
         </form>
     </div>
@@ -130,7 +130,9 @@
             <div class="container">
                 <!-- <h2>Simple Collapsible</h2> -->
                 <!-- <p>Click on the button to toggle between showing and hiding content.</p> -->
+                {% if book_flights %}
                 <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#demo">Book Flight</button>
+                {% endif %}
                 <div id="demo" class="collapse">
                     {% if not changed_book %}
                     <form action="{{ url_for('buyTicket') }}" method="POST"> 
@@ -176,6 +178,7 @@
                         <input type="hidden" id="departure_date" name="departure_date" value="{{line['departure_date']}}"> 
                         <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}"> 
                         <input type="hidden" id="base_price" name="base_price" value="{{line['base_price']}}"> 
+                        <input type="hidden" id="roundtrip_date" name="roundtrip_date" value="{{roundtrip_date}}"> 
 
                         <input type="hidden" id="prev_airline_name" name="prev_airline_name" value="{{prev_airline_name}}"> 
                         <input type="hidden" id="prev_unique_airplane_num" name="prev_unique_airplane_num" value="{{prev_unique_airplane_num}}"> 

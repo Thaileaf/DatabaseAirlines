@@ -33,7 +33,7 @@ def root():
         cursor.execute(query, (email)) 
         flights = cursor.fetchall()      
         flights = add_time_difference(flights)
-        return render_template('index.html', flights=flights, airports=airports, book_flights=True)
+        return render_template('index.html', flights=flights, airports=airports, book_flights=False)
     else:
         flights = getFutureFlights()
         return render_template('index.html', flights=flights, airports=airports)
@@ -77,12 +77,13 @@ def comment():
 def flights():
 
     arrival_airport, arrival_city, arrive_date = None, None, None
-
     if 'email' in 'session':
         arrival_airport = request.form['arrive_airport']
         arrival_city = request.form['arrive_city']
         arrive_date = request.form['arrive_date']
 
+    roundtrip_date = request.form['roundtrip_date']
+    # print(request.form['roundtrip_date'])   
     departure_airport = request.form['depart_airport']
     departure_city = request.form['depart_city']
     departure_date = request.form['depart_date']
@@ -92,7 +93,7 @@ def flights():
         
     if 'email' in session:
         data = searchFlight(departure_airport, arrival_airport, arrival_city, departure_city, departure_date, arrive_date)
-        roundtrip_date = request.form['roundtrip_date']
+
         show_book_button = True
         return render_template('index.html', flights=data, hide_header=True, book_flights=show_book_button, roundtrip_date=roundtrip_date)
 
@@ -150,9 +151,11 @@ def buyTicket():
     expiration = request.form['expiration'] + "-01" #adding extra day to conform with db
     base_price = int(float(request.form['base_price']))
     # arrival_date = request.form('arrival_date')
-    roundtrip_date = request.form['roundtrip_date']
-    departure_airport = request.form['depature_airport']
+
+    departure_airport = request.form['departure_airport']
     arrival_airport = request.form['arrival_airport']
+
+    roundtrip_date = request.form['roundtrip_date']
 
     if roundtrip_date:
         cursor = conn.cursor()        
