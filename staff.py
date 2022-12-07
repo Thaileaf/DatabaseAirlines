@@ -88,7 +88,11 @@ def addFlight():
 	)
 	query = "INSERT INTO flight VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 	cursor = conn.cursor() 
-	cursor.execute(query, values)
+	try:
+		cursor.execute(query, values)
+	except: 
+		addFlightError = "Invalid Inputs"
+		return flightEditor(True, addFlightError)
 	conn.commit()
 	flights = getFutureFlights(staffAirline)
 	addFlightError = "Successfully Added Flight"
@@ -130,7 +134,13 @@ def addAirplane():
 	if(data): 
 		return flightEditor(False, None, True, "Airplane Number Already Exists")
 	query = "INSERT INTO airplane VALUES(%s, %s,%s,%s, %s)"
-	cursor.execute(query,(staffAirline, airplaneNum, seats, company, age))
+	try:
+		cursor.execute(query,(staffAirline, airplaneNum, seats, company, age))
+	except: 
+		error = "Invalid Inputs"
+		return flightEditor(False, None, True, error)
+		
+
 	conn.commit()
 	return flightEditor(False, None, True, "Successfully Added Airplane")
 
@@ -150,7 +160,11 @@ def addAirport():
 	if(data): 
 		return flightEditor(False, None, False, None, True, "Airport Name Already Exists")
 	query = "INSERT INTO airport VALUES(%s, %s,%s,%s)"
-	cursor.execute(query,(name, city, country, aType))
+	try:
+		cursor.execute(query,(name, city, country, aType))
+	except:
+		error = "Invalid Inputs"
+		return flightEditor(False, None, False, None, True, error)
 	conn.commit()
 	return flightEditor(False, None, False, None, True, "Successfully Added Airport")
 
