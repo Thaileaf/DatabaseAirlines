@@ -164,7 +164,6 @@ def getComments( aName = None, fNum = None, dTime = None, dDate = None, aNum = N
     cursor = conn.cursor() 
     cursor.execute(query + " " +fquery, values)
     res = cursor.fetchall() 
-    print(len(res))
     return res
 
 def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start = None, end = None, depCountry = None, arrCountry = None ):
@@ -199,7 +198,6 @@ def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start =
 		a = set()
 		for port in hold: 
 			a.add(port["name"])
-		print(len(a))
 		arrPort =arrPort.intersection(a)
 	if(depCity or depCountry): 
 		q1 = "SELECT * FROM airport WHERE "
@@ -215,7 +213,6 @@ def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start =
 		cursor.execute(q1, args)
 		hold = cursor.fetchall()
 		d = set()
-		print(hold)
 		for port in hold: 
 			d.add(port["name"])
 		depPort = depPort.intersection(d)
@@ -237,8 +234,8 @@ def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start =
 	findQuery += " AND depart_from in %s"
 	if(len(arrPort) == 0 or len(depPort) == 0): 
 		return [] 
-	print(conditionals_val+[arrPort,depPort])
-	print(findQuery)
+	# print(conditionals_val+[arrPort,depPort])
+	# print(findQuery)
 	cursor.execute(findQuery, conditionals_val+[arrPort,depPort])
 	flights = cursor.fetchall()
 

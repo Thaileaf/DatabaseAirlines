@@ -209,8 +209,14 @@
                 </div>
             </div>
             <details>
-                <summary>Cu</summary>
-                <p>Content 1...</p>
+                <summary>Customers</summary>
+                <a><strong>Emails: </strong></a><br>
+                {%if line['customers']%}
+                {%for cust in line['customers']%}
+                    <a>{{cust["email"]}}</a><br>
+                {%endfor%}
+                {%endif%}
+                <p></p>
             </details>
             <p class="card-text"><strong>Length: </strong> {{line['total_time']}}</p>
             <form action="/Staff/findComments"  method="POST">

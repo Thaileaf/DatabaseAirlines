@@ -35,6 +35,8 @@ def staffSearchFlight():
 	for flight in flights: 
 		cust = findCustomersForFlight(flight)
 		flight["customers"] = cust 
+		print(cust)
+		print(len(cust))
 
 	return flightEditor(flights = flights)
 
@@ -263,7 +265,7 @@ def report():
 
 
 	data = cursor.fetchall();
-	print(data)
+	# print(data)
 	return redirect("/");
 	
 
