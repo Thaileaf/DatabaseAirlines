@@ -208,7 +208,17 @@
                     <h6 class="card-subtitle mb-2 text-muted">{{line['arrive_at']}}</h6>
                 </div>
             </div>
-            <p class="card-text"><strong>Length: </strong> {{line['TotalTime']}}</p>
+            <details>
+                <summary>Customers</summary>
+                <a><strong>Emails: </strong></a><br>
+                {%if line['customers']%}
+                {%for cust in line['customers']%}
+                    <a>{{cust["email"]}}</a><br>
+                {%endfor%}
+                {%endif%}
+                <p></p>
+            </details>
+            <p class="card-text"><strong>Length: </strong> {{line['total_time']}}</p>
             <form action="/Staff/findComments"  method="POST">
             
                 <input type="hidden" name="aNum" value="{{line['unique_airplane_num']}}"> 
