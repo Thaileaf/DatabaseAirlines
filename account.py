@@ -142,23 +142,8 @@ def get_tickets():
 @app.route('/buyTicket', methods=["GET", "POST"])
 @role_required('Customer')
 def buyTicket():  
-    
-    cursor = conn.cursor()
-    ticket_id = random.randrange(1, 10**10)
-    query = 'SELECT * from ticket where ticket.ticket_id = %s'
-    cursor.execute(query, (ticket_id))	
-    check = cursor.fetchone()
-    error_count = 0
 
-    # verifies that the ticket_id is unique, if it takes too long, then give up 	
-    while check and error_count < 50:
-        error_count += 1
-        ticket_id = '{:10}'.format(random.randrange(1, 10**10))
-        cursor.execute(query, (ticket_id))	
-        check = cursor.fetchone()
-    if check:
-        raise RuntimeError("Unable to generate ticket_id")
-
+    ticket_id = generate_ticket_id()
     purchase_date = date.today()
     purchase_time = datetime.now().strftime("%H:%M:%S")
     email = session['email']
@@ -179,6 +164,7 @@ def buyTicket():
     arrival_airport = request.form['arrival_airport']
 
     if roundtrip_date:
+        cursor = conn.cursor()        
         # send credit card info
         # send the previous flight information 
         # get the roundtrip flights
@@ -196,27 +182,11 @@ def buyTicket():
         return render_template("index.html", flights=data, changed_book=True, hide_header=True, card_type=card_type, card_number=card_number, 
         name_on_card=name_on_card, expiration=expiration, base_price=base_price, prev_airline_name=airline_name, prev_unique_airplane_num=unique_airplane_num, 
         prev_flight_number=flight_number, prev_departure_date=departure_date, prev_departure_time=departure_time)
-
     else:   
-        query = 'SELECT * from flight where airline_name = %s and unique_airplane_num = %s and flight_number = %s and departure_date = %s and departure_time = %s'
-        cursor.execute(query, (airline_name, unique_airplane_num, flight_number, departure_date, departure_time)) 
-        data = cursor.fetchone()
+        data = unique_flight(airline_name, unique_airplane_num, flight_number, departure_date, departure_time)
 
         if (data):  
-            # get number of seats to seats
-            query = 'SELECT num_of_seats from airplane where airline_name = %s and unique_airplane_num = %s'
-            cursor.execute(query, (airline_name, unique_airplane_num))
-
-            total_seats = cursor.fetchone()['num_of_seats']
-            # print("Test")
-            print(total_seats)
-            # count number of tickets 
-            query = 'SELECT count(*) from ticket where airline_name = %s and unique_airplane_num = %s and flight_number = %s and departure_date = %s and departure_time = %s'
-            cursor.execute(query, (airline_name, unique_airplane_num, flight_number, departure_date, departure_time)) 
-            count_tickets = cursor.fetchone()['count(*)']
-
-            if count_tickets // total_seats > 0.6:
-                base_price *= 1.25
+            base_price = price_modify(airline_name, unique_airplane_num, flight_number, departure_date, departure_time, base_price)
 
             query = 'INSERT into ticket Values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
             cursor.execute(query, (ticket_id, airline_name, unique_airplane_num, flight_number, departure_date, departure_time, card_type, card_number, name_on_card, expiration, base_price, email, purchase_date, purchase_time))
@@ -226,8 +196,52 @@ def buyTicket():
         return render_template('submitted.html')
 
 @app.route('/roundtripBook', methods=["GET", "POST"])
+@role_required('Customer')
 def roundtripBook():
+    purchase_date = date.today()
+    purchase_time = datetime.now().strftime("%H:%M:%S")
+    email = session['email']
+
+    card_type = request.form['card_type']
+    card_number = request.form['card_number']
+    name_on_card = request.form['name_on_card']
+    expiration = request.form['expiration']
+    airline_name = request.form['airline_name']
+    unique_airplane_num = request.form['unique_airplane_num']
+    flight_number = request.form['flight_number']
+    departure_date = request.form['departure_date']
+    departure_time = request.form['departure_time']
+    base_price = request.form['base_price']
+    prev_airline_name = request.form['prev_airline_name']
+    prev_unique_airplane_num = request.form['prev_unique_airplane_num']
+    prev_flight_number = request.form['prev_flight_number']
+    prev_departure_date = request.form['prev_departure_date']
+    prev_departure_time = request.form['prev_departure_time']
+    prev_base_price = request.form['prev_base_price']
     cursor = conn.cursor()
+
+    ticket_id_1 = generate_ticket_id()
+    data1 = unique_flight(prev_airline_name, prev_unique_airplane_num, prev_flight_number, prev_departure_date, prev_departure_time)
+
+    if (data1):  
+        prev_base_price = price_modify(prev_airline_name, prev_unique_airplane_num, prev_flight_number, prev_departure_date, prev_departure_time, prev_base_price)
+        query = 'INSERT into ticket Values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        cursor.execute(query, (ticket_id_1, prev_airline_name, prev_unique_airplane_num, prev_flight_number, prev_departure_date, prev_departure_time, card_type, card_number, name_on_card, expiration, prev_base_price, email, purchase_date, purchase_time))
+        conn.commit()
+
+    ticket_id_2 = generate_ticket_id()
+    data2 = unique_flight(airline_name, unique_airplane_num, flight_number, departure_date, departure_time)
+
+    if (data2):  
+        base_price = price_modify(airline_name, unique_airplane_num, flight_number, departure_date, departure_time, base_price)
+        query = 'INSERT into ticket Values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        cursor.execute(query, (ticket_id_2, airline_name, unique_airplane_num, flight_number, departure_date, departure_time, card_type, card_number, name_on_card, expiration, base_price, email, purchase_date, purchase_time))
+        conn.commit()
+
+    cursor.close()
+
+
+    return render_template('submitted.html')
 
 
 

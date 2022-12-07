@@ -132,8 +132,11 @@
                 <!-- <p>Click on the button to toggle between showing and hiding content.</p> -->
                 <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#demo">Book Flight</button>
                 <div id="demo" class="collapse">
+                    {% if changed_book %}
                     <form action="{{ url_for('buyTicket') }}" method="POST"> 
-
+                    {% else %}
+                    <form action="{{ url_for('roundtripBook') }}" method="POST"> 
+                    {% endif %}
                         <!-- if changed_book true, then don't show credit card info, just load that into a hidden input-->
                         {% if changed_book %}
                         <input type="radio" id="credit" name="card_type" value="credit" checked>
@@ -172,19 +175,19 @@
                         <input type="hidden" id="flight_number" name="flight_number" value="{{line['flight_number']}}"> 
                         <input type="hidden" id="departure_date" name="departure_date" value="{{line['departure_date']}}"> 
                         <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}"> 
+                        <input type="hidden" id="base_price" name="base_price" value="{{line['base_price']}}"> 
 
                         <input type="hidden" id="prev_airline_name" name="prev_airline_name" value="{{prev_airline_name}}"> 
                         <input type="hidden" id="prev_unique_airplane_num" name="prev_unique_airplane_num" value="{{prev_unique_airplane_num}}"> 
                         <input type="hidden" id="prev_flight_number" name="prev_flight_number" value="{{prev_flight_number}}"> 
                         <input type="hidden" id="prev_departure_date" name="prev_departure_date" value="{{prev_departure_date}}"> 
                         <input type="hidden" id="prev_departure_time" name="prev_departure_time" value="{{prev_departure_time}}"> 
+                        <input type="hidden" id="prev_base_price" name="prev_base_price" value="{{line['prev_base_price']}}"> 
 
                         {% endif %}
 
                         <!-- <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}">  -->
                         <h6>Due to price varying policies, your flight may be more costly than the base price shown here. Please ignore that value 😊. </h6>
-                        
-                        {% if changed_book %}
                         <input type="submit" value="Book Flight" class="card-link">  <!-- For later, should only be visible if the user is logged in and only when searching/viewing future flights-->
                     </form>
         

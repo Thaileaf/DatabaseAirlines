@@ -5,6 +5,7 @@ import sys
 import datetime
 from dateutil import rrule
 from functools import wraps
+import random 
 
 # Decorator
 # Used to ensure only correct users can access page
@@ -36,6 +37,53 @@ def add_time_difference(flights):
         flight["total_time"] = str(arr - dep)
 
     return flights
+
+def generate_ticket_id():
+    cursor = conn.cursor()
+    ticket_id = random.randrange(1, 10**10)
+    query = 'SELECT * from ticket where ticket.ticket_id = %s'
+    cursor.execute(query, (ticket_id))	
+    check = cursor.fetchone()
+    error_count = 0
+
+    # verifies that the ticket_id is unique, if it takes too long, then give up 	
+    while check and error_count < 50:
+        error_count += 1
+        ticket_id = '{:10}'.format(random.randrange(1, 10**10))
+        cursor.execute(query, (ticket_id))	
+        check = cursor.fetchone()
+    if check:
+        raise RuntimeError("Unable to generate ticket_id")
+
+    return ticket_id
+
+
+def price_modify(airline_name, unique_airplane_num, flight_number, departure_date, departure_time, base_price):
+    cursor = conn.cursor()
+    query = 'SELECT num_of_seats from airplane where airline_name = %s and unique_airplane_num = %s'
+    cursor.execute(query, (airline_name, unique_airplane_num))
+
+    total_seats = cursor.fetchone()['num_of_seats']
+    # print("Test")
+    print(total_seats)
+    # count number of tickets 
+    query = 'SELECT count(*) from ticket where airline_name = %s and unique_airplane_num = %s and flight_number = %s and departure_date = %s and departure_time = %s'
+    cursor.execute(query, (airline_name, unique_airplane_num, flight_number, departure_date, departure_time)) 
+    count_tickets = cursor.fetchone()['count(*)']
+
+    if count_tickets // total_seats > 0.6:
+        base_price *= 1.25
+
+    return base_price
+
+def unique_flight(airline_name, unique_airplane_num, flight_number, departure_date, departure_time):
+    cursor = conn.cursor()        
+    query = 'SELECT * from flight where airline_name = %s and unique_airplane_num = %s and flight_number = %s and departure_date = %s and departure_time = %s'
+    cursor.execute(query, (airline_name, unique_airplane_num, flight_number, departure_date, departure_time)) 
+    data = cursor.fetchone()
+
+    return data
+
 
 def getFutureFlights(airline = None):
     cursor = conn.cursor()
