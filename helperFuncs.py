@@ -104,7 +104,7 @@ def calculate_by_month(startDate, endDate, select, email="%", airline_name="%"):
     query = 'SELECT ' + select + ''' as tot, DATE_FORMAT(departure_date, "%%Y-%%m") AS year_and_month FROM (SELECT * FROM ticket WHERE departure_date > %s AND 
     departure_date < %s AND airline_name like %s and email like %s) as TABLE1 GROUP BY year_and_month DESC;'''
 
-    print(query);
+    # print(query
     cursor = conn.cursor()
     cursor.execute(query, (startDate, endDate, airline_name, email))
     # print("2")
