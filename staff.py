@@ -224,8 +224,8 @@ def report():
 	cursor = conn.cursor();
 
 	if range == "Range":
-	start = request.form["from"]
-	end = request.form["to"]
+		start = request.form["from"]
+		end = request.form["to"]
 		query = """SELECT count(ticket_id) as tot
 					FROM (s
 					SELECT *
@@ -254,8 +254,8 @@ def report():
 					) as TABLE1
 					WHERE airline_name = %s;""";
 		cursor.execute(query, (session["staffAirline"]))
-	
-		
+
+
 
 	data = cursor.fetchall();
 	print(data)
