@@ -167,64 +167,86 @@ def getComments( aName = None, fNum = None, dTime = None, dDate = None, aNum = N
     print(len(res))
     return res
 
-def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start = None, end = None ):
-    findQuery = "SELECT * FROM flight WHERE"
-    cursor = conn.cursor()
-    conditionals = []
-    conditionals_val = []
-    airports = get_airports()
-    
-    arrPort = set()
-    depPort = set()
-    for port in airports: 
-        arrPort.add(port["name"])
-        depPort.add(port["name"])
-    if(dep): 
-        depPort = depPort.intersection({dep})
-    if(arr): 
-        arrPort = arrPort.intersection({arr})
-    if(arrCity): 
-        q1 = "SELECT * FROM airport WHERE city = %s"
-        cursor.execute(q1,[arrCity])
-        hold = cursor.fetchall()
-        a = set()
-        for port in hold: 
-            a.add(port["name"])
-        print(len(a))
-        arrPort =arrPort.intersection(a)
-    if(depCity): 
-        q1 = "SELECT * FROM airport WHERE city = %s"
-        cursor.execute(q1,[depCity])
-        hold = cursor.fetchall()
+def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start = None, end = None, depCountry = None, arrCountry = None ):
+	findQuery = "SELECT * FROM flight WHERE"
+	cursor = conn.cursor()
+	conditionals = []
+	conditionals_val = []
+	airports = get_airports()
+	
+	arrPort = set()
+	depPort = set()
+	for port in airports: 
+		arrPort.add(port["name"])
+		depPort.add(port["name"])
+	if(dep): 
+		depPort = depPort.intersection({dep})
+	if(arr): 
+		arrPort = arrPort.intersection({arr})
+	if(arrCity or arrCountry): 
+		q1 = "SELECT * FROM airport WHERE "
+		args = []
+		if(arrCity): 
+			q1 += " city = %s "
+			args.append(arrCity)
+		if(arrCountry): 
+			q1 += " country = %s "
+			args.append(arrCountry)
+		cursor.execute(q1,args)
+		hold = cursor.fetchall()
+		a = set()
+		for port in hold: 
+			a.add(port["name"])
+		print(len(a))
+		arrPort =arrPort.intersection(a)
+	if(depCity or depCountry): 
+		q1 = "SELECT * FROM airport WHERE "
+		args = []
+		if(depCity): 
+			q1 += " city = %s "
+			args.append(depCity)
+		if(depCountry): 
+			q1 += " country = %s "
+			args.append(depCountry)
+		cursor.execute(q1, args)
+		hold = cursor.fetchall()
+		d = set()
+		print(hold)
+		for port in hold: 
+			d.add(port["name"])
+		depPort = depPort.intersection(d)
+	if(start): 
+		conditionals_val.append(start)
+		conditionals.append("departure_date > %s")
+	if(end): 
+		conditionals_val.append(end)
+		conditionals.append("departure_date < %s")
+	
+	if(len(conditionals) == 0): 
+		findQuery = "SELECT * FROM flight WHERE departure_date > CAST( CURRENT_DATE() AS Date) AND departure_date < CAST( CURRENT_DATE() AS Date) +30"
+	conditionals = " AND ".join(conditionals)
+	findQuery += " " 
+	findQuery += conditionals
+	arrPort = tuple(arrPort)
+	depPort = tuple(depPort)
+	findQuery += " AND arrive_at in %s"
+	findQuery += " AND depart_from in %s"
+	if(len(arrPort) == 0 or len(depPort) == 0): 
+		return [] 
+	print(conditionals_val+[arrPort,depPort])
+	print(findQuery)
+	cursor.execute(findQuery, conditionals_val+[arrPort,depPort])
+	flights = cursor.fetchall()
 
-        d = set()
-        print(hold)
-        for port in hold: 
-            d.add(port["name"])
-        depPort = depPort.intersection(d)
-    if(start): 
-        conditionals_val.append(start)
-        conditionals.append("departure_date > %s")
-    if(end): 
-        conditionals_val.append(end)
-        conditionals.append("departure_date < %s")
-    
-    if(len(conditionals) == 0): 
-        findQuery = "SELECT * FROM flight WHERE departure_date > CAST( CURRENT_DATE() AS Date) AND departure_date < CAST( CURRENT_DATE() AS Date) +30"
-    conditionals = " AND ".join(conditionals)
-    findQuery += " " 
-    findQuery += conditionals
-    arrPort = tuple(arrPort)
-    depPort = tuple(depPort)
-    findQuery += " AND arrive_at in %s"
-    findQuery += " AND depart_from in %s"
-    if(len(arrPort) == 0 or len(depPort) == 0): 
-        return [] 
-    print(conditionals_val+[arrPort,depPort])
-    print(findQuery)
-    cursor.execute(findQuery, conditionals_val+[arrPort,depPort])
-    flights = cursor.fetchall()
+	return flights
 
-    return flights
+def findCustomersForFlight(flight): 
+	query = "SELECT email, ticket_ID FROM Ticket WHERE airline_name = %s AND unique_airline_num = %s AND flight_number = %s AND departure_date = %s AND departure_time = %s"
+	args = [flight["airline_name"], flight["uniqueu_airline_num"], flight["flight_number"], flight['departure_date'], flight["departure_time"]]
+	cursor = conn.cursor() 
+	cursor.execute(query,args)
+	customers = cursor.fetchall() 
+	return customers
 
+	
 
