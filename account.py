@@ -92,26 +92,16 @@ def flights():
         
     if 'email' in session:
         data = searchFlight(departure_airport, arrival_airport, arrival_city, departure_city, departure_date, arrive_date)
-        # if roundtrip_date
-        
-            
-        # show_book_button = True
-        # cursor.execute(query, (departure_date, departure_airport))
-        # if request.form['arrival_date']:
-        # (function) searchFlight: (dep: Any | None = None, arr: Any | None = None, arrCity: Any | None = None, depCity: Any | None = None, start: Any | None = None, end: Any | None = None) -> (Any | list)
-        # check if the roundtrip option 
+        roundtrip_date = request.form['roundtrip_date']
+        show_book_button = True
+        return render_template('index.html', flights=data, hide_header=True, book_flights=show_book_button, roundtrip_date=roundtrip_date)
 
-        # if not roundtrip_date
-        
     else:
         cursor = conn.cursor()        
         query = 'SELECT * from flight where departure_date = %s and depart_from = %s and arrive_at = %s'
         cursor.execute(query, (departure_date, departure_airport, arrival_airport))	
         data = cursor.fetchall()
-
-
-    # data = cursor.fetchall()	
-    return render_template('index.html', flights=data, hide_header=True, book_flights=show_book_button, re_search=True)
+        return render_template('index.html', flights=data, hide_header=True, book_flights=show_book_button, re_search=True)
 
 # Ticket management
 @app.route('/getTickets', methods=["GET", "POST"])
@@ -154,6 +144,7 @@ def buyTicket():
     departure_date = str(request.form['departure_date'])
     departure_time = str(request.form['departure_time'])
     card_type = request.form['card_type']
+    print(card_type)
     card_number = int(request.form['card_number'])
     name_on_card = request.form['name_on_card']
     expiration = request.form['expiration'] + "-01" #adding extra day to conform with db
@@ -222,6 +213,8 @@ def roundtripBook():
 
     ticket_id_1 = generate_ticket_id()
     data1 = unique_flight(prev_airline_name, prev_unique_airplane_num, prev_flight_number, prev_departure_date, prev_departure_time)
+    print("really")
+    print(card_type)
 
     if (data1):  
         prev_base_price = price_modify(prev_airline_name, prev_unique_airplane_num, prev_flight_number, prev_departure_date, prev_departure_time, prev_base_price)

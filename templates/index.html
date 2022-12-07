@@ -132,13 +132,13 @@
                 <!-- <p>Click on the button to toggle between showing and hiding content.</p> -->
                 <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#demo">Book Flight</button>
                 <div id="demo" class="collapse">
-                    {% if changed_book %}
+                    {% if not changed_book %}
                     <form action="{{ url_for('buyTicket') }}" method="POST"> 
                     {% else %}
                     <form action="{{ url_for('roundtripBook') }}" method="POST"> 
                     {% endif %}
                         <!-- if changed_book true, then don't show credit card info, just load that into a hidden input-->
-                        {% if changed_book %}
+                        {% if not changed_book %}
                         <input type="radio" id="credit" name="card_type" value="credit" checked>
                         <label for="credit">Credit</label>
                         <input type="radio" id="debit" name="card_type" value="debit">
