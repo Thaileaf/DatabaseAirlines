@@ -214,52 +214,36 @@ def revenue():
 	return render_template("/Staff/revenue.html", month=month, year=year);
 
 
-
 # Calculates the revenue for the last month and year for the airline
 @app.route('/Staff/report', methods=['GET', 'POST'])
 @role_required("Staff")
 def report():
 	
-	range = request.form["range"]
+	ranged = request.form["range"]
 	cursor = conn.cursor();
 
-	if range == "Range":
+	if ranged == "Range":
 		start = request.form["from"]
 		end = request.form["to"]
-		query = """SELECT count(ticket_id) as tot
-					FROM (s
-					SELECT *
-					FROM ticket
-					WHERE departure_date >= %s AND departure_date <= %s
-					) as TABLE1
-					WHERE airline_name = %s;""";
-		cursor.execute(query, (start, end, session["staffAirline"]))
 
-	elif range == "Month":
-		query = """SELECT count(ticket_id) as tot
-					FROM (
-					SELECT *
-					FROM ticket
-					WHERE departure_date >= cast(DATE_ADD(CURDATE(), INTERVAL -1 MONTH) AS DATE)
-					) as TABLE1
-					WHERE airline_name = %s;""";
-		cursor.execute(query, (session["staffAirline"]))
+	elif ranged == "Month":
+		today = datetime.date.today();
+		delta = relativedelta(months=1)
+		start = (today - delta).strftime("%y-%m-%d")
+		end = today
 
-	elif range == "Year":
-		query = """SELECT count(ticket_id) as tot
-					FROM (
-					SELECT *
-					FROM ticket
-					WHERE departure_date >= cast(DATE_ADD(CURDATE(), INTERVAL -1 YEAR) AS DATE)
-					) as TABLE1
-					WHERE airline_name = %s;""";
-		cursor.execute(query, (session["staffAirline"]))
+	elif ranged == "Year":
+		today = datetime.date.today();
+		delta = relativedelta(years=1)
+		start = (today - delta).strftime("%y-%m-%d")
+		end = today
 
+	
 
-
-	data = cursor.fetchall();
+	data = calculate_by_month(start, end, "count(ticket_id)", "%", session["staffAirline"])
+	total = sum([i["tot"] for i in data])
 	print(data)
-	return redirect("/");
+	return render_template("/Staff/report.html", table_info=data, total=total);
 	
 
 @app.route('/Staff/ViewComments')
