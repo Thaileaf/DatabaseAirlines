@@ -18,36 +18,6 @@
   <div class="account staff" style="padding: 100px;display:flex;flex-wrap:wrap;">
     <div class="block">
       <form action="..">
-        <p>Create flight: </p>
-        <select id="airport" name="airport">
-          {% for line in airports %}
-              <option name="airport" id="airport_s" value={{line['name']}}>{{line['name']}}</option> <!-- Vscode doesn't like that-->
-          {% endfor %}
-          </select>
-        <input type="datetime-local" id="depart" name="depart">
-        <input type="datetime-local" id="arrival" name="arrival">
-        <input type="submit" value="Submit">
-
-      </form>
-    </div>
-    <div class="block">
-      <form action="..">
-        <p>Add airport: </p>
-        <input type="text" id="airportname" name="airportname">
-        <input type="submit" value="Submit">
-
-      </form>
-    </div>
-    <div class="block">
-      <form action="..">
-        <p>Add airplane: </p>
-        <input type="text" id="planename" name="planename">
-        <input type="submit" value="Submit">
-
-      </form>
-    </div>
-    <div class="block">
-      <form action="..">
         <p>View Flights: </p>
         <label for="from">From:</label>
         <input type="date" id="from" name="from"> <br/>
@@ -93,7 +63,9 @@
     </div>
     <div class="block">
       <a href="/Staff/frequentcustomers">View Frequent Customers</a> </br>
-      <a href="/Staff/revenue">View Earned Revenue</a>
+      <a href="/Staff/revenue">View Earned Revenue</a><br>
+      <a href="/FlightEditor">Flight Manager</a></br> 
+      <a href="/Staff/ViewComments">View Comments</a>
     </div>
 
 
