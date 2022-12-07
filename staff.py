@@ -30,7 +30,11 @@ def staffSearchFlight():
 	if(start): start = datetime.datetime.strptime(start, '%Y-%m-%d').date()
 	if(end): end = datetime.datetime.strptime(end, '%Y-%m-%d').date()
 	flights = searchFlight(dep = dep, arr = arr, arrCity=arrCity, depCity=depCity, start = start, end = end, arrCountry = arrCountry, depCountry = depCountry)
-	print(len(flights))
+	add_time_difference(flights)
+	for flight in flights: 
+		cust = findCustomersForFlight(flight)
+		flight["customers"] = cust 
+
 	return flightEditor(flights = flights)
 
 @app.route('/FlightEditor')
@@ -38,7 +42,8 @@ def staffSearchFlight():
 def flightEditor(addingFlight = False, addFlightError = None, addingAirplane = False, addAirplaneError = None, addingAirport = False, addAirportError = None, flights = None):
 	staffAirline = session["staffAirline"]
 	if(flights == None):
-		flights = getFutureFlights(staffAirline)
+		flights = searchFlight()
+	flights = add_time_difference(flights)
 	ap = get_airports()
 	planes = getAirplanes(staffAirline)
 	return render_template('Staff/FlightEditor.html', airports = ap, planes = planes, airline = staffAirline, 

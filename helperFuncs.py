@@ -184,12 +184,14 @@ def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start =
 	if(arrCity or arrCountry): 
 		q1 = "SELECT * FROM airport WHERE "
 		args = []
+		args_con = []
 		if(arrCity): 
-			q1 += " city = %s "
+			args_con.append(" city = %s ")
 			args.append(arrCity)
 		if(arrCountry): 
-			q1 += " country = %s "
+			args_con.append(" country = %s ")
 			args.append(arrCountry)
+		q1 += " AND ".join(args_con)
 		cursor.execute(q1,args)
 		hold = cursor.fetchall()
 		a = set()
@@ -200,12 +202,14 @@ def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start =
 	if(depCity or depCountry): 
 		q1 = "SELECT * FROM airport WHERE "
 		args = []
+		args_con = []
 		if(depCity): 
-			q1 += " city = %s "
+			args_con.append(" city = %s ")
 			args.append(depCity)
 		if(depCountry): 
-			q1 += " country = %s "
+			args_con.append(" country = %s ")
 			args.append(depCountry)
+		q1 += " AND ".join(args_con)
 		cursor.execute(q1, args)
 		hold = cursor.fetchall()
 		d = set()
@@ -239,8 +243,8 @@ def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start =
 	return flights
 
 def findCustomersForFlight(flight): 
-	query = "SELECT email, ticket_ID FROM Ticket WHERE airline_name = %s AND unique_airline_num = %s AND flight_number = %s AND departure_date = %s AND departure_time = %s"
-	args = [flight["airline_name"], flight["uniqueu_airline_num"], flight["flight_number"], flight['departure_date'], flight["departure_time"]]
+	query = "SELECT email, ticket_ID FROM Ticket WHERE airline_name = %s AND unique_airplane_num = %s AND flight_number = %s AND departure_date = %s AND departure_time = %s"
+	args = [flight["airline_name"], flight["unique_airplane_num"], flight["flight_number"], flight['departure_date'], flight["departure_time"]]
 	cursor = conn.cursor() 
 	cursor.execute(query,args)
 	customers = cursor.fetchall() 
