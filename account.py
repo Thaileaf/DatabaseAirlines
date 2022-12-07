@@ -32,11 +32,91 @@ def root():
         query = 'SELECT distinct F.airline_name, F.unique_airplane_num, F.flight_number, F.departure_date, F.departure_time, F.arrival_date, F.arrival_time, F.base_price, F.status_flight, F.roundtrip, F.depart_from, F.arrive_at from flight as F, ticket as T where F.airline_name = T.airline_name and F.unique_airplane_num = T.unique_airplane_num and F.flight_number = T.flight_number and F.departure_date = T.departure_date and F.departure_time = T.departure_time and email = %s'
         cursor.execute(query, (email)) 
         flights = cursor.fetchall()      
+        # storing all flights in one big session, the button can still have a few hidden inputs to match the flights
         flights = add_time_difference(flights)
+
+        for flight in flights:
+            key = str(flight['airline_name']) + str(flight['unique_airplane_num']) + str(flight['flight_number']) + str(flight['departure_date']) + str(flight['departure_time'])
+            session[key] = [flight['airline_name'], flight['unique_airplane_num'], flight['flight_number'], flight['departure_date'], str(flight['departure_time']), 
+            flight['arrival_date'], str(flight['arrival_time']), flight['base_price'], flight['status_flight'], flight['depart_from'], flight['arrive_at']]
+
+            print(key, session[key])
+
         return render_template('index.html', flights=flights, airports=airports, book_flights=False)
     else:
         flights = getFutureFlights()
+        # print(flights)  
         return render_template('index.html', flights=flights, airports=airports)
+
+@app.route('/searchFlights', methods=['GET', 'POST'])
+def flights():
+
+    # fix nonroundtrip search first
+
+    arrival_airport, arrival_city, arrival_date = None, None, None
+    if 'email' in session:
+        print(request.form)
+        arrival_airport = request.form['arrival_airport']
+        arrival_city = request.form['arrival_city']
+        arrival_date = request.form['arrival_date']
+
+    try:
+        roundtrip_date = request.form['roundtrip_date']
+    except:
+        roundtrip_date = None
+
+    # print(request.form['roundtrip_date'])   
+    departure_airport = request.form['departure_airport']
+    departure_city = request.form['departure_city']
+    departure_date = request.form['departure_date']
+     # TODO: departure date not filtering correctly
+    show_book_button = False
+    # will need to do a bit more for search flights
+
+    # print(departure_airport, " ", arrival_airport,  " ", arrival_city,  " ", departure_city," ", departure_date," ", arrival_date)
+    # if departure_airport == "":?
+    if departure_airport == "": departure_airport = None  
+    if departure_date == "": departure_date = None
+    if departure_city == "": departure_city = None
+    if arrival_airport == "": arrival_airport = None
+    if arrival_city == "": arrival_city = None
+    if arrival_date == "": arrival_date = None
+
+    # print(arrival_city == None)
+
+    # print(arrival_city)
+    if 'email' in session:
+        # searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start = None, end = None, roundtrip = None, arrCountry = None, depCountry = None, airline = None):
+        print(departure_airport)
+        print(arrival_airport)
+        print(arrival_city)
+        print(departure_city)
+        print(departure_date)
+        print(arrival_date)
+        data = searchFlight(departure_airport, arrival_airport, arrival_city, departure_city, departure_date, None, None, None, None, None, arrival_date)
+        # print(data)
+        # cursor = conn.cursor()
+
+        # query = "SELECT * from flight where "
+        # if departure_airport:
+        #     query += "depart_from = %s and "
+        # if arrival_airport:
+        #     query += "arrive_at = %s and "
+        # if departure_city:
+        #     query += ""
+
+
+        #departure_date = %s and depart_from = %s and arrive_at = %s"
+        show_book_button = True
+        return render_template('index.html', flights=data, hide_header=True, book_flights=show_book_button, roundtrip_date=roundtrip_date)
+
+    else:
+        cursor = conn.cursor()        
+        query = 'SELECT * from flight where departure_date = %s and depart_from = %s and arrive_at = %s'
+        cursor.execute(query, (departure_date, departure_airport, arrival_airport))	
+        data = cursor.fetchall()
+        return render_template('index.html', flights=data, hide_header=True, book_flights=show_book_button, re_search=True)
+
 
 @app.route('/pastFlights', methods=["GET"])
 @role_required('Customer')
@@ -73,36 +153,6 @@ def comment():
 	return render_template('submitted.html')
 
 
-@app.route('/searchFlights', methods=['GET', 'POST'])
-def flights():
-
-    arrival_airport, arrival_city, arrive_date = None, None, None
-    if 'email' in 'session':
-        arrival_airport = request.form['arrive_airport']
-        arrival_city = request.form['arrive_city']
-        arrive_date = request.form['arrive_date']
-
-    roundtrip_date = request.form['roundtrip_date']
-    # print(request.form['roundtrip_date'])   
-    departure_airport = request.form['depart_airport']
-    departure_city = request.form['depart_city']
-    departure_date = request.form['depart_date']
-
-    show_book_button = False
-    # will need to do a bit more for search flights
-        
-    if 'email' in session:
-        data = searchFlight(departure_airport, arrival_airport, arrival_city, departure_city, departure_date, arrive_date)
-
-        show_book_button = True
-        return render_template('index.html', flights=data, hide_header=True, book_flights=show_book_button, roundtrip_date=roundtrip_date)
-
-    else:
-        cursor = conn.cursor()        
-        query = 'SELECT * from flight where departure_date = %s and depart_from = %s and arrive_at = %s'
-        cursor.execute(query, (departure_date, departure_airport, arrival_airport))	
-        data = cursor.fetchall()
-        return render_template('index.html', flights=data, hide_header=True, book_flights=show_book_button, re_search=True)
 
 # Ticket management
 @app.route('/getTickets', methods=["GET", "POST"])
@@ -145,7 +195,7 @@ def buyTicket():
     departure_date = str(request.form['departure_date'])
     departure_time = str(request.form['departure_time'])
     card_type = request.form['card_type']
-    print(card_type)
+    # print(card_type)
     card_number = int(request.form['card_number'])
     name_on_card = request.form['name_on_card']
     expiration = request.form['expiration'] + "-01" #adding extra day to conform with db
@@ -156,6 +206,7 @@ def buyTicket():
     arrival_airport = request.form['arrival_airport']
 
     roundtrip_date = request.form['roundtrip_date']
+    # print(roundtrip_date)
 
     if roundtrip_date:
         cursor = conn.cursor()        
@@ -169,9 +220,12 @@ def buyTicket():
         # data2 = cursor.execute(query, (roundtrip_date, arrival_airport, ))
         
         # # All flights where departure_date is the arrival_date, depart_from is arrival_airport, dearture_date is dep, arrive_at is depart_from   
-        query = 'SELECT * from flight where departure_date = %s and depart_from = %s and arrive_at in (Select depart_from from flight where departure_date = %s and arrive_at = %s );' 
-        cursor.execute(query, (roundtrip_date, arrival_airport, departure_date, departure_airport))
+        # and arrive_at in (Select depart_from from flight where departure_date = %s and arrive_at = %s );'
+        query = 'SELECT * from flight where departure_date = %s and depart_from = %s and arrive_at = %s' # , departure_date, departure_airport
+        cursor.execute(query, (roundtrip_date, arrival_airport, departure_airport))
+        print(roundtrip_date, arrival_airport, departure_airport)
         data = cursor.fetchall()    
+        print(data)
 
         return render_template("index.html", flights=data, changed_book=True, hide_header=True, card_type=card_type, card_number=card_number, 
         name_on_card=name_on_card, expiration=expiration, base_price=base_price, prev_airline_name=airline_name, prev_unique_airplane_num=unique_airplane_num, 

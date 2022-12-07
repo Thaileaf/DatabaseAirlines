@@ -36,11 +36,12 @@ def loginAuth():
 	hashed_password = hashed_password.hexdigest()
 
 	customer = True if "email" in request.form else False;
-	print(hashed_password)
+	# print(hashed_password)
 
 	#cursor used to send queries
 	cursor = conn.cursor()
 	#executes query
+	
 	if customer:
 		email = request.form['email']
 		query = 'SELECT * FROM customers WHERE email = %s and password = %s'
@@ -77,7 +78,7 @@ def loginAuth():
 			error = 'Invalid password or username'
 			value = False
 		
-
+	
 		return render_template('LoginAuth/login.html', error=error, isCust = value )
 
 #Authenticates the user register

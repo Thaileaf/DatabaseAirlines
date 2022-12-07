@@ -32,38 +32,34 @@
     {% if not hide_header %}
     <div>
         <form action="/searchFlights" method="POST" style="text-align: center;">
-            <!-- <label for="airport">Airport: </label> -->
-            <!-- <select id="airport" name="airport"> -->
-            <!-- {% for line in airports %} -->
-                <!-- <option name="airport" id="airport_s" value={{line['name']}}>{{line['name']}}</option>  -->
-            <!-- {% endfor %} -->
-
-            <label for="airport">Departure Airport: </label>
-            <select id="airport" name="depart_airport">
-                <option></option>
+            <label>Departure Airport: </label>
+            <select id="departure_airport" name="departure_airport">
             {% for line in airports %}
-                <option name="airport" id="airport_s" value={{line['name']}}>{{line['name']}}</option> 
+                <option name="departure_airport" id="departure_airport" value={{line['name']}}>{{line['name']}}</option> 
             {% endfor %}
             </select>
-            <label for="airport">Arrival Airport: </label>
-            <select id="airport" name="arrive_airport">
-                <option></option>
+            
+            {% if session.email %}
+            <label>Arrival Airport: </label>
+            <select id="arrival_airport" name="arrival_airport">
             {% for line in airports %}
-                <option name="airport" id="airport_s" value={{line['name']}}>{{line['name']}}</option> 
-            {% endfor %}
-            </select> <br>
-            <label for="airport">Departure City: </label>
-            <input name="depart_city">
-            <label for="airport">Arrival City: </label>
-            <input name="arrive_city"><br>
-
+                <option name="arrival_airport" id="arrival_airport" value={{line['name']}}>{{line['name']}}</option> 
+            {% endfor %} -->
             </select>
-            <!-- <label for="roundtrip">Roundtrip: </label> -->
-            <!-- <input onclick=arrivalOn() type="checkbox" id="flipper" name="flipper"><br/> -->
-            <label for="depart">Departure Date:</label>
-            <input type="date" id="depart_date" name="depart_date">
-            <label for="">Arrival Date:</label>
-            <input type="date" id="arrive_date" name="arrive_date">
+            {% endif %}
+
+            <label> Departure City: </label>
+            <input name="departure_city">
+
+            {% if session.email %}
+            <label>Arrival City: </label>
+            <input name="arrival_city">
+            {% endif %}
+
+            <label>Departure Date:</label>
+            <input type="date" id="departure_date" name="departure_date">
+            <label> Arrival Date:</label>
+            <input type="date" id="arrival_date" name="arrival_date">
             <label> Roundtrip Date:</label>
             <input type="date" id="roundtrip_date" name="roundtrip_date">
             <input type="submit" value="Submit">
@@ -76,7 +72,7 @@
 
 {% for line in flights %}
     <div class="card" style="width: 80vw;">
-        <div class="card-body" name={{line}}>
+        <div class="card-body" name={{line['track_number']}}>
             <div class="row">
                 <div class="col-2">
                     <h5 class="card-title">{{line['departure_time']}}</h5>
@@ -112,7 +108,7 @@
             </div>
             <div class="row">
                 <div class="col-2">
-                    <h6 class="card-subtitle mb-2 text-muted">{{line['depart_from']}}</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">{{line['depart_from']}}</h6> <!-- check later-->
                 </div>
                 <div class="col-1">
 
@@ -131,17 +127,20 @@
                 <!-- <h2>Simple Collapsible</h2> -->
                 <!-- <p>Click on the button to toggle between showing and hiding content.</p> -->
                 {% if book_flights %}
-                <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#demo">Book Flight</button>
+                <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#{{loop.index0}}">Book Flight</button>
                 {% endif %}
-                <div id="demo" class="collapse">
-                    {% if not changed_book %}
+                <div id={{loop.index0 }} class="collapse">
                     <form action="{{ url_for('buyTicket') }}" method="POST"> 
-                    {% else %}
-                    <form action="{{ url_for('roundtripBook') }}" method="POST"> 
-                    {% endif %}
+                        <!-- these 5 hidden inputs are the primary keys for identifying a flight-->
+                        <input type="hidden" id="airline_name" name="airline_name" value="{{line['airline_name']}}"> 
+                        <input type="hidden" id="unique_airplane_num" name="unique_airplane_num" value="{{line['unique_airplane_num']}}"> 
+                        <input type="hidden" id="flight_number" name="flight_number" value="{{line['flight_number']}}"> 
+                        <input type="hidden" id="departure_date" name="departure_date" value="{{line['departure_date']}}"> 
+                        <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}"> 
+
                         <!-- if changed_book true, then don't show credit card info, just load that into a hidden input-->
-                        {% if not changed_book %}
-                        <input type="radio" id="credit" name="card_type" value="credit" checked>
+                        <!-- {% if not changed_book %} -->
+                        <!-- <input type="radio" id="credit" name="card_type" value="credit" checked>
                         <label for="credit">Credit</label>
                         <input type="radio" id="debit" name="card_type" value="debit">
                         <label for="debit">Debit</label>
@@ -153,9 +152,9 @@
                         <input type="text" name="name_on_card" id="name_on_card"> 
                         <br></br>
                         <label for="expiration">Expiration Date:</label> 
-                        <input type="month" id="expiration" name="expiration" min="2022-12" value="2024-01">
+                        <input type="month" id="expiration" name="expiration" min="2022-12" value="2024-01"> -->
 
-                        <input type="hidden" id="airline_name" name="airline_name" value="{{line['airline_name']}}"> 
+                        <!-- <input type="hidden" id="airline_name" name="airline_name" value="{{line['airline_name']}}"> 
                         <input type="hidden" id="unique_airplane_num" name="unique_airplane_num" value="{{line['unique_airplane_num']}}"> 
                         <input type="hidden" id="flight_number" name="flight_number" value="{{line['flight_number']}}"> 
                         <input type="hidden" id="departure_airport" name="departure_airport" value="{{line['departure_airport']}}"> 
@@ -165,9 +164,10 @@
                         <input type="hidden" id="departure_date" name="departure_date" value="{{line['departure_date']}}"> 
                         <input type="hidden" id="arrival_date" name="arrival_date" value="{{line['arrival_date']}}"> 
                         <input type="hidden" id="base_price" name="base_price" value="{{line['base_price']}}"> 
+                        <input type="hidden" id="roundtrip_date" name="roundtrip_date" value="{{roundtrip_date}}">  -->
 
-                        {% else %}
-                        <input type="hidden" id="card_type" name="card_type" value="{{line['card_type']}}"> 
+                        <!-- {% else %} -->
+                        <!-- <input type="hidden" id="card_type" name="card_type" value="{{line['card_type']}}"> 
                         <input type="hidden" id="card_number" name="card_number" value="{{line['card_number']}}"> 
                         <input type="hidden" id="name_on_card" name="name_on_card" value="{{line['name_on_card']}}"> 
                         <input type="hidden" id="expiration" name="expiration" value="{{line['expiration']}}"> 
@@ -188,7 +188,7 @@
                         <input type="hidden" id="prev_base_price" name="prev_base_price" value="{{line['prev_base_price']}}"> 
 
                         {% endif %}
-
+ -->
                         <!-- <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}">  -->
                         <h6>Due to price varying policies, your flight may be more costly than the base price shown here. Please ignore that value 😊. </h6>
                         <input type="submit" value="Book Flight" class="card-link">  <!-- For later, should only be visible if the user is logged in and only when searching/viewing future flights-->

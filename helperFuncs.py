@@ -214,7 +214,7 @@ def getComments( aName = None, fNum = None, dTime = None, dDate = None, aNum = N
     res = cursor.fetchall() 
     return res
 
-def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start = None, end = None, roundtrip = None, arrCountry = None, depCountry = None, airline = None):
+def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start = None, end = None, roundtrip = None, arrCountry = None, depCountry = None, airline = None, arrival_date = None):
 
     findQuery = "SELECT * FROM flight WHERE"
     cursor = conn.cursor()
@@ -271,6 +271,9 @@ def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start =
     if(end): 
         conditionals_val.append(end)
         conditionals.append("departure_date < %s")
+    if (arrival_date):
+        conditionals_val.append(arrival_date)
+        conditionals.append("arrival_date = %s")
 
     if(len(conditionals) == 0): 
         findQuery = "SELECT * FROM flight WHERE departure_date > CAST( CURRENT_DATE() AS Date) AND departure_date < CAST( CURRENT_DATE() AS Date) +30"
