@@ -283,13 +283,15 @@ def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start =
     depPort = tuple(depPort)
     findQuery += " AND arrive_at in %s"
     findQuery += " AND depart_from in %s"
+    airport_vals = [arrPort,depPort]
     if(airline): 
         findQuery += " AND airline_name = %s "
+        airport_vals.append(airline)
     if(len(arrPort) == 0 or len(depPort) == 0): 
         return [] 
     print(conditionals_val+[arrPort,depPort])
     print(findQuery)
-    cursor.execute(findQuery, conditionals_val+[arrPort,depPort, airline])
+    cursor.execute(findQuery, conditionals_val+airport_vals)
     flights = cursor.fetchall()
 
     return flights
