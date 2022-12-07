@@ -20,6 +20,7 @@ def staff():
 @app.route('/FlightEditor/searchFlight', methods=['GET', 'POST'])
 @role_required("Staff")
 def staffSearchFlight():
+	airline = session["staffAirline"]
 	dep = request.form['dep']
 	arr = request.form['arr']
 	arrCity = request.form['arrCity']
@@ -30,7 +31,7 @@ def staffSearchFlight():
 	end = request.form['end']
 	if(start): start = datetime.datetime.strptime(start, '%Y-%m-%d').date()
 	if(end): end = datetime.datetime.strptime(end, '%Y-%m-%d').date()
-	flights = searchFlight(dep = dep, arr = arr, arrCity=arrCity, depCity=depCity, start = start, end = end, arrCountry = arrCountry, depCountry = depCountry)
+	flights = searchFlight(dep = dep, arr = arr, arrCity=arrCity, depCity=depCity, start = start, end = end, arrCountry = arrCountry, depCountry = depCountry, airline=airline)
 	add_time_difference(flights)
 	for flight in flights: 
 		cust = findCustomersForFlight(flight)
@@ -45,7 +46,7 @@ def staffSearchFlight():
 def flightEditor(addingFlight = False, addFlightError = None, addingAirplane = False, addAirplaneError = None, addingAirport = False, addAirportError = None, flights = None):
 	staffAirline = session["staffAirline"]
 	if(flights == None):
-		flights = searchFlight()
+		flights = searchFlight(airline=staffAirline)
 	flights = add_time_difference(flights)
 	ap = get_airports()
 	planes = getAirplanes(staffAirline)

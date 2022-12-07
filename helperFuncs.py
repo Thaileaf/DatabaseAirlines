@@ -214,7 +214,7 @@ def getComments( aName = None, fNum = None, dTime = None, dDate = None, aNum = N
     res = cursor.fetchall() 
     return res
 
-def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start = None, end = None, roundtrip = None, arrCountry = None, depCountry = None):
+def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start = None, end = None, roundtrip = None, arrCountry = None, depCountry = None, airline = None):
 
     findQuery = "SELECT * FROM flight WHERE"
     cursor = conn.cursor()
@@ -274,6 +274,8 @@ def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start =
 
     if(len(conditionals) == 0): 
         findQuery = "SELECT * FROM flight WHERE departure_date > CAST( CURRENT_DATE() AS Date) AND departure_date < CAST( CURRENT_DATE() AS Date) +30"
+
+
     conditionals = " AND ".join(conditionals)
     findQuery += " " 
     findQuery += conditionals
@@ -281,12 +283,13 @@ def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start =
     depPort = tuple(depPort)
     findQuery += " AND arrive_at in %s"
     findQuery += " AND depart_from in %s"
-
+    if(airline): 
+        findQuery += " AND airline_name = %s "
     if(len(arrPort) == 0 or len(depPort) == 0): 
         return [] 
-    # print(conditionals_val+[arrPort,depPort])
-    # print(findQuery)
-    cursor.execute(findQuery, conditionals_val+[arrPort,depPort])
+    print(conditionals_val+[arrPort,depPort])
+    print(findQuery)
+    cursor.execute(findQuery, conditionals_val+[arrPort,depPort, airline])
     flights = cursor.fetchall()
 
     return flights
