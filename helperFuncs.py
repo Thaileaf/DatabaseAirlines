@@ -134,7 +134,7 @@ def getComments( aName = None, fNum = None, dTime = None, dDate = None, aNum = N
 	print(len(res))
 	return res
 
-def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start = None, end = None ):
+def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start = None, end = None, depCountry = None, arrCountry = None ):
 	findQuery = "SELECT * FROM flight WHERE"
 	cursor = conn.cursor()
 	conditionals = []
@@ -150,20 +150,33 @@ def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start =
 		depPort = depPort.intersection({dep})
 	if(arr): 
 		arrPort = arrPort.intersection({arr})
-	if(arrCity): 
-		q1 = "SELECT * FROM airport WHERE city = %s"
-		cursor.execute(q1,[arrCity])
+	if(arrCity or arrCountry): 
+		q1 = "SELECT * FROM airport WHERE "
+		args = []
+		if(arrCity): 
+			q1 += " city = %s "
+			args.append(arrCity)
+		if(arrCountry): 
+			q1 += " country = %s "
+			args.append(arrCountry)
+		cursor.execute(q1,args)
 		hold = cursor.fetchall()
 		a = set()
 		for port in hold: 
 			a.add(port["name"])
 		print(len(a))
 		arrPort =arrPort.intersection(a)
-	if(depCity): 
-		q1 = "SELECT * FROM airport WHERE city = %s"
-		cursor.execute(q1,[depCity])
+	if(depCity or depCountry): 
+		q1 = "SELECT * FROM airport WHERE "
+		args = []
+		if(depCity): 
+			q1 += " city = %s "
+			args.append(depCity)
+		if(depCountry): 
+			q1 += " country = %s "
+			args.append(depCountry)
+		cursor.execute(q1, args)
 		hold = cursor.fetchall()
-
 		d = set()
 		print(hold)
 		for port in hold: 
@@ -194,4 +207,13 @@ def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start =
 
 	return flights
 
+def findCustomersForFlight(flight): 
+	query = "SELECT email, ticket_ID FROM Ticket WHERE airline_name = %s AND unique_airline_num = %s AND flight_number = %s AND departure_date = %s AND departure_time = %s"
+	args = [flight["airline_name"], flight["uniqueu_airline_num"], flight["flight_number"], flight['departure_date'], flight["departure_time"]]
+	cursor = conn.cursor() 
+	cursor.execute(query,args)
+	customers = cursor.fetchall() 
+	return customers
+
+	
 

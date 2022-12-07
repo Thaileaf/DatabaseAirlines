@@ -20,11 +20,13 @@ def staffSearchFlight():
 	arr = request.form['arr']
 	arrCity = request.form['arrCity']
 	depCity = request.form['depCity']
+	arrCountry = request.form['arrCountry']
+	depCountry = request.form['depCountry']
 	start = request.form['start']
 	end = request.form['end']
 	if(start): start = datetime.datetime.strptime(start, '%Y-%m-%d').date()
 	if(end): end = datetime.datetime.strptime(end, '%Y-%m-%d').date()
-	flights = searchFlight(dep = dep, arr = arr, arrCity=arrCity, depCity=depCity, start = start, end = end)
+	flights = searchFlight(dep = dep, arr = arr, arrCity=arrCity, depCity=depCity, start = start, end = end, arrCountry = arrCountry, depCountry = depCountry)
 	print(len(flights))
 	return flightEditor(flights = flights)
 
