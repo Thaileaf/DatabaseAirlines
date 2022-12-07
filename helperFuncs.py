@@ -88,13 +88,13 @@ def calculate_spending(email, start_date, end_date):
     # 	else:
     # 		table_info.append((date, 0))
     
-    test = calculate_by_month(start_date, end_date, "sum(sold_price)", email)
+    data = calculate_by_month(start_date, end_date, "sum(sold_price)", email)
     # cursor = conn.cursor()
     # query = 'SELECT sum(sold_price) as tot, DATE_FORMAT(departure_date, "%Y-%m") AS year_and_month FROM (SELECT * FROM ticket WHERE departure_date > %s AND departure_date < %s AND airline_name like %s and email = %s) as TABLE1 GROUP BY year_and_month DESC;'''
     # cursor.execute(query, (departure))
-    print(test)
+    total_spending = sum([i["tot"] for i in data])
 
-    return table_info, total_spending
+    return data, total_spending
 
 def calculate_by_month(startDate, endDate, select, email="%", airline_name="%"):
     # Returns data of selected columns in Ticket
