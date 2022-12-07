@@ -92,8 +92,7 @@ def calculate_spending(email, start_date, end_date):
     # cursor = conn.cursor()
     # query = 'SELECT sum(sold_price) as tot, DATE_FORMAT(departure_date, "%Y-%m") AS year_and_month FROM (SELECT * FROM ticket WHERE departure_date > %s AND departure_date < %s AND airline_name like %s and email = %s) as TABLE1 GROUP BY year_and_month DESC;'''
     # cursor.execute(query, (departure))
-    total_spending = data[0]["tot"]
-    print(data)
+    total_spending = sum([i["tot"] for i in data])
 
     return data, total_spending
 
