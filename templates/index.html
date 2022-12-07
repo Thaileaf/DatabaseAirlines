@@ -136,10 +136,9 @@
 
                         <!-- if changed_book true, then don't show credit card info, just load that into a hidden input-->
                         {% if changed_book %}
-
-                        <input type="radio" id="credit" name="drone" value="credit" checked>
+                        <input type="radio" id="credit" name="card_type" value="credit" checked>
                         <label for="credit">Credit</label>
-                        <input type="radio" id="debit" name="drone" value="debit">
+                        <input type="radio" id="debit" name="card_type" value="debit">
                         <label for="debit">Debit</label>
                         <br></br>
                         <label for="card_number">Credit/Debit Card:</label>
@@ -150,7 +149,7 @@
                         <br></br>
                         <label for="expiration">Expiration Date:</label> 
                         <input type="month" id="expiration" name="expiration" min="2022-12" value="2024-01">
-                    
+
                         <input type="hidden" id="airline_name" name="airline_name" value="{{line['airline_name']}}"> 
                         <input type="hidden" id="unique_airplane_num" name="unique_airplane_num" value="{{line['unique_airplane_num']}}"> 
                         <input type="hidden" id="flight_number" name="flight_number" value="{{line['flight_number']}}"> 
@@ -161,8 +160,31 @@
                         <input type="hidden" id="departure_date" name="departure_date" value="{{line['departure_date']}}"> 
                         <input type="hidden" id="arrival_date" name="arrival_date" value="{{line['arrival_date']}}"> 
                         <input type="hidden" id="base_price" name="base_price" value="{{line['base_price']}}"> 
+
+                        {% else %}
+                        <input type="hidden" id="card_type" name="card_type" value="{{line['card_type']}}"> 
+                        <input type="hidden" id="card_number" name="card_number" value="{{line['card_number']}}"> 
+                        <input type="hidden" id="name_on_card" name="name_on_card" value="{{line['name_on_card']}}"> 
+                        <input type="hidden" id="expiration" name="expiration" value="{{line['expiration']}}"> 
+                        
+                        <input type="hidden" id="airline_name" name="airline_name" value="{{line['airline_name']}}"> 
+                        <input type="hidden" id="unique_airplane_num" name="unique_airplane_num" value="{{line['unique_airplane_num']}}"> 
+                        <input type="hidden" id="flight_number" name="flight_number" value="{{line['flight_number']}}"> 
+                        <input type="hidden" id="departure_date" name="departure_date" value="{{line['departure_date']}}"> 
+                        <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}"> 
+
+                        <input type="hidden" id="prev_airline_name" name="prev_airline_name" value="{{prev_airline_name}}"> 
+                        <input type="hidden" id="prev_unique_airplane_num" name="prev_unique_airplane_num" value="{{prev_unique_airplane_num}}"> 
+                        <input type="hidden" id="prev_flight_number" name="prev_flight_number" value="{{prev_flight_number}}"> 
+                        <input type="hidden" id="prev_departure_date" name="prev_departure_date" value="{{prev_departure_date}}"> 
+                        <input type="hidden" id="prev_departure_time" name="prev_departure_time" value="{{prev_departure_time}}"> 
+
+                        {% endif %}
+
                         <!-- <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}">  -->
                         <h6>Due to price varying policies, your flight may be more costly than the base price shown here. Please ignore that value 😊. </h6>
+                        
+                        {% if changed_book %}
                         <input type="submit" value="Book Flight" class="card-link">  <!-- For later, should only be visible if the user is logged in and only when searching/viewing future flights-->
                     </form>
         

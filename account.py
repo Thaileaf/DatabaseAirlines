@@ -142,7 +142,7 @@ def get_tickets():
 @app.route('/buyTicket', methods=["GET", "POST"])
 @role_required('Customer')
 def buyTicket():  
-    w
+    
     cursor = conn.cursor()
     ticket_id = random.randrange(1, 10**10)
     query = 'SELECT * from ticket where ticket.ticket_id = %s'
@@ -168,7 +168,7 @@ def buyTicket():
     flight_number = int(float(request.form['flight_number']))
     departure_date = str(request.form['departure_date'])
     departure_time = str(request.form['departure_time'])
-    card_type = request.form['drone']
+    card_type = request.form['card_type']
     card_number = int(request.form['card_number'])
     name_on_card = request.form['name_on_card']
     expiration = request.form['expiration'] + "-01" #adding extra day to conform with db
@@ -180,9 +180,6 @@ def buyTicket():
 
     if roundtrip_date:
         # send credit card info
-
-
-
         # send the previous flight information 
         # get the roundtrip flights
         # the button will have roundtrip_apply property to book both flights simultaneously
@@ -196,8 +193,9 @@ def buyTicket():
         cursor.execute(query, (roundtrip_date, arrival_airport, departure_date, departure_airport))
         data = cursor.fetchall()    
 
-        return render_template("index.html", flights=data, changed_book=True, hide_header=True, card_type=card_type, card_number=card_number, name_on_card=name_on_card, expiration=expiration, base_price=base_price)
-        # print(data)
+        return render_template("index.html", flights=data, changed_book=True, hide_header=True, card_type=card_type, card_number=card_number, 
+        name_on_card=name_on_card, expiration=expiration, base_price=base_price, prev_airline_name=airline_name, prev_unique_airplane_num=unique_airplane_num, 
+        prev_flight_number=flight_number, prev_departure_date=departure_date, prev_departure_time=departure_time)
 
     else:   
         query = 'SELECT * from flight where airline_name = %s and unique_airplane_num = %s and flight_number = %s and departure_date = %s and departure_time = %s'
@@ -226,6 +224,12 @@ def buyTicket():
             cursor.close()
 
         return render_template('submitted.html')
+
+@app.route('/roundtripBook', methods=["GET", "POST"])
+def roundtripBook():
+    cursor = conn.cursor()
+
+
 
 @app.route('/cancelTicket', methods=["GET", "POST"])
 def cancelTicket():
