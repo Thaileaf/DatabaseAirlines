@@ -73,25 +73,44 @@ def comment():
 	return render_template('submitted.html')
 
 
-@app.route('/flights', methods=['GET', 'POST'])
+@app.route('/searchFlights', methods=['GET', 'POST'])
 def flights():
-    airport = request.form['airport']
-    departure_date = request.form['depart']
-    return_date = request.form['return']
+
+    arrival_airport, arrival_city, arrive_date = None, None, None
+
+    if 'email' in 'session':
+        arrival_airport = request.form['arrive_airport']
+        arrival_city = request.form['arrive_city']
+        arrive_date = request.form['arrive_date']
+
+    departure_airport = request.form['depart_airport']
+    departure_city = request.form['depart_city']
+    departure_date = request.form['depart_date']
+
     show_book_button = False
-
+    # will need to do a bit more for search flights
+        
     if 'email' in session:
-        show_book_button = True
+        data = searchFlight(departure_airport, arrival_airport, arrival_city, departure_city, departure_date, arrive_date)
+        # if roundtrip_date
+        
+            
+        # show_book_button = True
+        # cursor.execute(query, (departure_date, departure_airport))
+        # if request.form['arrival_date']:
+        # (function) searchFlight: (dep: Any | None = None, arr: Any | None = None, arrCity: Any | None = None, depCity: Any | None = None, start: Any | None = None, end: Any | None = None) -> (Any | list)
+        # check if the roundtrip option 
 
-    cursor = conn.cursor()
-    if not return_date:
-        query = 'SELECT * from flight where departure_date = %s and depart_from = %s'
-        cursor.execute(query, (departure_date, airport))
+        # if not roundtrip_date
+        
     else:
-        query = 'SELECT * from flight where departure_date = %s and depart_from = %s and arrive_at in (Select depart_from from flight where departure_date = %s);' 
-        cursor.execute(query, (departure_date, airport, return_date))	
+        cursor = conn.cursor()        
+        query = 'SELECT * from flight where departure_date = %s and depart_from = %s and arrive_at = %s'
+        cursor.execute(query, (departure_date, departure_airport, arrival_airport))	
+        data = cursor.fetchall()
 
-    data = cursor.fetchall()	
+
+    # data = cursor.fetchall()	
     return render_template('index.html', flights=data, hide_header=True, book_flights=show_book_button, re_search=True)
 
 # Ticket management
@@ -121,7 +140,9 @@ def get_tickets():
 
 # Buying a ticket
 @app.route('/buyTicket', methods=["GET", "POST"])
-def buyTicket():
+@role_required('Customer')
+def buyTicket():  
+    w
     cursor = conn.cursor()
     ticket_id = random.randrange(1, 10**10)
     query = 'SELECT * from ticket where ticket.ticket_id = %s'
@@ -129,7 +150,7 @@ def buyTicket():
     check = cursor.fetchone()
     error_count = 0
 
-    # Verifies that the ticket_id is unique, if it takes too long, then give up 	
+    # verifies that the ticket_id is unique, if it takes too long, then give up 	
     while check and error_count < 50:
         error_count += 1
         ticket_id = '{:10}'.format(random.randrange(1, 10**10))
@@ -152,34 +173,59 @@ def buyTicket():
     name_on_card = request.form['name_on_card']
     expiration = request.form['expiration'] + "-01" #adding extra day to conform with db
     base_price = int(float(request.form['base_price']))
+    # arrival_date = request.form('arrival_date')
+    roundtrip_date = request.form['roundtrip_date']
+    departure_airport = request.form['depature_airport']
+    arrival_airport = request.form['arrival_airport']
 
-    # flight verification
-    query = 'SELECT * from flight where airline_name = %s and unique_airplane_num = %s and flight_number = %s and departure_date = %s and departure_time = %s'
-    cursor.execute(query, (airline_name, unique_airplane_num, flight_number, departure_date, departure_time)) 
-    data = cursor.fetchone()
+    if roundtrip_date:
+        # send credit card info
 
-    if (data):  
-        # get number of seats to seats
-        query = 'SELECT num_of_seats from airplane where airline_name = %s and unique_airplane_num = %s'
-        cursor.execute(query, (airline_name, unique_airplane_num))
 
-        total_seats = cursor.fetchone()['num_of_seats']
-        # print("Test")
-        print(total_seats)
-        # count number of tickets 
-        query = 'SELECT count(*) from ticket where airline_name = %s and unique_airplane_num = %s and flight_number = %s and departure_date = %s and departure_time = %s'
+
+        # send the previous flight information 
+        # get the roundtrip flights
+        # the button will have roundtrip_apply property to book both flights simultaneously
+        # query = 'SELECT * from flight where departure_date = %s and depart_from = %s'
+
+        # data1 = cursor.execute(query, (departure_date, departure_airport, arrival_airport))
+        # data2 = cursor.execute(query, (roundtrip_date, arrival_airport, ))
+        
+        # # All flights where departure_date is the arrival_date, depart_from is arrival_airport, dearture_date is dep, arrive_at is depart_from   
+        query = 'SELECT * from flight where departure_date = %s and depart_from = %s and arrive_at in (Select depart_from from flight where departure_date = %s and arrive_at = %s );' 
+        cursor.execute(query, (roundtrip_date, arrival_airport, departure_date, departure_airport))
+        data = cursor.fetchall()    
+
+        return render_template("index.html", flights=data, changed_book=True, hide_header=True, card_type=card_type, card_number=card_number, name_on_card=name_on_card, expiration=expiration, base_price=base_price)
+        # print(data)
+
+    else:   
+        query = 'SELECT * from flight where airline_name = %s and unique_airplane_num = %s and flight_number = %s and departure_date = %s and departure_time = %s'
         cursor.execute(query, (airline_name, unique_airplane_num, flight_number, departure_date, departure_time)) 
-        count_tickets = cursor.fetchone()['count(*)']
+        data = cursor.fetchone()
 
-        if count_tickets // total_seats > 0.6:
-            base_price *= 1.25
+        if (data):  
+            # get number of seats to seats
+            query = 'SELECT num_of_seats from airplane where airline_name = %s and unique_airplane_num = %s'
+            cursor.execute(query, (airline_name, unique_airplane_num))
 
-        query = 'INSERT into ticket Values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
-        cursor.execute(query, (ticket_id, airline_name, unique_airplane_num, flight_number, departure_date, departure_time, card_type, card_number, name_on_card, expiration, base_price, email, purchase_date, purchase_time))
-        conn.commit()
-        cursor.close()
+            total_seats = cursor.fetchone()['num_of_seats']
+            # print("Test")
+            print(total_seats)
+            # count number of tickets 
+            query = 'SELECT count(*) from ticket where airline_name = %s and unique_airplane_num = %s and flight_number = %s and departure_date = %s and departure_time = %s'
+            cursor.execute(query, (airline_name, unique_airplane_num, flight_number, departure_date, departure_time)) 
+            count_tickets = cursor.fetchone()['count(*)']
 
-    return render_template('submitted.html')
+            if count_tickets // total_seats > 0.6:
+                base_price *= 1.25
+
+            query = 'INSERT into ticket Values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+            cursor.execute(query, (ticket_id, airline_name, unique_airplane_num, flight_number, departure_date, departure_time, card_type, card_number, name_on_card, expiration, base_price, email, purchase_date, purchase_time))
+            conn.commit()
+            cursor.close()
+
+        return render_template('submitted.html')
 
 @app.route('/cancelTicket', methods=["GET", "POST"])
 def cancelTicket():

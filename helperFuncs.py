@@ -165,7 +165,7 @@ def getComments( aName = None, fNum = None, dTime = None, dDate = None, aNum = N
 	print(len(res))
 	return res
 
-def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start = None, end = None ):
+def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start = None, end = None, roundtrip = None):
 	findQuery = "SELECT * FROM flight WHERE"
 	cursor = conn.cursor()
 	conditionals = []
@@ -216,6 +216,7 @@ def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start =
 	depPort = tuple(depPort)
 	findQuery += " AND arrive_at in %s"
 	findQuery += " AND depart_from in %s"
+
 	if(len(arrPort) == 0 or len(depPort) == 0): 
 		return [] 
 	print(conditionals_val+[arrPort,depPort])
