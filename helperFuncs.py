@@ -308,6 +308,9 @@ def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start =
     if(end): 
         conditionals_val.append(end)
         conditionals.append("departure_date < %s")
+    if(airline): 
+        conditionals_val.append(airline)
+        conditionals.append("airline_name = %s")
     if (arrival_date):
         conditionals_val.append(arrival_date)
         conditionals.append("arrival_date = %s")
@@ -324,9 +327,6 @@ def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start =
     findQuery += " AND arrive_at in %s"
     findQuery += " AND depart_from in %s"
     airport_vals = [arrPort,depPort]
-    if(airline): 
-        findQuery += " AND airline_name = %s "
-        airport_vals.append(airline)
     if(len(arrPort) == 0 or len(depPort) == 0): 
         return [] 
     print(conditionals_val+[arrPort,depPort])
