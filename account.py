@@ -254,7 +254,7 @@ def cancelTicket():
     print(ticket_id)
 
     if (data):
-        query = 'DELETE from ticket where ticket.ticket_id = %s' # only works temporarily? a bit strange 
+        query = 'DELETE from ticket where ticket.ticket_id = %s' 
         cursor.execute(query, (ticket_id))
         conn.commit()
 
