@@ -130,11 +130,15 @@
                 <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#{{loop.index0}}">Book Flight</button>
                 {% endif %}
                 <div id={{loop.index0 }} class="collapse">
-                    {%if not roundtrip_date %}
-                    <form action="{{ url_for('buyTicket') }}" method="POST"> 
-                    {% else %}
-                    <form action="{{ url_for('roundtripBook') }}" method="POST">
-                    {%endif%} 
+
+                    <!-- if changed_book true, then don't show credit card info, just load that into a hidden input-->
+                    {%if roundtrip_book_search%}
+                    <form action="{{ url_for('searchFlights') }}" method="POST"></form>
+                    {%elif roundtrip_ticket_buy%}
+                    <form action="{{ url_for('buyTicket') }}" method="POST"></form>
+                    {%else%}
+                    <form action="{{ url_for('buyTicket') }}" method="POST">
+                    {%endif%}
                         <!-- these 5 hidden inputs are the primary keys for identifying a flight-->
                         <input type="hidden" id="airline_name" name="airline_name" value="{{line['airline_name']}}"> 
                         <input type="hidden" id="unique_airplane_num" name="unique_airplane_num" value="{{line['unique_airplane_num']}}"> 
@@ -142,8 +146,7 @@
                         <input type="hidden" id="departure_date" name="departure_date" value="{{line['departure_date']}}"> 
                         <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}"> 
 
-                        <!-- if changed_book true, then don't show credit card info, just load that into a hidden input-->
-                        {% if not roundtrip_date %}
+                        {%if not roundtrip_date%}
                         <input type="radio" id="credit" name="card_type" value="credit" checked>
                         <label for="credit">Credit</label>
                         <input type="radio" id="debit" name="card_type" value="debit">
@@ -158,8 +161,7 @@
                         <label for="expiration">Expiration Date:</label> 
                         <input type="month" id="expiration" name="expiration" min="2022-12" value="2024-01">
                         {%endif%}
-
-
+                        
                         <!-- <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}">  -->
                         <h6>Due to price varying policies, your flight may be more costly than the base price shown here. Please ignore that value 😊. </h6>
                         <input type="submit" value="Book Flight" class="card-link">  <!-- For later, should only be visible if the user is logged in and only when searching/viewing future flights-->
