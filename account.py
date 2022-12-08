@@ -10,10 +10,10 @@ from datetime import datetime, timedelta, date
 
 @app.route('/myaccount')
 def myaccount():
-	if "email" in session:
-		return redirect('/Customers/customer')
-	elif "username" in session:
-		return redirect('/Staff/staff')
+    if "email" in session:
+        return redirect('/Customers/customer')
+    elif "username" in session:
+        return redirect('/Staff/staff')
 
 # Customer Use Cases
 @app.route('/Customers/customer')
@@ -138,23 +138,23 @@ def pastFlights():
 @app.route('/comment', methods=["POST"])
 @role_required('Customer')
 def comment():
-	email = session['email']
-	rating = request.form['rating']
-	comment = request.form['comment']
-	airline_name = str(request.form['airline_name'])
-	unique_airplane_num = int(float(request.form['unique_airplane_num']))
-	flight_number = int(float(request.form['flight_number']))
-	departure_date = str(request.form['departure_date'])
-	departure_time = str(request.form['departure_time'])
+    email = session['email']
+    rating = request.form['rating']
+    comment = request.form['comment']
+    airline_name = str(request.form['airline_name'])
+    unique_airplane_num = int(float(request.form['unique_airplane_num']))
+    flight_number = int(float(request.form['flight_number']))
+    departure_date = str(request.form['departure_date'])
+    departure_time = str(request.form['departure_time'])
 
     # need to check for duplicate entry still here
-	cursor = conn.cursor()
-	query = 'INSERT into ratings Values (%s, %s, %s, %s, %s, %s, %s, %s)'
-	
-	cursor.execute(query, (email, airline_name, unique_airplane_num, flight_number, departure_date, departure_time, rating, comment))	
-	conn.commit()
-	cursor.close()
-	return render_template('submitted.html')
+    cursor = conn.cursor()
+    query = 'INSERT into ratings Values (%s, %s, %s, %s, %s, %s, %s, %s)'
+    
+    cursor.execute(query, (email, airline_name, unique_airplane_num, flight_number, departure_date, departure_time, rating, comment))	
+    conn.commit()
+    cursor.close()
+    return render_template('submitted.html')
 
 # Ticket management
 @app.route('/getTickets', methods=["GET", "POST"])

@@ -175,22 +175,27 @@ def addAirport():
 @app.route('/Staff/frequentcustomers')
 @role_required("Staff")
 def frequentCustomer():
-	query = """SELECT email as customer, count(email) as flights 
-			FROM (
-				SELECT *
-				FROM ticket
+	view = """CREATE VIEW customerflights AS SELECT email as customer, count(email) as flights 
+	FROM (
+		SELECT *
+		FROM ticket
 				WHERE departure_date >= cast(DATE_ADD(CURDATE(), INTERVAL -1 YEAR) AS DATE)
 				) as TABLE1
-			WHERE airline_name = %s
-			GROUP BY email 
-			ORDER BY count(email) DESC;"""
+			WHERE airline_name = %s GROUP BY email ORDER BY count(email) DESC;"""
 
+	query = """SELECT * from customerflights
+WHERE flights = (SELECT max(flights) FROM customerflights);"""
 
+	dropView = "DROP VIEW customerflights;"
+	
+	
+	
 	cursor = conn.cursor()
 
-
-	cursor.execute(query, (session["staffAirline"]))
+	cursor.execute(view, (session["staffAirline"]))
+	cursor.execute(query)
 	data = cursor.fetchall();
+	cursor.execute(dropView);
 
 	return render_template('/Staff/frequentCustomers.html', table_info=data);
 
@@ -278,6 +283,7 @@ def viewComments(fNum = None, aNum = None, dDate = None, dTime = None, customer 
 	if(len(comments) > 0): 
 		for c in comments: 
 			avg += c["rating"]
+		avg = avg/len(comments)
 	else: 
 		error = "No Comments Found"
 	return render_template("Staff/viewComments.html", airline = airline, comments = comments,fNum=fNum, aNum=aNum, dDate=dDate, dTime=dTime, customer=customer, avg = avg, error = error)
