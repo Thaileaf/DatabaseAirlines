@@ -9,13 +9,14 @@
 <a href="/">Home</a> <!-- This doesn't work at the moment -->
 
 <table>
-	<th>Customer</th>
+	<th>Customer Email</th>
 	<th>Flights</th>
 	
   {% for customer in table_info %} 
   <tr>
 		<td>{{ customer["customer"] }}</td>
 		<td>{{ customer["flights"] }}</td>
+
 	</tr>
   {% endfor %}
 </table>

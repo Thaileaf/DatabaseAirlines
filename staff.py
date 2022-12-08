@@ -184,8 +184,8 @@ def frequentCustomer():
 			WHERE airline_name = %s
 			GROUP BY email 
 			ORDER BY count(email) DESC;"""
-
-
+	
+	
 	cursor = conn.cursor()
 
 
@@ -278,6 +278,7 @@ def viewComments(fNum = None, aNum = None, dDate = None, dTime = None, customer 
 	if(len(comments) > 0): 
 		for c in comments: 
 			avg += c["rating"]
+		avg = avg/len(comments)
 	else: 
 		error = "No Comments Found"
 	return render_template("Staff/viewComments.html", airline = airline, comments = comments,fNum=fNum, aNum=aNum, dDate=dDate, dTime=dTime, customer=customer, avg = avg, error = error)
