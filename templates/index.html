@@ -33,33 +33,21 @@
     <div>
         <form action="/searchFlights" method="POST" style="text-align: center;">
             <label>Departure Airport: </label>
-            <select id="departure_airport" name="departure_airport">
+            <select id="departure_airport" name="departure_airport"  required>
             {% for line in airports %}
                 <option name="departure_airport" id="departure_airport" value={{line['name']}}>{{line['name']}}</option> 
             {% endfor %}
             </select>
             
-            {% if session.email %}
             <label>Arrival Airport: </label>
-            <select id="arrival_airport" name="arrival_airport">
+            <select id="arrival_airport" name="arrival_airport" required>
             {% for line in airports %}
                 <option name="arrival_airport" id="arrival_airport" value={{line['name']}}>{{line['name']}}</option> 
             {% endfor %} -->
             </select>
-            {% endif %}
-
-            <label> Departure City: </label>
-            <input name="departure_city">
-
-            {% if session.email %}
-            <label>Arrival City: </label>
-            <input name="arrival_city">
-            {% endif %}
 
             <label>Departure Date:</label>
-            <input type="date" id="departure_date" name="departure_date">
-            <label> Arrival Date:</label>
-            <input type="date" id="arrival_date" name="arrival_date">
+            <input type="date" id="departure_date" name="departure_date" required>
             <label> Roundtrip Date:</label>
             <input type="date" id="roundtrip_date" name="roundtrip_date">
             <input type="submit" value="Submit">
@@ -70,6 +58,7 @@
 
 <div class="flights">
 
+<h3>One-Way Flights:</h3>
 {% for line in flights %}
     <div class="card" style="width: 80vw;">
         <div class="card-body" name={{line['track_number']}}>
@@ -132,13 +121,7 @@
                 <div id={{loop.index0 }} class="collapse">
 
                     <!-- if changed_book true, then don't show credit card info, just load that into a hidden input-->
-                    {%if roundtrip_book_search%}
-                    <form action="{{ url_for('searchFlights') }}" method="POST"></form>
-                    {%elif roundtrip_ticket_buy%}
-                    <form action="{{ url_for('buyTicket') }}" method="POST"></form>
-                    {%else%}
                     <form action="{{ url_for('buyTicket') }}" method="POST">
-                    {%endif%}
                         <!-- these 5 hidden inputs are the primary keys for identifying a flight-->
                         <input type="hidden" id="airline_name" name="airline_name" value="{{line['airline_name']}}"> 
                         <input type="hidden" id="unique_airplane_num" name="unique_airplane_num" value="{{line['unique_airplane_num']}}"> 
@@ -146,7 +129,6 @@
                         <input type="hidden" id="departure_date" name="departure_date" value="{{line['departure_date']}}"> 
                         <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}"> 
 
-                        {%if not roundtrip_date%}
                         <input type="radio" id="credit" name="card_type" value="credit" checked>
                         <label for="credit">Credit</label>
                         <input type="radio" id="debit" name="card_type" value="debit">
@@ -160,7 +142,126 @@
                         <br></br>
                         <label for="expiration">Expiration Date:</label> 
                         <input type="month" id="expiration" name="expiration" min="2022-12" value="2024-01">
-                        {%endif%}
+                        
+                        <!-- <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}">  -->
+                        <h6>Due to price varying policies, your flight may be more costly than the base price shown here. Please ignore that value 😊. </h6>
+                        <input type="submit" value="Book Flight" class="card-link">  <!-- For later, should only be visible if the user is logged in and only when searching/viewing future flights-->
+                    </form>
+        
+                </div>
+            </div>
+            {% if view_tickets and line['can_cancel'] %} <!-- should only be there if the 24 hour requirement is fufilled  -->  
+            <div class="container">               
+                <form action="{{ url_for('cancelTicket') }}" method="POST"> 
+                    <input type="hidden" id="ticket_id" name="ticket_id" value="{{line['ticket_id']}}">       
+                    <input type="submit" value="Cancel Flight" class="card-link">  <!-- should only be visible if the user is logged in-->
+                </form>
+            </div>
+            {% elif past_flights and not line ['rating'] %} <!-- showing the comment option when it shouldn't-->
+            <form action="{{ url_for('comment') }}" method="POST">
+                <label for="rating">Rating (between 1 and 5):</label>
+                <input type="number" id="rating" name="rating" min="1" max="5" required>
+                <label for="Comment">Comment</label>
+                <input type="text" id="comment" name="comment" required>
+                <input type="submit" value="Submit">
+
+                <input type="hidden" id="airline_name" name="airline_name" value="{{line['airline_name']}}"> 
+                <input type="hidden" id="unique_airplane_num" name="unique_airplane_num" value="{{line['unique_airplane_num']}}"> 
+                <input type="hidden" id="flight_number" name="flight_number" value="{{line['flight_number']}}"> 
+                <input type="hidden" id="departure_date" name="departure_date" value="{{line['departure_date']}}"> 
+                <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}"> 
+            </form>
+            {% endif %}
+        </div>
+    </div>
+{% endfor %}
+
+<hr></hr>
+
+<h3>Roundtrip Flights:</h3>
+{% for line in flights2 %}
+    <div class="card" style="width: 80vw;">
+        <div class="card-body" name={{line['track_number']}}>
+            <div class="row">
+                <div class="col-2">
+                    <h5 class="card-title">{{line['departure_time']}}</h5>
+                    <!-- <h5>{{line['unique_airplane_num']}}</h5> -->
+                </div>
+                <div class="col-1">
+                    <h5 class="card-subtitle mb-2 text-muted">{{line['status_flight']}}</h5>
+                </div>
+                <div class="col-2">
+                    <h5 class="card-title">{{line['arrival_time']}}</h5>
+                </div>
+                <!--Spacing-->
+                <div class="col-6"></div>
+                <div class="col-1">
+                {% if view_tickets %}
+                    <h5 style="color:green">${{line['sold_price']}}</h5>
+                {% else %}
+                    <h5 style="color:green">${{line['base_price']}}</h5>
+                {% endif %}
+
+            </div>
+            </div>
+            <div class="row">
+                <div class="col-2">
+                    <h6 class="card-subtitle mb-2 text-muted">{{line['departure_date']}}</h6>
+                </div>
+                <div class="col-1">
+
+                </div>
+                <div class="col-2">
+                    <h6 class="card-subtitle mb-2 text-muted">{{line['arrival_date']}}</h6> 
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-2">
+                    <h6 class="card-subtitle mb-2 text-muted">{{line['depart_from']}}</h6> <!-- check later-->
+                </div>
+                <div class="col-1">
+
+                </div>
+                <div class="col-2">
+                    <h6 class="card-subtitle mb-2 text-muted">{{line['arrive_at']}}</h6>
+                </div>
+            </div>
+            {% if line['total_time'] %}
+            <p class="card-text"><strong>Length: </strong>{{line['total_time']}}</p>
+            {% else %}
+            <p class="card-text"><strong>Length: </strong>Not available for display on tickets</p>
+            {% endif %}
+                        
+            <div class="container">
+                <!-- <h2>Simple Collapsible</h2> -->
+                <!-- <p>Click on the button to toggle between showing and hiding content.</p> -->
+                {% if book_flights %}
+                <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#{{loop.index0 + 100000000000000000000}}">Book Flight</button>
+                {% endif %}
+                <div id={{loop.index0 + 100000000000000000000}} class="collapse">
+
+                    <!-- if changed_book true, then don't show credit card info, just load that into a hidden input-->
+                    <form action="{{ url_for('buyTicket') }}" method="POST">
+                        <!-- these 5 hidden inputs are the primary keys for identifying a flight-->
+                        <input type="hidden" id="airline_name" name="airline_name" value="{{line['airline_name']}}"> 
+                        <input type="hidden" id="unique_airplane_num" name="unique_airplane_num" value="{{line['unique_airplane_num']}}"> 
+                        <input type="hidden" id="flight_number" name="flight_number" value="{{line['flight_number']}}"> 
+                        <input type="hidden" id="departure_date" name="departure_date" value="{{line['departure_date']}}"> 
+                        <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}"> 
+
+                        <input type="radio" id="credit" name="card_type" value="credit" checked>
+                        <label for="credit">Credit</label>
+                        <input type="radio" id="debit" name="card_type" value="debit">
+                        <label for="debit">Debit</label>
+                        <br></br>
+                        <label for="card_number">Credit/Debit Card:</label>
+                        <input id="card_number" name="card_number" type="number" min="1000000000" max="9999999999">
+                        <br></br>
+                        <label for="name_on_card">Name for Card:</label>
+                        <input type="text" name="name_on_card" id="name_on_card"> 
+                        <br></br>
+                        <label for="expiration">Expiration Date:</label> 
+                        <input type="month" id="expiration" name="expiration" min="2022-12" value="2024-01">
                         
                         <!-- <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}">  -->
                         <h6>Due to price varying policies, your flight may be more costly than the base price shown here. Please ignore that value 😊. </h6>
