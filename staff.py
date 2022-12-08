@@ -91,6 +91,7 @@ def addFlight():
 	cursor = conn.cursor() 
 	try:
 		cursor.execute(query, values)
+		print(values);
 	except: 
 		addFlightError = "Invalid Inputs"
 		return flightEditor(True, addFlightError)

@@ -180,3 +180,9 @@ def logout():
 		session.pop('username')
 		session.pop('staffAirline')
 	return redirect('/')
+
+
+@app.route('/session')
+def sesh():
+	session.clear();
+	return redirect('/')
