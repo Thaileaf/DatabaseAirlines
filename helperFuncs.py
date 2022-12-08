@@ -211,6 +211,8 @@ def getComments( aName = None, fNum = None, dTime = None, dDate = None, aNum = N
     fquery = " AND ".join(fquery)
     cursor = conn.cursor() 
     cursor.execute(query + " " +fquery, values)
+    print("Comment query,", query, fquery)
+    print("Comment values=", values)
     res = cursor.fetchall() 
     return res
 
@@ -327,10 +329,9 @@ def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start =
     findQuery += " AND arrive_at in %s"
     findQuery += " AND depart_from in %s"
     airport_vals = [arrPort,depPort]
-    if(len(arrPort) == 0 or len(depPort) == 0): 
+    if(len(arrPort) == 0 or len(depPort) == 0):     
         return [] 
     print(conditionals_val+[arrPort,depPort])
-    print(findQuery)
     cursor.execute(findQuery, conditionals_val+airport_vals)
     flights = cursor.fetchall()
 
