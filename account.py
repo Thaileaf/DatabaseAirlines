@@ -133,7 +133,7 @@ def pastFlights():
     flights = cursor.fetchall() 
     flights = add_time_difference(flights)
 
-    return render_template('index.html', flights=flights, hide_header=True, past_flights=True) # this doesn't seem to work ??????
+    return render_template('index.html', flights=flights, hide_header=True, past_flights=True)
 
 @app.route('/comment', methods=["POST"])
 @role_required('Customer')
@@ -246,7 +246,7 @@ def cancelTicket():
     cursor = conn.cursor()
     email = session['email']
     ticket_id = int(float(request.form['ticket_id']))
-
+    print(ticket_id)
     #check that the ticket_id is in your email so you can't delete someone elses ticket
     query = 'SELECT * from ticket where email = %s and ticket_id = %s'
     cursor.execute(query, (email, ticket_id))
@@ -254,7 +254,7 @@ def cancelTicket():
     print(ticket_id)
 
     if (data):
-        query = 'DELETE from ticket where ticket.ticket_id = %s' # only works temporarily? a bit strange 
+        query = 'DELETE from ticket where ticket.ticket_id = %s' 
         cursor.execute(query, (ticket_id))
         conn.commit()
 

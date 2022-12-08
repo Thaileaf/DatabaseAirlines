@@ -274,7 +274,7 @@
             <div class="container">               
                 <form action="{{ url_for('cancelTicket') }}" method="POST"> 
                     <input type="hidden" id="ticket_id" name="ticket_id" value="{{line['ticket_id']}}">       
-                    <input type="submit" value="Cancel Flight" class="card-link">  <!-- should only be visible if the user is logged in-->
+                    <input type="submit" value="Cancel Ticket" class="card-link">  <!-- should only be visible if the user is logged in-->
                 </form>
             </div>
             {% elif past_flights and not line ['rating'] %} <!-- showing the comment option when it shouldn't-->
