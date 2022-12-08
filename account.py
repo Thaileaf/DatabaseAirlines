@@ -29,40 +29,69 @@ def root():
     if 'email' in session: # check if a customer is logged in 
         email = session['email']
         cursor = conn.cursor()
-        # query = 'SELECT distinct F.airline_name, F.unique_airplane_num, F.flight_number, F.departure_date, F.departure_time, F.arrival_date, F.arrival_time, F.base_price, F.status_flight, F.roundtrip, F.depart_from, F.arrive_at from flight as F, ticket as T where F.airline_name = T.airline_name and F.unique_airplane_num = T.unique_airplane_num and F.flight_number = T.flight_number and F.departure_date = T.departure_date and F.departure_time = T.departure_time and email = %s'       
-        # cursor.execute(query, (email)) 
-        query = 'SELECT * from flight'
-        cursor.execute(query)
-        flights = cursor.fetchall()      
+        query = 'SELECT distinct F.airline_name, F.unique_airplane_num, F.flight_number, F.departure_date, F.departure_time, F.arrival_date, F.arrival_time, F.base_price, F.status_flight, F.roundtrip, F.depart_from, F.arrive_at from flight as F, ticket as T where F.airline_name = T.airline_name and F.unique_airplane_num = T.unique_airplane_num and F.flight_number = T.flight_number and F.departure_date = T.departure_date and F.departure_time = T.departure_time and email = %s'       
+        cursor.execute(query, (email)) 
+        flights = cursor.fetchall()
         # storing all flights in one big session, the button can still have a few hidden inputs to match the flights
         flights = add_time_difference(flights)
 
-        for flight in flights:
-            key = str(flight['airline_name']) + str(flight['unique_airplane_num']) + str(flight['flight_number']) + str(flight['departure_date']) + str(flight['departure_time'])
-            session[key] = [
-                flight['airline_name'], #0
-                flight['unique_airplane_num'], #1
-                flight['flight_number'], #2
-                flight['departure_date'], #3
-                str(flight['departure_time']), #4 
-                flight['arrival_date'], #5
-                str(flight['arrival_time']), #6 
-                flight['base_price'], #7
-                flight['status_flight'], #8 
-                flight['depart_from'], #9
-                flight['arrive_at']] #10
+        # for flight in flights:
+        #     key = str(flight['airline_name']) + str(flight['unique_airplane_num']) + str(flight['flight_number']) + str(flight['departure_date']) + str(flight['departure_time'])
+        #     session[key] = [
+        #         flight['airline_name'], #0
+        #         flight['unique_airplane_num'], #1
+        #         flight['flight_number'], #2
+        #         flight['departure_date'], #3
+        #         str(flight['departure_time']), #4 
+        #         flight['arrival_date'], #5
+        #         str(flight['arrival_time']), #6 
+        #         flight['base_price'], #7
+        #         flight['status_flight'], #8 
+        #         flight['depart_from'], #9
+        #         flight['arrive_at']] #10
 
-            print(key, session[key])
+            # print(key, session[key])
 
         return render_template('index.html', flights=flights, airports=airports, book_flights=False)
     else:
-        flights = getFutureFlights()
-        # print(flights)  
+        # flights = getFutureFlights()
+        cursor = conn.cursor()
+        query = 'SELECT * from flight'
+        cursor.execute(query)
+        flights = cursor.fetchall()      
+
+        # query = 'SELECT * from f'
+        print(flights)  
         return render_template('index.html', flights=flights, airports=airports)
 
 @app.route('/searchFlights', methods=['GET', 'POST'])
 def flights():
+    # storing all flights in one big session, the button can still have a few hidden inputs to match the flights
     # fix nonroundtrip search first
+
+    cursor = conn.cursor()
+    query = 'SELECT * from flight'
+    cursor.execute(query)
+    flights = cursor.fetchall()
+
+    # add all flights to the session
+    flights = add_time_difference(flights)
+
+    for flight in flights:
+        key = str(flight['airline_name']) + str(flight['unique_airplane_num']) + str(flight['flight_number']) + str(flight['departure_date']) + str(flight['departure_time'])
+        session[key] = [
+            flight['airline_name'], #0
+            flight['unique_airplane_num'], #1
+            flight['flight_number'], #2
+            flight['departure_date'], #3
+            str(flight['departure_time']), #4 
+            flight['arrival_date'], #5
+            str(flight['arrival_time']), #6 
+            flight['base_price'], #7
+            flight['status_flight'], #8 
+            flight['depart_from'], #9
+            flight['arrive_at']] #10
+    
 
     arrival_airport, arrival_city, arrival_date = None, None, None
     if 'email' in session:
@@ -80,12 +109,8 @@ def flights():
     departure_airport = request.form['departure_airport']
     departure_city = request.form['departure_city']
     departure_date = request.form['departure_date']
-     # TODO: departure date not filtering correctly
     show_book_button = False
-    # will need to do a bit more for search flights
 
-    # print(departure_airport, " ", arrival_airport,  " ", arrival_city,  " ", departure_city," ", departure_date," ", arrival_date)
-    # if departure_airport == "":?
     if departure_airport == "": departure_airport = None  
     if departure_date == "": departure_date = None
     if departure_city == "": departure_city = None
@@ -145,8 +170,6 @@ def comment():
 	cursor.close()
 	return render_template('submitted.html')
 
-
-
 # Ticket management
 @app.route('/getTickets', methods=["GET", "POST"])
 @role_required('Customer')
@@ -176,6 +199,9 @@ def get_tickets():
 @app.route('/buyTicket', methods=["GET", "POST"])
 @role_required('Customer')
 def buyTicket():  
+    # if roundtrip_book:
+    #     pass
+
     ticket_id = generate_ticket_id()
     purchase_date = date.today()
     purchase_time = datetime.now().strftime("%H:%M:%S")
@@ -183,40 +209,69 @@ def buyTicket():
 
     airline_name = request.form['airline_name']
     unique_airplane_num = request.form['unique_airplane_num']
-    flight_number = int(float(request.form['flight_number']))
+    flight_number = str(request.form['flight_number'])
     departure_date = str(request.form['departure_date'])
     departure_time = str(request.form['departure_time'])
     # key = airline_name + str(unique_airplane_num) + str(flight_number) + departure_date + departure_time
-    key = str(airline_name) + str(unique_airplane_num) + str(flight_number) + str(flight['departure_date']) + str(flight['departure_time'])
+    key = str(airline_name) + str(unique_airplane_num) + str(flight_number) + str(departure_date) + str(departure_time)
+    print(key)
 
     card_type = request.form['card_type']
     card_number = int(request.form['card_number'])
     name_on_card = request.form['name_on_card']
     expiration = request.form['expiration'] + "-01" #adding extra day to conform with db
 
-    print(key)
-    print(session)
+    # print(key)
+    # print(session)
 
+
+        #session[key] = [
+        #         flight['airline_name'], #0
+        #         flight['unique_airplane_num'], #1
+        #         flight['flight_number'], #2
+        #         flight['departure_date'], #3
+        #         str(flight['departure_time']), #4 
+        #         flight['arrival_date'], #5
+        #         str(flight['arrival_time']), #6 
+        #         flight['base_price'], #7
+        #         flight['status_flight'], #8 
+        #         flight['depart_from'], #9
+        #         flight['arrive_at']] #10
 
     # base_price = int(float(request.form['base_price']))
     # arrival_date = request.form('arrival_date')
-    departure_airport = session[key]['departure_airport']
-    arrival_airport = request.form['arrival_airport']
+    print(session)
+    departure_airport = session[key][9]
+    arrival_airport = session[key][10]
+    base_price = session[key][7]
+    try:
+        roundtrip_date = request.form['roundtrip_date']
+        # print(roundtrip_date)
+        session['roundtrip_date'] = roundtrip_date
+    except:
+        roundtrip_date = None
 
-    roundtrip_date = request.form['roundtrip_date']
     # print(roundtrip_date)
+    cursor = conn.cursor()        
+
 
     if roundtrip_date:
-        cursor = conn.cursor()        
+        # set previous flight info before it gets overwritten
+        print("Reached here!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        session['prev_airline_name'] = session[key][0]
+        session['prev_unique_airplane_num'] = session[key][1]
+        session['prev_flight_number'] = session[key][2]
+        session['prev_departure_date'] = session[key][3]
+        session['prev_departure_time'] = session[key][4]
+        session['prev_base_price'] = session[key][7]
+        session['card_type'] = card_type
+        session['card_number'] = card_number
+        session['name_on_card'] = name_on_card
+        session['expiration'] = expiration
 
-        # set ticket_id to prev_ticket id
 
-        # send credit card info
-        # send the previous flight information 
         # get the roundtrip flights
-        # the button will have roundtrip_apply property to book both flights simultaneously
         # query = 'SELECT * from flight where departure_date = %s and depart_from = %s'
-
         # data1 = cursor.execute(query, (departure_date, departure_airport, arrival_airport))
         # data2 = cursor.execute(query, (roundtrip_date, arrival_airport, ))
         
@@ -224,13 +279,11 @@ def buyTicket():
         # and arrive_at in (Select depart_from from flight where departure_date = %s and arrive_at = %s );'
         query = 'SELECT * from flight where departure_date = %s and depart_from = %s and arrive_at = %s' # , departure_date, departure_airport
         cursor.execute(query, (roundtrip_date, arrival_airport, departure_airport))
-        print(roundtrip_date, arrival_airport, departure_airport)
+        # print(roundtrip_date, arrival_airport, departure_airport)
         data = cursor.fetchall()    
-        print(data)
+        # print(data)
 
-        return render_template("index.html", flights=data, changed_book=True, hide_header=True, card_type=card_type, card_number=card_number, 
-        name_on_card=name_on_card, expiration=expiration, base_price=base_price, prev_airline_name=airline_name, prev_unique_airplane_num=unique_airplane_num, 
-        prev_flight_number=flight_number, prev_departure_date=departure_date, prev_departure_time=departure_time)
+        return render_template("index.html", flights=data, changed_book=True, hide_header=True)
     else:   
         data = unique_flight(airline_name, unique_airplane_num, flight_number, departure_date, departure_time)
 
@@ -250,29 +303,31 @@ def roundtripBook():
     purchase_date = date.today()
     purchase_time = datetime.now().strftime("%H:%M:%S")
     email = session['email']
+    print(session)
+    card_type = session['card_type']
+    card_number = session['card_number']
+    name_on_card = session['name_on_card']
+    expiration = session['expiration']
 
-    card_type = request.form['card_type']
-    card_number = request.form['card_number']
-    name_on_card = request.form['name_on_card']
-    expiration = request.form['expiration']
     airline_name = request.form['airline_name']
     unique_airplane_num = request.form['unique_airplane_num']
     flight_number = request.form['flight_number']
     departure_date = request.form['departure_date']
     departure_time = request.form['departure_time']
     base_price = request.form['base_price']
-    prev_airline_name = request.form['prev_airline_name']
-    prev_unique_airplane_num = request.form['prev_unique_airplane_num']
-    prev_flight_number = request.form['prev_flight_number']
-    prev_departure_date = request.form['prev_departure_date']
-    prev_departure_time = request.form['prev_departure_time']
-    prev_base_price = request.form['prev_base_price']
-    cursor = conn.cursor()
 
+    prev_airline_name = session['prev_airline_name']
+    prev_unique_airplane_num = session['prev_unique_airplane_num']
+    prev_flight_number = session['prev_flight_number']
+    prev_departure_date = session['prev_departure_date']
+    prev_departure_time = session['prev_departure_time']
+    prev_base_price = session['prev_base_price']
+    
+    cursor = conn.cursor()
     ticket_id_1 = generate_ticket_id()
     data1 = unique_flight(prev_airline_name, prev_unique_airplane_num, prev_flight_number, prev_departure_date, prev_departure_time)
-    print("really")
-    print(card_type)
+    # print("really")
+    # print(card_type)
 
     if (data1):  
         prev_base_price = price_modify(prev_airline_name, prev_unique_airplane_num, prev_flight_number, prev_departure_date, prev_departure_time, prev_base_price)
@@ -290,8 +345,6 @@ def roundtripBook():
         conn.commit()
 
     cursor.close()
-
-
     return render_template('submitted.html')
 
 
