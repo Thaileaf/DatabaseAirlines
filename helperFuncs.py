@@ -214,6 +214,43 @@ def getComments( aName = None, fNum = None, dTime = None, dDate = None, aNum = N
     res = cursor.fetchall() 
     return res
 
+def userSearchFlight(departure_airport = None, arrival_airport = None, departure_city = None, arrival_city = None, departure_date = None, arrival_date = None, roundtrip_date = None):
+    query = 'SELECT * from flight where '
+    cursor = conn.cursor()
+    first_and = True
+    
+    if departure_airport:
+        query += f' and depart_from = "{departure_airport}"'
+    elif departure_city:
+        # get the corresponding airport, then plug it in
+        airport_query = f'SELECT * from airport where city = "{departure_city}"'
+        cursor.execute(airport_query, (departure_city))
+        departure_airport = cursor.fetchone()
+        query += f' and depart_from = "{departure_airport}"'
+
+    if arrival_airport:
+        query += f' and arrive_at = "{arrival_airport}"'
+    elif arrival_city:
+        airport_query = f'SELECT * from airport where city = "{arrival_city}"'
+        cursor.execute(airport_query, (arrival_city))
+        arrival_airport = cursor.fetchone()
+        print(arrival_airport)
+        query += f' and arrive_art = "{arrival_airport}"'
+
+    if departure_date:
+        query += f' and departure_date = "{departure_date}"'
+    if arrival_date:
+        query += f' and arrival_date = "{arrival_date}"'
+
+    query = query.replace("  and", "", 1)
+    print(query)
+    cursor.execute(query)
+    data = cursor.fetchall()
+    return data
+
+    # will figure out roundtrip later 
+
+
 def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start = None, end = None, roundtrip = None, arrCountry = None, depCountry = None, airline = None, arrival_date = None):
 
     findQuery = "SELECT * FROM flight WHERE"

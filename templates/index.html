@@ -139,8 +139,8 @@
                         <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}"> 
 
                         <!-- if changed_book true, then don't show credit card info, just load that into a hidden input-->
-                        <!-- {% if not changed_book %} -->
-                        <!-- <input type="radio" id="credit" name="card_type" value="credit" checked>
+                        {% if not changed_book %}
+                        <input type="radio" id="credit" name="card_type" value="credit" checked>
                         <label for="credit">Credit</label>
                         <input type="radio" id="debit" name="card_type" value="debit">
                         <label for="debit">Debit</label>
@@ -152,7 +152,7 @@
                         <input type="text" name="name_on_card" id="name_on_card"> 
                         <br></br>
                         <label for="expiration">Expiration Date:</label> 
-                        <input type="month" id="expiration" name="expiration" min="2022-12" value="2024-01"> -->
+                        <input type="month" id="expiration" name="expiration" min="2022-12" value="2024-01">
 
                         <!-- <input type="hidden" id="airline_name" name="airline_name" value="{{line['airline_name']}}"> 
                         <input type="hidden" id="unique_airplane_num" name="unique_airplane_num" value="{{line['unique_airplane_num']}}"> 
@@ -187,8 +187,8 @@
                         <input type="hidden" id="prev_departure_time" name="prev_departure_time" value="{{prev_departure_time}}"> 
                         <input type="hidden" id="prev_base_price" name="prev_base_price" value="{{line['prev_base_price']}}"> 
 
-                        {% endif %}
- -->
+                        {% endif %} 
+
                         <!-- <input type="hidden" id="departure_time" name="departure_time" value="{{line['departure_time']}}">  -->
                         <h6>Due to price varying policies, your flight may be more costly than the base price shown here. Please ignore that value 😊. </h6>
                         <input type="submit" value="Book Flight" class="card-link">  <!-- For later, should only be visible if the user is logged in and only when searching/viewing future flights-->

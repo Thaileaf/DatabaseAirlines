@@ -29,16 +29,28 @@ def root():
     if 'email' in session: # check if a customer is logged in 
         email = session['email']
         cursor = conn.cursor()
-        query = 'SELECT distinct F.airline_name, F.unique_airplane_num, F.flight_number, F.departure_date, F.departure_time, F.arrival_date, F.arrival_time, F.base_price, F.status_flight, F.roundtrip, F.depart_from, F.arrive_at from flight as F, ticket as T where F.airline_name = T.airline_name and F.unique_airplane_num = T.unique_airplane_num and F.flight_number = T.flight_number and F.departure_date = T.departure_date and F.departure_time = T.departure_time and email = %s'
-        cursor.execute(query, (email)) 
+        # query = 'SELECT distinct F.airline_name, F.unique_airplane_num, F.flight_number, F.departure_date, F.departure_time, F.arrival_date, F.arrival_time, F.base_price, F.status_flight, F.roundtrip, F.depart_from, F.arrive_at from flight as F, ticket as T where F.airline_name = T.airline_name and F.unique_airplane_num = T.unique_airplane_num and F.flight_number = T.flight_number and F.departure_date = T.departure_date and F.departure_time = T.departure_time and email = %s'       
+        # cursor.execute(query, (email)) 
+        query = 'SELECT * from flight'
+        cursor.execute(query)
         flights = cursor.fetchall()      
         # storing all flights in one big session, the button can still have a few hidden inputs to match the flights
         flights = add_time_difference(flights)
 
         for flight in flights:
             key = str(flight['airline_name']) + str(flight['unique_airplane_num']) + str(flight['flight_number']) + str(flight['departure_date']) + str(flight['departure_time'])
-            session[key] = [flight['airline_name'], flight['unique_airplane_num'], flight['flight_number'], flight['departure_date'], str(flight['departure_time']), 
-            flight['arrival_date'], str(flight['arrival_time']), flight['base_price'], flight['status_flight'], flight['depart_from'], flight['arrive_at']]
+            session[key] = [
+                flight['airline_name'], #0
+                flight['unique_airplane_num'], #1
+                flight['flight_number'], #2
+                flight['departure_date'], #3
+                str(flight['departure_time']), #4 
+                flight['arrival_date'], #5
+                str(flight['arrival_time']), #6 
+                flight['base_price'], #7
+                flight['status_flight'], #8 
+                flight['depart_from'], #9
+                flight['arrive_at']] #10
 
             print(key, session[key])
 
@@ -50,7 +62,6 @@ def root():
 
 @app.route('/searchFlights', methods=['GET', 'POST'])
 def flights():
-
     # fix nonroundtrip search first
 
     arrival_airport, arrival_city, arrival_date = None, None, None
@@ -82,30 +93,12 @@ def flights():
     if arrival_city == "": arrival_city = None
     if arrival_date == "": arrival_date = None
 
-    # print(arrival_city == None)
-
-    # print(arrival_city)
     if 'email' in session:
-        # searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start = None, end = None, roundtrip = None, arrCountry = None, depCountry = None, airline = None):
-        print(departure_airport)
-        print(arrival_airport)
-        print(arrival_city)
-        print(departure_city)
-        print(departure_date)
-        print(arrival_date)
-        data = searchFlight(departure_airport, arrival_airport, arrival_city, departure_city, departure_date, None, None, None, None, None, arrival_date)
-        # print(data)
+        data = userSearchFlight(departure_airport, arrival_airport, departure_city, arrival_city, departure_date, arrival_date, roundtrip_date)
+        print(data)
         # cursor = conn.cursor()
 
-        # query = "SELECT * from flight where "
-        # if departure_airport:
-        #     query += "depart_from = %s and "
-        # if arrival_airport:
-        #     query += "arrive_at = %s and "
-        # if departure_city:
-        #     query += ""
-
-
+        # if roundtrip selected, do the below query (but when you get back to the flask code, save the previous keys in prev session states)
         #departure_date = %s and depart_from = %s and arrive_at = %s"
         show_book_button = True
         return render_template('index.html', flights=data, hide_header=True, book_flights=show_book_button, roundtrip_date=roundtrip_date)
@@ -183,26 +176,31 @@ def get_tickets():
 @app.route('/buyTicket', methods=["GET", "POST"])
 @role_required('Customer')
 def buyTicket():  
-
     ticket_id = generate_ticket_id()
     purchase_date = date.today()
     purchase_time = datetime.now().strftime("%H:%M:%S")
     email = session['email']
 
-    airline_name = str(request.form['airline_name'])
-    unique_airplane_num = int(float(request.form['unique_airplane_num']))
+    airline_name = request.form['airline_name']
+    unique_airplane_num = request.form['unique_airplane_num']
     flight_number = int(float(request.form['flight_number']))
     departure_date = str(request.form['departure_date'])
     departure_time = str(request.form['departure_time'])
+    # key = airline_name + str(unique_airplane_num) + str(flight_number) + departure_date + departure_time
+    key = str(airline_name) + str(unique_airplane_num) + str(flight_number) + str(flight['departure_date']) + str(flight['departure_time'])
+
     card_type = request.form['card_type']
-    # print(card_type)
     card_number = int(request.form['card_number'])
     name_on_card = request.form['name_on_card']
     expiration = request.form['expiration'] + "-01" #adding extra day to conform with db
-    base_price = int(float(request.form['base_price']))
-    # arrival_date = request.form('arrival_date')
 
-    departure_airport = request.form['departure_airport']
+    print(key)
+    print(session)
+
+
+    # base_price = int(float(request.form['base_price']))
+    # arrival_date = request.form('arrival_date')
+    departure_airport = session[key]['departure_airport']
     arrival_airport = request.form['arrival_airport']
 
     roundtrip_date = request.form['roundtrip_date']
@@ -210,6 +208,9 @@ def buyTicket():
 
     if roundtrip_date:
         cursor = conn.cursor()        
+
+        # set ticket_id to prev_ticket id
+
         # send credit card info
         # send the previous flight information 
         # get the roundtrip flights
