@@ -134,7 +134,9 @@ def registerUserAuth():
 def registerStaffAuth():
 	#grabs information from the forms
 	username = request.form['username']
+	email = request.form['email']
 	password = request.form['password']
+	phone = request.form['pnum']
 	airline = request.form['airline']
 	firstName = request.form['first name']
 	lastName = request.form['last name']
@@ -165,10 +167,20 @@ def registerStaffAuth():
 		error = "Invalid Airline"
 		return render_template('LoginAuth/staffSignUp.html', error = error)
 	else:
-		ins = 'INSERT INTO airlinestaff VALUES(%s, %s, %s, %s, %s, %s)'
-		cursor.execute(ins, (username, airline, hashed_password,firstName, lastName, bday))
-		conn.commit()
-		cursor.close()
+		try:
+			ins = 'INSERT INTO airlinestaff VALUES(%s, %s, %s, %s, %s, %s)'
+			cursor.execute(ins, (username, airline, hashed_password,firstName, lastName, bday))
+			conn.commit()
+			ins = 'INSERT INTO EmailAddress VALUES(%s,%s,%s)'
+			cursor.execute(ins, (username, airline, email))
+			conn.commit() 
+			if(phone):
+				ins = 'INSERT INTO PhoneNumber VALUES(%s,%s,%s)'
+				cursor.execute(ins, (username, airline, phone))
+				conn.commit() 
+		except: 
+			error = "Invalid Inputs"
+			return render_template('LoginAuth/staffSignUp.html', error = error)
 		return login(False)
 
 
