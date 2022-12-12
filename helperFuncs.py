@@ -157,6 +157,7 @@ def calculate_by_month(startDate, endDate, select, email="%", airline_name="%"):
     departure_date < %s AND airline_name like %s and email like %s) as TABLE1 GROUP BY year_and_month DESC;'''
 
     # print(query
+    print("calc by=", query)
     cursor = conn.cursor()
     cursor.execute(query, (startDate, endDate, airline_name, email))
     # print("2")
