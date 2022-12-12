@@ -74,7 +74,10 @@ def price_modify(airline_name, unique_airplane_num, flight_number, departure_dat
     if count_tickets // total_seats > 0.6:
         base_price *= 1.25
         # base_price = int
-
+    elif count_tickets // total_seats > 1:
+        print(count_tickets)
+        print(total_seats)
+        raise ValueError("You can't buy this ticket - the flight is full")
     return base_price
 
 def unique_flight(airline_name, unique_airplane_num, flight_number, departure_date, departure_time):

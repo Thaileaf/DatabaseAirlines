@@ -209,6 +209,20 @@ def buyTicket():
     # departure_airport = session[key][9]
     # arrival_airport = session[key][10]
     
+    cursor = conn.cursor()
+    query = 'SELECT num_of_seats from airplane where airline_name = %s and unique_airplane_num = %s'
+    cursor.execute(query, (airline_name, unique_airplane_num))
+
+    total_seats = cursor.fetchone()['num_of_seats']
+    print(total_seats)
+    # count number of tickets 
+    query = 'SELECT count(*) from ticket where airline_name = %s and unique_airplane_num = %s and flight_number = %s and departure_date = %s and departure_time = %s'
+    cursor.execute(query, (airline_name, unique_airplane_num, flight_number, departure_date, departure_time)) 
+    count_tickets = cursor.fetchone()['count(*)']
+
+    if count_tickets > total_seats:
+        raise ValueError("Can't overbook the flight")
+
     if (data):  
         base_price = float(base_price)
         base_price = price_modify(airline_name, unique_airplane_num, flight_number, departure_date, departure_time, base_price)
