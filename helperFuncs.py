@@ -308,8 +308,8 @@ def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start =
         conditionals_val.append(arrival_date)
         conditionals.append("arrival_date = %s")
 
-    if(len(conditionals) == 0): 
-        findQuery = "SELECT * FROM flight WHERE departure_date > CAST( CURRENT_DATE() AS Date) AND departure_date < CAST( CURRENT_DATE() AS Date) +30"
+    if(not start and not end): 
+        findQuery = "SELECT * FROM flight WHERE departure_date > CAST( CURRENT_DATE() AS Date) AND departure_date < DATE_ADD(CAST( CURRENT_DATE() AS Date), INTERVAL 30 DAY) AND"
 
 
     conditionals = " AND ".join(conditionals)
@@ -323,6 +323,7 @@ def searchFlight(dep = None, arr = None, arrCity = None, depCity = None, start =
     if(len(arrPort) == 0 or len(depPort) == 0):     
         return [] 
     print(conditionals_val+[arrPort,depPort])
+    print(findQuery)
     cursor.execute(findQuery, conditionals_val+airport_vals)
     flights = cursor.fetchall()
 
